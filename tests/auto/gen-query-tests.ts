@@ -11,14 +11,24 @@ import type { ParseIt } from '../../src/hhh'
 export type TestCases = [
 `
 
+function stringify(arg: unknown): string {
+  return JSON.stringify(arg, (key, value) => {
+    if (value instanceof RegExp) {
+      return value.toString()
+    }
+    return value
+  })
+}
+
 for (const query of queries) {
+  const stringifiedQuery = stringify(query)
   try {
     const parsed = esquery.parse(query)
-    content += `Expect<Equal<ParseIt<${JSON.stringify(
-      query,
-    )}>, ${JSON.stringify(parsed)}>>,\n`
+    content += `Expect<Equal<ParseIt<${stringifiedQuery}>, ${stringify(
+      parsed,
+    )}>>,\n`
   } catch (e) {
-    console.error(`Err while parsing ${JSON.stringify(query)}`)
+    console.error(`Err while parsing ${stringifiedQuery}`)
     throw e
   }
 }

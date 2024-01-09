@@ -54,7 +54,7 @@ export const queries = [
     spaces,
     [
       '',
-      ['=', spaces, 'type(number)'],
+      ['=', spaces, ['type(number)', '/^aaa bbb$/ims']],
       [['=', '>', '<', '>=', '<='], spaces, ['a', '10.4', '" string "']],
     ],
     spaces,

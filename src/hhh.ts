@@ -129,7 +129,7 @@ export type ParseAttrValueRegex<T extends string> =
     ? Res extends string
       ? Res
       : Res extends [infer R]
-        ? { type: 'regex'; value: R }
+        ? { type: 'regexp'; value: R }
         : never
     : never
 
