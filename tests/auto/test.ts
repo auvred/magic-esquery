@@ -1,7 +1,7 @@
 import type { Expect, Equal } from './utils'
 import type { ParseIt } from '../../src/hhh'
 
-type _TestCases = [
+export type TestCases = [
 Expect<Equal<ParseIt<"Program">, {"type":"identifier","value":"Program"}>>,
 Expect<Equal<ParseIt<"*">, {"type":"wildcard","value":"*"}>>,
 Expect<Equal<ParseIt<"ProgramCallExpression">, {"type":"identifier","value":"ProgramCallExpression"}>>,

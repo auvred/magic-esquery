@@ -209,106 +209,110 @@ type Aaa<
       }
   : never
 
+export type SplitFirst<
+  T extends string,
+  Splitter extends string,
+> = T extends `${infer First}${Splitter}${infer Last}`
+  ? [TrimS<First>, TrimS<Last>]
+  : never
+
+// export type SplitFirstAndTrim<
+//   T extends string,
+//   Splitter extends string,
+// > = SplitFirst<T, Splitter> extends [
+//   infer First extends string,
+//   infer Last extends string,
+// ]
+//   ? [TrimS<First>, TrimS<Last>]
+//   : never
+
+type ParseAttrWithEq<
+  RawAttrName extends string,
+  AttrValue extends string,
+  Rest extends string,
+> = RawAttrName extends `${infer AttrName}<`
+  ? // branch for '<=' op
+    ParseIdentifierName<
+      TrimS<AttrName>,
+      Exclude<IdentifierNameRestrictedSymbols, '.'>
+    > extends infer IdentifierNameParseRes
+    ? IdentifierNameParseRes extends 'identifierNameEmpty'
+      ? 'attrNope-identifierNameNopeOnLessOrEqOp'
+      : IdentifierNameParseRes extends {
+            value: infer IdentifierNameParseResValue
+            rest: infer IdentifierNameParseResRest
+          }
+        ? IdentifierNameParseResRest extends ''
+          ? Aaa<IdentifierNameParseResValue, Rest, '<=', AttrValue>
+          : 'attrNope-lessOrEqOpWrongIdentifierName'
+        : never
+    : 'attr Stub1'
+  : RawAttrName extends `${infer AttrName}>`
+    ? // branch for '>=' op
+      ParseIdentifierName<
+        TrimS<AttrName>,
+        Exclude<IdentifierNameRestrictedSymbols, '.'>
+      > extends infer IdentifierNameParseRes
+      ? IdentifierNameParseRes extends 'identifierNameEmpty'
+        ? 'attrNope-identifierNameNopeOnGreaterOrEqOp'
+        : IdentifierNameParseRes extends {
+              value: infer IdentifierNameParseResValue
+              rest: infer IdentifierNameParseResRest
+            }
+          ? IdentifierNameParseResRest extends ''
+            ? Aaa<IdentifierNameParseResValue, Rest, '>=', AttrValue>
+            : 'attrNope-greaterOrEqOpWrongIdentifierName'
+          : never
+      : 'attr Stub2'
+    : // branch for '=' op
+      ParseIdentifierName<
+          TrimS<RawAttrName>,
+          Exclude<IdentifierNameRestrictedSymbols, '.'>
+        > extends infer IdentifierNameParseRes
+      ? IdentifierNameParseRes extends 'identifierNameEmpty'
+        ? 'attrNope-identifierNameNopeOnEqOp'
+        : IdentifierNameParseRes extends {
+              value: infer IdentifierNameParseResValue
+              rest: infer IdentifierNameParseResRest
+            }
+          ? IdentifierNameParseResRest extends ''
+            ? ParseAttrValueType<AttrValue> extends infer AttrValueTypeParseRes
+              ? AttrValueTypeParseRes extends string
+                ? ParseAttrValueRegex<AttrValue> extends infer AttrValueRegexParseRes
+                  ? AttrValueRegexParseRes extends string
+                    ? Aaa<IdentifierNameParseResValue, Rest, '=', AttrValue>
+                    : {
+                        type: 'attribute'
+                        name: IdentifierNameParseResValue
+                        operator: '='
+                        value: AttrValueRegexParseRes
+                        rest: Rest
+                      }
+                  : never
+                : {
+                    type: 'attribute'
+                    name: IdentifierNameParseResValue
+                    operator: '='
+                    value: AttrValueTypeParseRes
+                    rest: Rest
+                  }
+              : never
+            : 'attrNope-eqOpWrongIdentifierName'
+          : never
+      : 'attr Stub3'
+
 // TODO: handle just '<' and '>'
 export type ParseAttr<T extends string> = T extends `[${infer _V}]${infer Rest}`
   ? TrimS<_V> extends infer V
     ? V extends string
-      ? V extends `${infer _RawAttrName}=${infer _AttrValue}`
-        ? TrimSRight<_RawAttrName> extends infer RawAttrName
-          ? RawAttrName extends string
-            ? TrimSLeft<_AttrValue> extends infer AttrValue
-              ? AttrValue extends string
-                ? RawAttrName extends `${infer AttrName}<`
-                  ? // branch for '<=' op
-                    ParseIdentifierName<
-                      TrimS<AttrName>,
-                      Exclude<IdentifierNameRestrictedSymbols, '.'>
-                    > extends infer IdentifierNameParseRes
-                    ? IdentifierNameParseRes extends 'identifierNameEmpty'
-                      ? 'attrNope-identifierNameNopeOnLessOrEqOp'
-                      : IdentifierNameParseRes extends {
-                            value: infer IdentifierNameParseResValue
-                            rest: infer IdentifierNameParseResRest
-                          }
-                        ? IdentifierNameParseResRest extends ''
-                          ? Aaa<
-                              IdentifierNameParseResValue,
-                              Rest,
-                              '<=',
-                              AttrValue
-                            >
-                          : 'attrNope-lessOrEqOpWrongIdentifierName'
-                        : never
-                    : 'attr Stub1'
-                  : RawAttrName extends `${infer AttrName}>`
-                    ? // branch for '>=' op
-                      ParseIdentifierName<
-                        TrimS<AttrName>,
-                        Exclude<IdentifierNameRestrictedSymbols, '.'>
-                      > extends infer IdentifierNameParseRes
-                      ? IdentifierNameParseRes extends 'identifierNameEmpty'
-                        ? 'attrNope-identifierNameNopeOnGreaterOrEqOp'
-                        : IdentifierNameParseRes extends {
-                              value: infer IdentifierNameParseResValue
-                              rest: infer IdentifierNameParseResRest
-                            }
-                          ? IdentifierNameParseResRest extends ''
-                            ? Aaa<
-                                IdentifierNameParseResValue,
-                                Rest,
-                                '>=',
-                                AttrValue
-                              >
-                            : 'attrNope-greaterOrEqOpWrongIdentifierName'
-                          : never
-                      : 'attr Stub2'
-                    : // branch for '=' op
-                      ParseIdentifierName<
-                          TrimS<RawAttrName>,
-                          Exclude<IdentifierNameRestrictedSymbols, '.'>
-                        > extends infer IdentifierNameParseRes
-                      ? IdentifierNameParseRes extends 'identifierNameEmpty'
-                        ? 'attrNope-identifierNameNopeOnEqOp'
-                        : IdentifierNameParseRes extends {
-                              value: infer IdentifierNameParseResValue
-                              rest: infer IdentifierNameParseResRest
-                            }
-                          ? IdentifierNameParseResRest extends ''
-                            ? ParseAttrValueType<AttrValue> extends infer AttrValueTypeParseRes
-                              ? AttrValueTypeParseRes extends string
-                                ? ParseAttrValueRegex<AttrValue> extends infer AttrValueRegexParseRes
-                                  ? AttrValueRegexParseRes extends string
-                                    ? Aaa<
-                                        IdentifierNameParseResValue,
-                                        Rest,
-                                        '=',
-                                        AttrValue
-                                      >
-                                    : {
-                                        type: 'attribute'
-                                        name: IdentifierNameParseResValue
-                                        operator: '='
-                                        value: AttrValueRegexParseRes
-                                        rest: Rest
-                                      }
-                                  : never
-                                : {
-                                    type: 'attribute'
-                                    name: IdentifierNameParseResValue
-                                    operator: '='
-                                    value: AttrValueTypeParseRes
-                                    rest: Rest
-                                  }
-                              : never
-                            : 'attrNope-eqOpWrongIdentifierName'
-                          : never
-                      : 'attr Stub3'
-                : never
-              : never
-            : never
-          : never
+      ? V extends `${infer RawAttrName}=${infer AttrValue}`
+        ? RawAttrName extends string
+          ? AttrValue extends string
+            ? ParseAttrWithEq<TrimS<RawAttrName>, TrimS<AttrValue>, Rest>
+            : 'parseAttrErr-AttrValueIsNotString'
+          : 'parseAttrErr-RawAttrNameIsNotString'
         : // V doesn't contain '=' sign (without op)
-          // [name.path]
+          //  [name.path]
           ParseIdentifierName<
               V,
               Exclude<IdentifierNameRestrictedSymbols, '.'>
@@ -335,7 +339,7 @@ export type ParseAttr<T extends string> = T extends `[${infer _V}]${infer Rest}`
       : 'attrNope-squareBrackets'
     : never
   : 'attrNope-doesnthaveSquareBrackets'
-export declare const sellRes: ParseAttr<'[aaa<=" string "]'>
+export declare const sellRes: ParseAttr<'[aaa.bbb.ccc]'>
 //                    ^?
 //                     {"type":"attribute","name":"aaa.bbb.ccc","operator":"<=","value":{"type":"literal","value":" string "}}
 

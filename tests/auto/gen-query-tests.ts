@@ -8,7 +8,7 @@ import { queries } from './queries.test'
 let content = `import type { Expect, Equal } from './utils'
 import type { ParseIt } from '../../src/hhh'
 
-type _TestCases = [
+export type TestCases = [
 `
 
 for (const query of queries) {
