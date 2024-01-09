@@ -54,8 +54,8 @@ export const queries = [
     spaces,
     [
       '',
-      [['=', '>', '<', '>=', '<='], spaces, ['a', '10.4', '" string "']],
       ['=', spaces, 'type(number)'],
+      [['=', '>', '<', '>=', '<='], spaces, ['a', '10.4', '" string "']],
     ],
     spaces,
     ']',
