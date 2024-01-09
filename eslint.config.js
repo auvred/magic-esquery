@@ -15,5 +15,8 @@ module.exports = (async () => {
         ],
       },
     },
+    {
+      ignores: ['tests/auto/test.ts'],
+    },
   ]
 })()

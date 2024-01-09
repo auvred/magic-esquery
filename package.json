@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "tests-watch": "while true; do inotifywait -e modify tests/auto/queries.test.ts; pnpm tsx tests/auto/queries.test.ts; pnpm eslint --fix tests/auto/test.ts; pnpm tsc --noEmit; done"
+    "tests-watch": "while true; do inotifywait -e modify tests/auto/queries.test.ts; pnpm tsx tests/auto/queries.test.ts; pnpm eslint --fix tests/auto/test.ts; pnpm tsc --noEmit; done",
+    "test": "tsx tests/auto/gen-query-tests.ts && tsc --noEmit"
   },
   "dependencies": {
     "@typescript-eslint/typescript-estree": "^6.18.0",

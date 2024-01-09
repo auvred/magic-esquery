@@ -195,7 +195,7 @@ type Aaa<
         : {
             type: 'attribute'
             name: Name
-            operator: '='
+            operator: Operator
             value: AttrValueNumberParseRes
             rest: Rest
           }
@@ -203,7 +203,7 @@ type Aaa<
     : {
         type: 'attribute'
         name: Name
-        operator: '='
+        operator: Operator
         value: AttrValueStringParseRes
         rest: Rest
       }
@@ -335,6 +335,9 @@ export type ParseAttr<T extends string> = T extends `[${infer _V}]${infer Rest}`
       : 'attrNope-squareBrackets'
     : never
   : 'attrNope-doesnthaveSquareBrackets'
+export declare const sellRes: ParseAttr<'[aaa<=" string "]'>
+//                    ^?
+//                     {"type":"attribute","name":"aaa.bbb.ccc","operator":"<=","value":{"type":"literal","value":" string "}}
 
 export declare const resn: ParseAttr<'[aaa]'>
 //                    ^?
@@ -478,9 +481,6 @@ export type ParseSelector<T extends string> =
           : never
         : never
     : never
-
-export declare const sellRes: ParseIt<'[aaa   =a]'>
-//                    ^?
 
 export declare const res: ParseAtom<', aa'>
 //                    ^?

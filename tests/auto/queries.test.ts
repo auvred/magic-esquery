@@ -52,7 +52,12 @@ export const queries = [
     spaces,
     ['aaa', 'aaa.bbb.ccc'],
     spaces,
-    ['', [['=', '>=', '<='], spaces, 'a']],
+    [
+      '',
+      [['=', '>=', '<='], spaces, ['a', '10.4', '" string "']],
+      ['=', spaces, 'type(number)'],
+    ],
+    spaces,
     ']',
     spaces,
   ),
