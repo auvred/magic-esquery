@@ -93,4 +93,23 @@ export const queries = [
     'Ddd',
     spaces,
   ),
+
+  ...genVariants(spaces, 'aa[bb]', spaces),
+  ...genVariants(
+    spaces,
+    'aa[bb=cc]',
+    spaces,
+    '>',
+    spaces,
+    'Expression',
+    spaces,
+    ',',
+    spaces,
+    ['Expression', 'Expression[some.val=45]'],
+    spaces,
+    '~',
+    spaces,
+    'Identifier[computed=false][name="Name"]',
+    spaces,
+  ),
 ]

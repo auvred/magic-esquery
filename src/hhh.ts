@@ -394,9 +394,27 @@ export type ParseAtom<T extends string> =
       : WildcardParseRes
     : never
 
-export declare const pAttr: ParseAttr<'[aa]'>
+export type ParseSequence<
+  T extends string,
+  Memo extends unknown[] = [],
+> = ParseAtom<T> extends infer Atom
+  ? Atom extends string
+    ? {
+        selectors: Memo
+        rest: T
+      }
+    : Atom extends {
+          rest: infer Rest
+        }
+      ? Rest extends string
+        ? ParseSequence<Rest, [...Memo, Simplify<Omit<Atom, 'rest'>>]>
+        : never
+      : never
+  : never
+
+export declare const pAttr: ParseSequence<'a[aa] a'>
 //                      ^?
-export declare const pAtom: ParseAtom<'[name.path] , some rest'>
+export declare const pAtom: ParseSequence<'[name.path] x, some rest'>
 //                     ^?
 
 export type TrimLeft<
@@ -442,7 +460,16 @@ export type ParseBinaryOp<T extends string> = TrimSLeft<T> extends infer Op
           : 'unknownBinaryOp'
   : never
 
-// TODO: add support for compound sequences
+type SimplifySeq<S> = S extends {
+  selectors: infer Selectors
+}
+  ? Selectors extends [infer First, ...infer Rest]
+    ? Rest[0] extends undefined
+      ? First
+      : { type: 'compound'; selectors: [First, ...Rest] }
+    : never
+  : never
+
 // TODO: add support for subject indicator ('!')
 export type ParseSelectorRequrser<
   T extends string,
@@ -463,47 +490,59 @@ export type ParseSelectorRequrser<
         }
       ? // just assertion
         BinaryOpParseResRest extends string
-        ? ParseAtom<TrimS<BinaryOpParseResRest>> extends infer AtomParseRes
-          ? AtomParseRes extends string | never
-            ? // wrong atom
+        ? ParseSequence<TrimS<BinaryOpParseResRest>> extends infer SeqParseRes
+          ? SeqParseRes extends string | never
+            ? // wrong Seq
               {
-                error: `recursersequenceErr-atomParseFailed-${AtomParseRes}`
+                error: `recursersequenceErr-SeqParseFailed-${SeqParseRes}`
                 memo: Memo
                 rest: T
               }
-            : // nice atom
-              AtomParseRes extends {
+            : // nice Seq/or seq before comma
+              SeqParseRes extends {
+                  selectors: infer Selectors
                   rest: infer Rest
                 }
-              ? Rest extends ''
-                ? // atom is last in sequence
+              ? Selectors extends [infer _, ...infer __]
+                ? // selectors is not empty , let's continue
+                  Rest extends ''
+                  ? // Seq is last in selector
+                    {
+                      type: Op
+                      left: Memo
+                      right: SimplifySeq<SeqParseRes>
+                    }
+                  : // Seq is not last
+                    Rest extends string
+                    ? ParseSelectorRequrser<
+                        Rest,
+                        {
+                          type: Op
+                          left: Memo
+                          right: SimplifySeq<SeqParseRes>
+                        }
+                      >
+                    : 5
+                : // seq is closing the selectors chain
                   {
-                    type: Op
-                    left: Memo
-                    right: Simplify<Omit<AtomParseRes, 'rest'>>
+                    error: `recursersequenceErr-SeqParseFailed-${'todo'}`
+                    memo: Memo
+                    rest: BinaryOpParseResRest
                   }
-                : // atom is not last
-                  Rest extends string
-                  ? ParseSelectorRequrser<
-                      Rest,
-                      {
-                        type: Op
-                        left: Memo
-                        right: Simplify<Omit<AtomParseRes, 'rest'>>
-                      }
-                    >
-                  : 5
               : 'here Stub'
           : 1
         : 2
       : 3
   : 4
 
+export declare const adfeqw: ParseIt<' A > B ~ C '>
+//                      ^?
+
 export type ParseSelector<T extends string> =
-  ParseAtom<T> extends infer AtomParseRes
-    ? AtomParseRes extends string
-      ? `sequenceErr-atomParseFailed-${AtomParseRes}`
-      : AtomParseRes extends {
+  ParseSequence<T> extends infer SeqParseRes
+    ? SeqParseRes extends string
+      ? `sequenceErr-SeqParseFailed-${SeqParseRes}`
+      : SeqParseRes extends {
             rest: infer Rest
           }
         ? // just assertion
@@ -511,23 +550,21 @@ export type ParseSelector<T extends string> =
           ? Rest extends ''
             ? // sequence of 1 elem
               // Program
-              AtomParseRes
+              SimplifySeq<SeqParseRes>
             : // sequence of multiple elems
               // Program > Identifier
-              ParseSelectorRequrser<Rest, Simplify<Omit<AtomParseRes, 'rest'>>>
+              ParseSelectorRequrser<Rest, SimplifySeq<SeqParseRes>>
           : never
         : never
     : never
-
-export declare const res: ParseAtom<', aa'>
-//                    ^?
 
 export type _ParseSelectorsTrimCommaAtStart<T extends string> =
   TrimSLeft<T> extends infer R
     ? R extends `,${infer Rest}`
       ? { res: TrimSLeft<Rest> }
-      : 'commaErr'
-    : never
+      : `commaErr`
+    : // : `commaErr-${R}`
+      never
 
 // export type _ParseSelectorsRecurser<T extends string, SelMemo> =
 
@@ -568,7 +605,7 @@ export type ParseSelectors<
         }
   : never
 
-export declare const selsRes: ParseIt<'[aa]'>
+export declare const selsRes: ParseIt<'a[aa]'>
 //                    ^?
 
 export type ParseIt<T extends string> = ParseSelectors<
