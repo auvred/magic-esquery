@@ -1,6 +1,5 @@
-import { auvred } from '@auvred/eslint-config'
-
-export default (async () => {
+module.exports = (async () => {
+  const { auvred } = await import('@auvred/eslint-config')
   return [
     ...(await auvred()),
     {

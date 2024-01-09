@@ -1,16 +1,19 @@
 import type {
   ParseAtom,
   ParseAttr,
+  ParseAttrValueNumber,
   ParseAttrValueRegex,
+  ParseAttrValueString,
   ParseAttrValueType,
   ParseIdentifier,
   ParseSelector,
   ParseSelectors,
   ParseWildcard,
+  TrimLeft,
   TrimS,
   _ParseAttrValueRegexFlags,
   _ParseSelectorsTrimCommaAtStart,
-} from './hhh'
+} from './src/hhh'
 
 export type Expect<T extends true> = T
 export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <
@@ -19,12 +22,18 @@ export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <
   ? true
   : false
 
+export declare const test: ParseAttr<'[a=b]'>
+//                    ^?
+
 export type trims = [
+  Expect<Equal<TrimLeft<'00 b 0', '0'>, ' b 0'>>,
   Expect<Equal<TrimS<'  a b c '>, 'a b c'>>,
   Expect<Equal<TrimS<'a b c'>, 'a b c'>>,
   Expect<Equal<TrimS<'       '>, ''>>,
   Expect<Equal<TrimS<'a '>, 'a'>>,
+  Expect<Equal<TrimS<'aaa   '>, 'aaa'>>,
   Expect<Equal<TrimS<' a'>, 'a'>>,
+  Expect<Equal<TrimS<'   aaa'>, 'aaa'>>,
 ]
 
 export type wildcardParsing = [
@@ -150,6 +159,21 @@ export type attrValueRegexFlags = [
   Expect<Equal<_ParseAttrValueRegexFlags<'gm'>, 'regexUnknownFlag-g'>>,
   Expect<Equal<_ParseAttrValueRegexFlags<' m'>, 'regexUnknownFlag- '>>,
   Expect<Equal<_ParseAttrValueRegexFlags<''>, 'regexEmptyFlags'>>,
+]
+
+export type arrValueString = [
+  Expect<Equal<ParseAttrValueString<'" string "'>, { res: ' string ' }>>,
+  Expect<Equal<ParseAttrValueString<'" str\\"ing "'>, { res: ' str"ing ' }>>,
+  Expect<Equal<ParseAttrValueString<'" string "'>, { res: ' string ' }>>,
+  Expect<Equal<ParseAttrValueString<'""'>, { res: '' }>>,
+  Expect<Equal<ParseAttrValueString<"'\\''">, { res: "'" }>>,
+]
+
+export type arrValueNumber = [
+  Expect<Equal<ParseAttrValueNumber<'1'>, { res: 1 }>>,
+  Expect<Equal<ParseAttrValueNumber<'100'>, { res: 100 }>>,
+  Expect<Equal<ParseAttrValueNumber<'010'>, { res: 10 }>>,
+  Expect<Equal<ParseAttrValueNumber<'10.4'>, { res: 10.4 }>>,
 ]
 
 export type attrValueRegex = [
@@ -328,12 +352,60 @@ export type attrParsing = [
   >,
   Expect<
     Equal<
+      ParseAttr<'[name="value"]r'>,
+      {
+        type: 'attribute'
+        name: 'name'
+        operator: '='
+        value: {
+          type: 'literal'
+          value: 'value'
+        }
+        rest: 'r'
+      }
+    >
+  >,
+  Expect<
+    Equal<
+      ParseAttr<'[name=" va\\"lue "]'>,
+      {
+        type: 'attribute'
+        name: 'name'
+        operator: '='
+        value: {
+          type: 'literal'
+          value: ' va"lue '
+        }
+        rest: ''
+      }
+    >
+  >,
+  Expect<
+    Equal<
+      ParseAttr<'[name=100]'>,
+      {
+        type: 'attribute'
+        name: 'name'
+        operator: '='
+        value: {
+          type: 'literal'
+          value: 100
+        }
+        rest: ''
+      }
+    >
+  >,
+  Expect<
+    Equal<
       ParseAttr<'[name=value]r'>,
       {
         type: 'attribute'
         name: 'name'
         operator: '='
-        value: 'value'
+        value: {
+          type: 'literal'
+          value: 'value'
+        }
         rest: 'r'
       }
     >
@@ -345,11 +417,15 @@ export type attrParsing = [
         type: 'attribute'
         name: 'name.path'
         operator: '='
-        value: 'value'
+        value: {
+          type: 'literal'
+          value: 'value'
+        }
         rest: ''
       }
     >
   >,
+  Expect<Equal<ParseAttr<'[name.path=val.ue]'>, 'unsupportedShit'>>,
   Expect<Equal<ParseAttr<'[=value]'>, 'attrNope-identifierNameNopeOnEqOp'>>,
   Expect<
     Equal<ParseAttr<'[name+path=value]'>, 'attrNope-eqOpWrongIdentifierName'>
@@ -506,7 +582,10 @@ export type sequenceParsing = [
             type: 'attribute'
             name: 'attr.name'
             operator: '='
-            value: 'value'
+            value: {
+              type: 'literal'
+              value: 'value'
+            }
           }
         }
         right: {
