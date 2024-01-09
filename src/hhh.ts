@@ -216,16 +216,6 @@ export type SplitFirst<
   ? [TrimS<First>, TrimS<Last>]
   : never
 
-// export type SplitFirstAndTrim<
-//   T extends string,
-//   Splitter extends string,
-// > = SplitFirst<T, Splitter> extends [
-//   infer First extends string,
-//   infer Last extends string,
-// ]
-//   ? [TrimS<First>, TrimS<Last>]
-//   : never
-
 type ParseAttrWithEq<
   RawAttrName extends string,
   AttrValue extends string,
@@ -301,6 +291,27 @@ type ParseAttrWithEq<
           : never
       : 'attr Stub3'
 
+type ParseAttrWithStrictNotEq<
+  RawAttrName extends string,
+  AttrValue extends string,
+  Op extends string,
+  Rest extends string,
+> = ParseIdentifierName<
+  RawAttrName,
+  Exclude<IdentifierNameRestrictedSymbols, '.'>
+> extends infer IdentifierNameParseRes
+  ? IdentifierNameParseRes extends 'identifierNameEmpty'
+    ? 'attrNope-identifierNameNopeOnLessOrEqOp'
+    : IdentifierNameParseRes extends {
+          value: infer IdentifierNameParseResValue
+          rest: infer IdentifierNameParseResRest
+        }
+      ? IdentifierNameParseResRest extends ''
+        ? Aaa<IdentifierNameParseResValue, Rest, Op, AttrValue>
+        : `attrNope-${Op}-OpWrongIdentifierName`
+      : never
+  : 'attr Stub 999'
+
 // TODO: handle just '<' and '>'
 export type ParseAttr<T extends string> = T extends `[${infer _V}]${infer Rest}`
   ? TrimS<_V> extends infer V
@@ -309,33 +320,55 @@ export type ParseAttr<T extends string> = T extends `[${infer _V}]${infer Rest}`
         ? RawAttrName extends string
           ? AttrValue extends string
             ? ParseAttrWithEq<TrimS<RawAttrName>, TrimS<AttrValue>, Rest>
-            : 'parseAttrErr-AttrValueIsNotString'
-          : 'parseAttrErr-RawAttrNameIsNotString'
-        : // V doesn't contain '=' sign (without op)
-          //  [name.path]
-          ParseIdentifierName<
-              V,
-              Exclude<IdentifierNameRestrictedSymbols, '.'>
-            > extends infer IdentifierNameParseRes
-          ? IdentifierNameParseRes extends 'identifierNameEmpty'
-            ? // []
-              'attrNope-identifierNameNopeWithoutOp'
-            : // [something]
-              IdentifierNameParseRes extends {
-                  value: infer IdentifierNameParseResValue
-                  rest: infer IdentifierNameParseResRest
-                }
-              ? IdentifierNameParseResRest extends ''
-                ? // [nice.attr.without.op]
-                  {
-                    type: 'attribute'
-                    name: IdentifierNameParseResValue
-                    rest: Rest
-                  }
-                : // [something+wrong]
-                  'attrNope-withoutOpWrongIdentifierName'
-              : never
-          : 'attr Stub4'
+            : 'parseAttrErr-1-AttrValueIsNotString'
+          : 'parseAttrErr-2-RawAttrNameIsNotString'
+        : // V doesn't contain '=' sign
+          V extends `${infer RawAttrName}<${infer AttrValue}`
+          ? RawAttrName extends string
+            ? AttrValue extends string
+              ? ParseAttrWithStrictNotEq<
+                  TrimS<RawAttrName>,
+                  TrimS<AttrValue>,
+                  '<',
+                  Rest
+                >
+              : 'parseAttrErr-3-AttrValueIsNotString'
+            : 'parseAttrErr-4-RawAttrNameIsNotString'
+          : V extends `${infer RawAttrName}>${infer AttrValue}`
+            ? RawAttrName extends string
+              ? AttrValue extends string
+                ? ParseAttrWithStrictNotEq<
+                    TrimS<RawAttrName>,
+                    TrimS<AttrValue>,
+                    '>',
+                    Rest
+                  >
+                : 'parseAttrErr-5-AttrValueIsNotString'
+              : 'parseAttrErr-6-RawAttrNameIsNotString'
+            : //  [name.path]
+              ParseIdentifierName<
+                  V,
+                  Exclude<IdentifierNameRestrictedSymbols, '.'>
+                > extends infer IdentifierNameParseRes
+              ? IdentifierNameParseRes extends 'identifierNameEmpty'
+                ? // []
+                  'attrNope-identifierNameNopeWithoutOp'
+                : // [something]
+                  IdentifierNameParseRes extends {
+                      value: infer IdentifierNameParseResValue
+                      rest: infer IdentifierNameParseResRest
+                    }
+                  ? IdentifierNameParseResRest extends ''
+                    ? // [nice.attr.without.op]
+                      {
+                        type: 'attribute'
+                        name: IdentifierNameParseResValue
+                        rest: Rest
+                      }
+                    : // [something+wrong]
+                      'attrNope-withoutOpWrongIdentifierName'
+                  : never
+              : 'attr Stub4'
       : 'attrNope-squareBrackets'
     : never
   : 'attrNope-doesnthaveSquareBrackets'
