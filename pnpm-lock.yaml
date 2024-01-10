@@ -16,6 +16,9 @@ devDependencies:
   '@auvred/eslint-config':
     specifier: ^0.6.0
     version: 0.6.0(eslint@8.56.0)(prettier@3.1.1)(typescript@5.3.3)
+  '@type-challenges/utils':
+    specifier: ^0.1.1
+    version: 0.1.1
   '@types/esquery':
     specifier: ^1.5.3
     version: 1.5.3
@@ -392,6 +395,10 @@ packages:
   /@pkgr/core@0.1.0:
     resolution: {integrity: sha512-Zwq5OCzuwJC2jwqmpEQt7Ds1DTi6BWSwoGkbb1n9pO3hzb35BoJELx7c0T23iDkBGkh2e7tvOtjF3tr3OaQHDQ==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+    dev: true
+
+  /@type-challenges/utils@0.1.1:
+    resolution: {integrity: sha512-A7ljYfBM+FLw+NDyuYvGBJiCEV9c0lPWEAdzfOAkb3JFqfLl0Iv/WhWMMARHiRKlmmiD1g8gz/507yVvHdQUYA==}
     dev: true
 
   /@types/debug@4.1.12:

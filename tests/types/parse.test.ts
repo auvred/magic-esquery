@@ -1,4 +1,4 @@
-import type { Expect, Equal } from './utils'
+import type { Expect, Equal } from '@type-challenges/utils'
 import type { ParseIt } from '../../src/hhh'
 
 export type TestCases = [

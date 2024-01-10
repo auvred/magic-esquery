@@ -1,7 +1,6 @@
 {
   "scripts": {
-    "tests-watch": "while true; do inotifywait -e modify tests/auto/queries.test.ts; pnpm tsx tests/auto/queries.test.ts; pnpm eslint --fix tests/auto/test.ts; pnpm tsc --noEmit; done",
-    "test": "tsx tests/auto/gen-query-tests.ts && tsc --noEmit"
+    "test": "tsx tests/utils/gen-parser-tests.ts && tsc --noEmit -p tsconfig.tests.json"
   },
   "dependencies": {
     "@typescript-eslint/typescript-estree": "^6.18.0",
@@ -9,6 +8,7 @@
   },
   "devDependencies": {
     "@auvred/eslint-config": "^0.6.0",
+    "@type-challenges/utils": "^0.1.1",
     "@types/esquery": "^1.5.3",
     "@types/node": "^20.10.7",
     "eslint": "^8.56.0",

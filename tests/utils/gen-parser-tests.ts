@@ -3,16 +3,16 @@ import path from 'node:path'
 
 import esquery from 'esquery'
 
-import { queries } from './queries.test'
+import { queries } from './queries-for-parser-tests'
 
-let content = `import type { Expect, Equal } from './utils'
+let content = `import type { Expect, Equal } from '@type-challenges/utils'
 import type { ParseIt } from '../../src/hhh'
 
 export type TestCases = [
 `
 
 function stringify(arg: unknown): string {
-  return JSON.stringify(arg, (key, value) => {
+  return JSON.stringify(arg, (_, value) => {
     if (value instanceof RegExp) {
       return value.toString()
     }
@@ -35,4 +35,8 @@ for (const query of queries) {
 
 content += ']'
 
-fs.writeFileSync(path.join(__dirname, 'test.ts'), content, {})
+fs.writeFileSync(
+  path.join(__dirname, '..', 'types', 'parse.test.ts'),
+  content,
+  { encoding: 'utf8' },
+)
