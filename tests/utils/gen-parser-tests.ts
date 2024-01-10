@@ -46,8 +46,7 @@ genFromSelectors('parse.generated-test.ts', manualSelectors)
 const tsEslintSelectors = fs
   .readFileSync(path.join(__dirname, 'ts-eslint-selectors.txt'), 'utf8')
   .split('\n')
-  .filter(selector => {
-    const sel = selector.trim()
-    return sel && !sel.startsWith('#')
+  .filter(sel => {
+    return sel.trim() && !sel.startsWith('  ') && !sel.startsWith('#')
   })
 genFromSelectors('ts-eslint-parse.generated-test.ts', tsEslintSelectors)

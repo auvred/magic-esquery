@@ -74,10 +74,7 @@ try {
       }
       return !tsEslintSelectors.includes(selector)
     })
-    .map(selector => [
-      selector,
-      // '  TODO_Replace_with_actual_type'
-    ])
+    .map(selector => [selector, '  TODO_Replace_with_actual_type'])
   const tsEslintRev = $('git rev-parse HEAD', {
     cwd: tmpdir,
     stdio: 'pipe',

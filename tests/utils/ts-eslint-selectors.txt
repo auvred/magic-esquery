@@ -1,288 +1,575 @@
 # c3767edf65716be08df25723d7dbb770de0e7037
 *
+  T.Node
 ArrayExpression
+  T.ArrayExpression
 ArrayExpression, ArrayPattern
+  T.ArrayExpression | T.ArrayPattern
 ArrayExpression > SpreadElement
+  T.SpreadElement
 ArrayPattern
+  T.ArrayPattern
 ArrowFunctionExpression
+  T.ArrowFunctionExpression
 ArrowFunctionExpression[async = false]
+  T.ArrowFunctionExpression
 ArrowFunctionExpression[async = true]:exit
+  T.ArrowFunctionExpression
 ArrowFunctionExpression[async = true] > :not(BlockStatement, AwaitExpression)
+  T.ArrowFunctionExpression
 ArrowFunctionExpression:exit
+  T.ArrowFunctionExpression
 ArrowFunctionExpression, FunctionDeclaration, FunctionExpression
+  T.ArrowFunctionExpression | T.FunctionDeclaration | T.FunctionExpression
 ArrowFunctionExpression, FunctionDeclaration, FunctionExpression, MethodDefinition
+  T.ArrowFunctionExpression | T.FunctionDeclaration | T.FunctionExpression | T.MethodDefinition
 ArrowFunctionExpression, FunctionDeclaration, FunctionExpression, MethodDefinition:exit
+  T.ArrowFunctionExpression | T.FunctionDeclaration | T.FunctionExpression | T.MethodDefinition
 ArrowFunctionExpression, FunctionDeclaration, FunctionExpression, TSCallSignatureDeclaration, TSConstructSignatureDeclaration, TSDeclareFunction, TSEmptyBodyFunctionExpression, TSFunctionType, TSMethodSignature
+  T.ArrowFunctionExpression | T.FunctionDeclaration | T.FunctionExpression | T.TSCallSignatureDeclaration | T.TSConstructSignatureDeclaration | T.TSDeclareFunction | T.TSEmptyBodyFunctionExpression | T.TSFunctionType | T.TSMethodSignature
 ArrowFunctionExpression, FunctionExpression
+  T.ArrowFunctionExpression | T.FunctionExpression
 ArrowFunctionExpression > :not(BlockStatement).body
+  T.ArrowFunctionExpression
 ArrowFunctionExpression > TSTypeParameterDeclaration > TSTypeParameter[constraint]
+  T.TSTypeParameter
 AssignmentExpression
+  T.AssignmentExpression
 AssignmentExpression[operator='+=']
+  T.AssignmentExpression
 AssignmentExpression[operator = "="], AssignmentPattern
+  T.AssignmentExpression | T.AssignmentPattern
 AssignmentExpression[operator = "+="], BinaryExpression[operator = "+"]
+  T.AssignmentExpression | T.BinaryExpression
 AssignmentPattern
+  T.AssignmentPattern
 AwaitExpression
+  T.AwaitExpression
 AwaitExpression, CallExpression, TaggedTemplateExpression
+  T.AwaitExpression | T.CallExpression | T.TaggedTemplateExpression
 BinaryExpression
+  T.BinaryExpression
 BinaryExpression, AssignmentExpression
+  T.BinaryExpression | T.AssignmentExpression
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name='indexOf'][computed=false]
+  T.MemberExpression
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="indexOf"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="indexOf"][computed=false]
+  T.MemberExpression
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="lastIndexOf"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="lastIndexOf"][computed=false]
+  T.MemberExpression
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="match"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="match"][computed=false]
+  T.MemberExpression
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="slice"][computed=false], BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="substring"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="slice"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="substring"][computed=false]
+  T.MemberExpression
 BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name='indexOf'][computed=false]
+  T.MemberExpression
 BinaryExpression, LogicalExpression
+  T.BinaryExpression | T.LogicalExpression
 BinaryExpression > MemberExpression.left[computed=true], BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="charAt"][computed=false], BinaryExpression > ChainExpression.left > MemberExpression[computed=true], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="charAt"][computed=false]
+  T.MemberExpression
 BinaryExpression[operator='+']
+  T.BinaryExpression
 BinaryExpression[operator='>']
+  T.BinaryExpression
 BinaryExpression[operator=/^[<>!=]?={0,2}$/]
+  T.BinaryExpression
 BlockStatement
+  T.BlockStatement
 BlockStatement, ClassBody
+  T.BlockStatement | T.ClassBody
 BlockStatement:exit
+  T.BlockStatement
 BreakStatement
+  T.BreakStatement
 CallExpression
+  T.CallExpression
 CallExpression[arguments.length=0] > MemberExpression[property.name='sort'][computed=false]
+  T.MemberExpression
 CallExpression[arguments.length=0] > MemberExpression[property.name='toSorted'][computed=false]
+  T.MemberExpression
 CallExpression[arguments.length=1] > MemberExpression.callee[property.name='match'][computed=false]
+  T.MemberExpression
 CallExpression[arguments.length=1] > MemberExpression.callee[property.name="test"][computed=false]
+  T.MemberExpression
 CallExpression > *.callee
+  T.LeftHandSideExpression
 CallExpression[callee.name="require"]
+  T.CallExpression
 CallExpression > MemberExpression.callee
+  T.MemberExpression
 CallExpression > MemberExpression.callee > Identifier[name = "toString"].property
+  T.MemberExpression
 CallExpression > MemberExpression.callee[property.name="test"][computed=false]
+  T.MemberExpression
 CallExpression, NewExpression
+  T.CallExpression | T.NewExpression
 CallExpression[optional = true]
+  T.CallExpression
 CallExpression[optional = true] > TSNonNullExpression.callee
+  T.TSNonNullExpression
 ChainExpression > TSNonNullExpression
+  T.TSNonNullExpression
 ClassBody
+  T.ClassBody
 ClassBody:exit
+  T.ClassBody
 ClassBody > MethodDefinition
+  T.MethodDefinition
 ClassBody > MethodDefinition[key.name='new']
+  T.MethodDefinition
 ClassBody > PropertyDefinition
+  T.PropertyDefinition
 ClassDeclaration
+  T.ClassDeclaration
 ClassDeclaration, ClassExpression
+  T.ClassDeclaration | T.ClassExpression
 ClassDeclaration, ClassExpression:exit
+  T.ClassDeclaration | T.ClassExpression
 ClassDeclaration:exit
+  T.ClassDeclaration
 ClassDeclaration[superClass], ClassExpression[superClass]
+  T.ClassDeclaration | T.ClassExpression
 ClassExpression
+  T.ClassExpression
 ConditionalExpression
+  T.ConditionalExpression
 ContinueStatement
+  T.ContinueStatement
 DebuggerStatement
+  T.DebuggerStatement
 DoWhileStatement
+  T.DoWhileStatement
 DoWhileStatement, WhileStatement, ForInStatement, ForOfStatement, WithStatement
+  T.DoWhileStatement | T.WhileStatement | T.ForInStatement | T.ForOfStatement | T.WithStatement
 EmptyStatement
+  T.EmptyStatement
 *:exit
+  T.Node
 ExperimentalSpreadProperty
+  T.ExperimentalSpreadProperty
 ExportAllDeclaration
+  T.ExportAllDeclaration
 ExportDefaultDeclaration
+  T.ExportDefaultDeclaration
 ExportNamedDeclaration
+  T.ExportNamedDeclaration
 ExportNamedDeclaration[declaration.type="TSEnumDeclaration"]
+  T.ExportNamedDeclaration
 ExportNamedDeclaration[declaration.type="TSEnumDeclaration"]:exit
+  T.ExportNamedDeclaration
 ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]
+  T.ExportNamedDeclaration
 ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]:exit
+  T.ExportNamedDeclaration
 ExportNamedDeclaration:not([source])
+  TODO
 ExportNamedDeclaration[source]
+  TODO
 ExportSpecifier
+  T.ExportSpecifier
 ExpressionStatement
+  T.ExpressionStatement
 ForInStatement
+  T.ForInStatement
 ForOfStatement
+  T.ForOfStatement
 ForOfStatement[await = true]
+  TODO
 ForStatement
+  T.ForStatement
 ForStatement:exit
+  T.ForStatement
 ForStatement > *.init:exit
+  TODO
 FunctionDeclaration
+  T.FunctionDeclaration
 FunctionDeclaration[async = false]
+  TODO
 FunctionDeclaration:exit
+  T.FunctionDeclaration
 FunctionDeclaration, FunctionExpression
+  T.FunctionDeclaration | T.FunctionExpression
 FunctionDeclaration, TSDeclareFunction, FunctionExpression
+  T.FunctionDeclaration | T.TSDeclareFunction | T.FunctionExpression
 FunctionDeclaration, TSDeclareFunction, TSEmptyBodyFunctionExpression, FunctionExpression, ArrowFunctionExpression
+  T.FunctionDeclaration | T.TSDeclareFunction | T.TSEmptyBodyFunctionExpression | T.FunctionExpression | T.ArrowFunctionExpression
 FunctionExpression
+  T.FunctionExpression
 FunctionExpression[async = false]
+  TODO
 FunctionExpression:exit
+  T.FunctionExpression
 IfStatement
+  T.IfStatement
 ImportDeclaration
+  T.ImportDeclaration
 ImportDeclaration[importKind = "type"]
+  TODO
 ImportDeclaration[importKind!="type"]
+  TODO
 ImportDeclaration[importKind=type]
+  TODO
 ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier
+  T.ImportDefaultSpecifier | T.ImportNamespaceSpecifier | T.ImportSpecifier
 ImportExpression
+  T.ImportExpression
 ImportNamespaceSpecifier
+  T.ImportNamespaceSpecifier
 ImportSpecifier
+  T.ImportSpecifier
 ImportSpecifier[importKind = "type"]
+  TODO
 JSXAttribute
+  T.JSXAttribute
 JSXAttribute[value]
+  TODO
 JSXAttribute[value != null]
+  TODO
 JSXClosingElement
+  T.JSXClosingElement
 JSXClosingFragment
+  T.JSXClosingFragment
 JSXElement
+  T.JSXElement
 JSXExpressionContainer
+  T.JSXExpressionContainer
 JSXFragment
+  T.JSXFragment
 JSXOpeningElement
+  T.JSXOpeningElement
 JSXOpeningFragment
+  T.JSXOpeningFragment
 JSXSpreadAttribute
+  T.JSXSpreadAttribute
 Literal
+  T.Literal
 LogicalExpression
+  T.LogicalExpression
 LogicalExpression[operator = "||"]
+  TODO
 LogicalExpression[operator!="??"]
+  TODO
 LogicalExpression[operator="||"], LogicalExpression[operator="??"]
+  TODO
 LogicalExpression[operator = "??"] > TSNonNullExpression.left
+  T.TSNonNullExpression
 :matches(ClassDeclaration, ClassExpression):exit
+  TODO
 :matches(DoWhileStatement, ForStatement, ForInStatement, ForOfStatement, IfStatement, WhileStatement, WithStatement):exit
+  TODO
 :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "ArrowFunctionExpression"], :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "FunctionExpression"], :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "TSEmptyBodyFunctionExpression"], :matches(MethodDefinition, TSAbstractMethodDefinition)[computed = false][kind = "method"]
+  TODO
 :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type != "ArrowFunctionExpression"][value.type != "FunctionExpression"][value.type != "TSEmptyBodyFunctionExpression"]
+  TODO
 MemberExpression
+  T.MemberExpression
 MemberExpression[computed=false]
+  TODO
 MemberExpression[computed = true] > *.property
+  TODO
 MemberExpression:exit
+  T.MemberExpression
 MemberExpression, JSXMemberExpression, MetaProperty
+  T.MemberExpression | T.JSXMemberExpression | T.MetaProperty
 MemberExpression[optional = true]
+  TODO
 MemberExpression[optional = true] > TSNonNullExpression.object
+  T.TSNonNullExpression
 MethodDefinition
+  T.MethodDefinition
 MethodDefinition[computed = false]:matches([kind = "get"], [kind = "set"])
+  TODO
 MethodDefinition[computed=true]
+  TODO
 MethodDefinition[kind="constructor"]
+  TODO
 MethodDefinition, PropertyDefinition
+  T.MethodDefinition | T.PropertyDefinition
 MethodDefinition, PropertyDefinition, StaticBlock
+  T.MethodDefinition | T.PropertyDefinition | T.StaticBlock
 MethodDefinition, TSAbstractMethodDefinition
+  T.MethodDefinition | T.TSAbstractMethodDefinition
 NewExpression
+  T.NewExpression
 :not(ArrowFunctionExpression) > TSTypeParameterDeclaration > TSTypeParameter[constraint]
+  T.TSTypeParameter
 :not(ObjectPattern) > Property
+  T.Property
 :not(ObjectPattern) > Property[computed = false][kind = "init"][value.type != "ArrowFunctionExpression"][value.type != "FunctionExpression"][value.type != "TSEmptyBodyFunctionExpression"]
+  TODO_narrower
 :not(TSClassImplements, TSInterfaceHeritage) > MemberExpression
+  T.MemberExpression
 ObjectExpression
+  T.ObjectExpression
 ObjectExpression, ObjectPattern
+  T.ObjectExpression | T.ObjectPattern
 ObjectPattern
+  T.ObjectPattern
 onCodePathEnd
+  T.onCodePathEnd
 onCodePathStart
+  T.onCodePathStart
 Program
+  T.Program
 Program:exit
+  T.Program
 Program > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), Program > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)[declare = true]
+  TODO
 Property
+  T.Property
 Property[computed = false][kind = "init"][value.type = "ArrowFunctionExpression"], Property[computed = false][kind = "init"][value.type = "FunctionExpression"], Property[computed = false][kind = "init"][value.type = "TSEmptyBodyFunctionExpression"]
+  TODO
 Property[computed = false]:matches([kind = "get"], [kind = "set"])
+  TODO
 PropertyDefinition
+  T.PropertyDefinition
 PropertyDefinition > ArrowFunctionExpression.value
+  T.ArrowFunctionExpression
 PropertyDefinition > ArrowFunctionExpression.value:exit
+  T.ArrowFunctionExpression
 PropertyDefinition:exit
+  T.PropertyDefinition
 PropertyDefinition > *.key:exit
+  T.PropertyNameComputed | T.PropertyNameNonComputed
 PropertyDefinition, TSAbstractPropertyDefinition
+  T.PropertyDefinition | T.TSAbstractPropertyDefinition
 PropertyDefinition[value != null]
+  T.PropertyDefinition
 RestElement
+  T.RestElement
 ReturnStatement
+  T.ReturnStatement
 SequenceExpression
+  T.SequenceExpression
 SpreadElement
+  T.SpreadElement
 SpreadProperty
+  T.SpreadProperty
 :statement
+  TODO
 StaticBlock
+  T.StaticBlock
 StaticBlock:exit
+  T.StaticBlock
 Super
+  T.Super
 SwitchCase
+  T.SwitchCase
 SwitchCase:exit
+  T.SwitchCase
 SwitchStatement
+  T.SwitchStatement
 SwitchStatement:exit
+  T.SwitchStatement
 TaggedTemplateExpression > *.tag
+  T.LeftHandSideExpression
 TemplateLiteral
+  T.TemplateLiteral
 ThisExpression
+  T.ThisExpression
 ThisExpression, Super
+  T.ThisExpression
 ThrowStatement
+  T.ThrowStatement
 TryStatement
+  T.TryStatement
 TSAbstractMethodDefinition
+  T.TSAbstractMethodDefinition
 TSAbstractMethodDefinition, TSAbstractPropertyDefinition
+  T.TSAbstractMethodDefinition | T.TSAbstractPropertyDefinition
 TSAbstractPropertyDefinition
+  T.TSAbstractPropertyDefinition
 TSAnyKeyword
+  T.TSAnyKeyword
 TSArrayType
+  T.TSArrayType
 TSAsExpression
+  T.TSAsExpression
 TSAsExpression, TSTypeAssertion
+  T.TSAsExpression | T.TSTypeAssertion
 TSBigIntKeyword
+  T.TSBigIntKeyword
 TSBooleanKeyword
+  T.TSBooleanKeyword
 TSCallSignatureDeclaration
+  T.TSCallSignatureDeclaration
 TSClassImplements
+  T.TSClassImplements
 TSConditionalType
+  T.TSConditionalType
 TSConstructSignatureDeclaration
+  T.TSConstructSignatureDeclaration
 TSDeclareFunction
+  T.TSDeclareFunction
 TSDeclareFunction:exit
+  T.TSDeclareFunction
 TSEmptyBodyFunctionExpression
+  T.TSEmptyBodyFunctionExpression
 TSEnumDeclaration
+  T.TSEnumDeclaration
 TSEnumDeclaration:exit
+  T.TSEnumDeclaration
 TSEnumDeclaration, TSTypeLiteral
+  T.TSEnumDeclaration | T.TSTypeLiteral
 TSEnumMember
+  T.TSEnumMember
 TSEnumMember[computed != true]
+  TODO
 TSExportAssignment
+  T.TSExportAssignment
 TSExternalModuleReference
+  T.TSExternalModuleReference
 TSImportEqualsDeclaration
+  T.TSImportEqualsDeclaration
 TSImportType
+  T.TSImportType
 TSIndexedAccessType
+  T.TSIndexedAccessType
 TSIndexSignature, TSPropertySignature
+  T.TSIndexSignatur | T.TSPropertySignaturee
 TSInterfaceBody
+  T.TSInterfaceBody
 TSInterfaceBody > TSConstructSignatureDeclaration
+  T.TSConstructSignatureDeclaration
 TSInterfaceBody, TSModuleBlock
+  T.TSInterfaceBody | T.TSModuleBlock
 TSInterfaceDeclaration
+  T.TSInterfaceDeclaration
 TSInterfaceDeclaration:exit
+  T.TSInterfaceDeclaration
 TSInterfaceDeclaration[extends.length > 0]
+  T.TSInterfaceDeclaration
 TSInterfaceDeclaration TSThisType
+  T.TSThisType
 TSInterfaceDeclaration TSTypeLiteral
+  T.TSTypeLiteral
 TSInterfaceDeclaration TSTypeLiteral:exit
+  T.TSTypeLiteral
 TSInterfaceHeritage
+  T.TSInterfaceHeritage
 TSIntersectionType
+  T.TSIntersectionType
 TSIntersectionType:exit
+  T.TSIntersectionType
 TSMappedType
+  T.TSMappedType
 TSMethodSignature
+  T.TSMethodSignature
 TSMethodSignature[computed = false], TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type = "TSFunctionType"]
+  TODO
 TSMethodSignature[key.name='constructor']
+  TODO
 TSModuleBlock
+  T.TSModuleBlock
 TSModuleBlock:exit
+  T.TSModuleBlock
 TSModuleDeclaration
+  T.TSModuleDeclaration
 TSModuleDeclaration[declare = true] > TSModuleBlock > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), TSModuleDeclaration[declare = true] > TSModuleBlock > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)
+  TODO
 TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModuleBlock > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModuleBlock > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)
+  TODO
 TSModuleDeclaration:exit
+  T.TSModuleDeclaration
 TSModuleDeclaration[global!=true][id.type!='Literal']
+  TODO
 TSModuleDeclaration > TSModuleBlock
+  T.TSModuleBlock
 TSModuleDeclaration > TSModuleDeclaration
+  T.TSModuleDeclaration
 TSNeverKeyword
+  T.TSNeverKeyword
 TSNonNullExpression
+  T.TSNonNullExpression
 TSNonNullExpression > ChainExpression
+  T.ChainExpression
 TSNonNullExpression > TSNonNullExpression
+  T.TSNonNullExpression
 TSNullKeyword
+  T.TSNullKeyword
 TSNumberKeyword
+  T.TSNumberKeyword
 TSObjectKeyword
+  T.TSObjectKeyword
 TSParameterProperty
+  T.TSParameterProperty
 TSPropertySignature
+  T.TSPropertySignature
 TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type != "TSFunctionType"]
+  TODO
 TSQualifiedName
+  T.TSQualifiedName
 TSQualifiedName:exit
+  T.TSQualifiedName
 TSStringKeyword
+  T.TSStringKeyword
 TSSymbolKeyword
+  T.TSSymbolKeyword
 TSTupleType
+  T.TSTupleType
 TSTypeAliasDeclaration
+  T.TSTypeAliasDeclaration
 TSTypeAliasDeclaration[typeAnnotation.type='TSTypeLiteral']
+  TODO
 TSTypeAnnotation
+  T.TSTypeAnnotation
 TSTypeAssertion
+  T.TSTypeAssertion
 TSTypeLiteral
+  T.TSTypeLiteral
 TSTypeLiteral:exit
+  T.TSTypeLiteral
 TSTypeLiteral[members.length = 1]
+  T.TSTypeLiteral
 TSTypeParameterDeclaration
+  T.TSTypeParameterDeclaration
 TSTypeParameterDeclaration > TSTypeParameter
+  T.TSTypeParameter
 TSTypeParameterInstantiation
+  T.TSTypeParameterInstantiation
 TSTypeReference
+  T.TSTypeReference
 TSUndefinedKeyword
+  T.TSUndefinedKeyword
 TSUnionType
+  T.TSUnionType
 TSUnionType:exit
+  T.TSUnionType
 TSUnknownKeyword
+  T.TSUnknownKeyword
 TSVoidKeyword
+  T.TSVoidKeyword
 UnaryExpression
+  T.UnaryExpression
 UnaryExpression[operator="!"]
+  TODO
 UnaryExpression[operator="delete"]
+  TODO
 UnaryExpression[operator=delete]
+  TODO
 UnaryExpression[operator="void"]
+  TODO
 UpdateExpression
+  T.UpdateExpression
 VariableDeclaration
+  T.VariableDeclaration
 VariableDeclaration:exit
+  T.VariableDeclaration
 VariableDeclaration[kind = "await using"]
+  TODO
 VariableDeclarator
+  T.VariableDeclarator
 VariableDeclarator, AssignmentExpression
+  T.VariableDeclarator | T.AssignmentExpression
 VariableDeclarator[init != null]
+  TODO
 VariableDeclarator[init.type='ThisExpression'], AssignmentExpression[right.type='ThisExpression']
+  TODO
 VariableDeclarator,PropertyDefinition,:matches(FunctionDeclaration,FunctionExpression) > AssignmentPattern
+  T.VariableDeclarator | T.PropertyDefinition | T.AssignmentPattern
 WhileStatement
+  T.WhileStatement
 WithStatement
+  T.WithStatement
 YieldExpression
+  T.YieldExpression
