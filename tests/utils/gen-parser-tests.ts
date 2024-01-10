@@ -6,7 +6,7 @@ import esquery from 'esquery'
 import { queries } from './queries-for-parser-tests'
 
 let content = `import type { Expect, Equal } from '@type-challenges/utils'
-import type { ParseIt } from '../../src/hhh'
+import type { ParseIt } from '../../src/parser'
 
 export type TestCases = [
 `

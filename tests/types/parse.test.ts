@@ -1,5 +1,5 @@
 import type { Expect, Equal } from '@type-challenges/utils'
-import type { ParseIt } from '../../src/hhh'
+import type { ParseIt } from '../../src/parser'
 
 export type TestCases = [
 Expect<Equal<ParseIt<"Program">, {"type":"identifier","value":"Program"}>>,
