@@ -1,3 +1,4 @@
+// eslint-disable-next-line ts/ban-types
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {}
 
 type IdentifierNameRestrictedSymbols =
@@ -17,7 +18,10 @@ type IdentifierNameRestrictedSymbols =
   | '+'
   | '.'
 
-type AttrValueRestrictedSymbols = Exclude<IdentifierNameRestrictedSymbols, '.'>
+type IdentifierNameRestrictedSymbolsWithDot = Exclude<
+  IdentifierNameRestrictedSymbols,
+  '.'
+>
 
 export type ParseIdentifierName<
   T extends string,
@@ -246,7 +250,7 @@ type ParseAttrWithEq<
     : // branch for '=' op
       ParseIdentifierName<
           TrimSpaces<RawAttrName>,
-          AttrValueRestrictedSymbols
+          IdentifierNameRestrictedSymbolsWithDot
         > extends infer IdentifierNameParseRes
       ? IdentifierNameParseRes extends 'identifierNameEmpty'
         ? 'attrNope-identifierNameNopeOnEqOp'
@@ -287,7 +291,7 @@ type ParseAttrWithStrictNotEq<
   Rest extends string,
 > = ParseIdentifierName<
   RawAttrName,
-  AttrValueRestrictedSymbols
+  IdentifierNameRestrictedSymbolsWithDot
 > extends infer IdentifierNameParseRes
   ? IdentifierNameParseRes extends 'identifierNameEmpty'
     ? 'attrNope-identifierNameNopeOnLessOrEqOp'
@@ -341,7 +345,7 @@ export type ParseAttr<T extends string> =
               : //  [name.path]
                 ParseIdentifierName<
                     Inner,
-                    AttrValueRestrictedSymbols
+                    IdentifierNameRestrictedSymbolsWithDot
                   > extends infer IdentifierNameParseRes
                 ? IdentifierNameParseRes extends 'identifierNameEmpty'
                   ? // []
@@ -366,6 +370,29 @@ export type ParseAttr<T extends string> =
       : never
     : 'attrNope-doesnthaveSquareBrackets'
 
+export type ParseField<T extends string> = T extends `.${infer Rest}`
+  ? ParseIdentifierName<
+      Rest,
+      IdentifierNameRestrictedSymbolsWithDot
+    > extends infer IdentifierNameParseRes
+    ? IdentifierNameParseRes extends 'identifierNameEmpty'
+      ? 'fieldErr-identifierNameNope'
+      : IdentifierNameParseRes extends {
+            value: infer IdentifierNameParseResValue
+            rest: infer IdentifierNameParseResRest
+          }
+        ? {
+            type: 'field'
+            name: IdentifierNameParseResValue
+            rest: IdentifierNameParseResRest
+          }
+        : never
+    : 'field stub'
+  : 'field not starts with dot'
+
+export declare const asdf: ParseIt<'.aaa.bbb'>
+//                     ^?
+
 export type ParseAtom<T extends string> =
   ParseWildcard<T> extends infer WildcardParseRes
     ? WildcardParseRes extends string
@@ -373,7 +400,11 @@ export type ParseAtom<T extends string> =
         ? IdentifierParseRes extends string
           ? ParseAttr<T> extends infer AttrParseRes
             ? AttrParseRes extends string
-              ? 'super next Stub (unimplemented)'
+              ? ParseField<T> extends infer FieldParseRes
+                ? FieldParseRes extends string
+                  ? 'super next Stub (unimplemented)'
+                  : FieldParseRes
+                : never
               : AttrParseRes
             : never
           : IdentifierParseRes
