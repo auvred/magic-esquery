@@ -1,3 +1,5 @@
+// TODO: fix broken tests
+
 import type {
   ParseAtom,
   ParseAttr,
@@ -9,6 +11,7 @@ import type {
   ParseSelector,
   ParseSelectors,
   ParseWildcard,
+  SplitFirst,
   TrimLeft,
   TrimS,
   _ParseAttrValueRegexFlags,
@@ -34,6 +37,13 @@ export type trims = [
   Expect<Equal<TrimS<'aaa   '>, 'aaa'>>,
   Expect<Equal<TrimS<' a'>, 'a'>>,
   Expect<Equal<TrimS<'   aaa'>, 'aaa'>>,
+]
+
+export type split = [
+  Expect<Equal<SplitFirst<'aa=bb', '='>, ['aa', 'bb']>>,
+  Expect<Equal<SplitFirst<'aa=bb=cc', '='>, ['aa', 'bb=cc']>>,
+  Expect<Equal<SplitFirst<'=bb=cc', '='>, ['', 'bb=cc']>>,
+  Expect<Equal<SplitFirst<'aa=', '='>, ['aa', '']>>,
 ]
 
 export type wildcardParsing = [
@@ -162,18 +172,33 @@ export type attrValueRegexFlags = [
 ]
 
 export type arrValueString = [
-  Expect<Equal<ParseAttrValueString<'" string "'>, { res: ' string ' }>>,
-  Expect<Equal<ParseAttrValueString<'" str\\"ing "'>, { res: ' str"ing ' }>>,
-  Expect<Equal<ParseAttrValueString<'" string "'>, { res: ' string ' }>>,
-  Expect<Equal<ParseAttrValueString<'""'>, { res: '' }>>,
-  Expect<Equal<ParseAttrValueString<"'\\''">, { res: "'" }>>,
+  Expect<
+    Equal<
+      ParseAttrValueString<'" string "'>,
+      { type: 'literal'; value: ' string ' }
+    >
+  >,
+  Expect<
+    Equal<
+      ParseAttrValueString<'" str\\"ing "'>,
+      { type: 'literal'; value: ' str"ing ' }
+    >
+  >,
+  Expect<
+    Equal<
+      ParseAttrValueString<'" string "'>,
+      { type: 'literal'; value: ' string ' }
+    >
+  >,
+  Expect<Equal<ParseAttrValueString<'""'>, { type: 'literal'; value: '' }>>,
+  Expect<Equal<ParseAttrValueString<"'\\''">, { type: 'literal'; value: "'" }>>,
 ]
 
 export type arrValueNumber = [
-  Expect<Equal<ParseAttrValueNumber<'1'>, { res: 1 }>>,
-  Expect<Equal<ParseAttrValueNumber<'100'>, { res: 100 }>>,
-  Expect<Equal<ParseAttrValueNumber<'010'>, { res: 10 }>>,
-  Expect<Equal<ParseAttrValueNumber<'10.4'>, { res: 10.4 }>>,
+  Expect<Equal<ParseAttrValueNumber<'1'>, { type: 'literal'; value: 1 }>>,
+  Expect<Equal<ParseAttrValueNumber<'100'>, { type: 'literal'; value: 100 }>>,
+  Expect<Equal<ParseAttrValueNumber<'010'>, { type: 'literal'; value: 10 }>>,
+  Expect<Equal<ParseAttrValueNumber<'10.4'>, { type: 'literal'; value: 10.4 }>>,
 ]
 
 export type attrValueRegex = [
