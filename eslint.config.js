@@ -1,7 +1,16 @@
 module.exports = (async () => {
   const { auvred } = await import('@auvred/eslint-config')
   return [
-    ...(await auvred()),
+    ...(await auvred({
+      imports: {
+        overrides: {
+          'import/consistent-type-specifier-style': [
+            'error',
+            'prefer-top-level',
+          ],
+        },
+      },
+    })),
     {
       rules: {
         'unused-imports/no-unused-vars': [
@@ -16,7 +25,7 @@ module.exports = (async () => {
       },
     },
     {
-      ignores: ['tests/auto/test.ts'],
+      ignores: ['tests/types/parse.test.ts'],
     },
   ]
 })()
