@@ -1,4 +1,5 @@
 {
+  "packageManager": "pnpm@8.14.1",
   "scripts": {
     "gen-parser-tests": "tsx tests/utils/gen-parser-tests.ts",
     "extract-ts-eslint-selectors": "tsx scripts/extract-ts-eslint-selectors/run.ts",
