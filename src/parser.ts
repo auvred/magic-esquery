@@ -390,7 +390,20 @@ export type ParseField<T extends string> = T extends `.${infer Rest}`
     : 'field stub'
   : 'field not starts with dot'
 
-export declare const asdf: ParseIt<'.aaa.bbb'>
+export type ParseNegation<T extends string> =
+  T extends `:not(${infer Inner})${infer Rest}`
+    ? ParseSelectors<TrimSpaces<Inner>> extends infer SelectorsParseRes
+      ? SelectorsParseRes extends string
+        ? SelectorsParseRes
+        : SelectorsParseRes extends {
+              selectors: infer Selectors
+            }
+          ? { type: 'not'; selectors: Selectors; rest: Rest }
+          : 'nope'
+      : never
+    : 'is not negation'
+
+export declare const asdf: ParseIt<':not(a, b)'>
 //                     ^?
 
 export type ParseAtom<T extends string> =
@@ -402,7 +415,11 @@ export type ParseAtom<T extends string> =
             ? AttrParseRes extends string
               ? ParseField<T> extends infer FieldParseRes
                 ? FieldParseRes extends string
-                  ? 'super next Stub (unimplemented)'
+                  ? ParseNegation<T> extends infer NegationParseRes
+                    ? NegationParseRes extends string
+                      ? 'super next Stub (unimplemented)'
+                      : NegationParseRes
+                    : never
                   : FieldParseRes
                 : never
               : AttrParseRes

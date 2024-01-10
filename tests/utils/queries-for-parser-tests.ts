@@ -141,5 +141,24 @@ export const queries = (
       ['.aaa', '.aaa.bbb'],
       spaces,
     ),
+
+    genVariants(
+      'Program',
+      spaces,
+      ':',
+      ['not'],
+      '(',
+      spaces,
+      ['A > B', 'A , B', 'A[b] ~ B[a]'],
+      spaces,
+      ')',
+      spaces,
+      ['', '>'],
+      spaces,
+      ':',
+      ['not'],
+      '(A > B)',
+      spaces,
+    ),
   ] satisfies GenVariantArgs
 ).flat(Number.POSITIVE_INFINITY)
