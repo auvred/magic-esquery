@@ -1,7 +1,27 @@
 {
   "include": ["src/**/*.ts", "tests/**/*.ts"],
   "compilerOptions": {
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "strict": true,
+
     "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "lib": ["ES2022"],
+    "moduleDetection": "force",
+    "target": "ESNext",
+
+    "skipLibCheck": true,
+
+    "noErrorTruncation": true
   }
 }
