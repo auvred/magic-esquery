@@ -1,89 +1,288 @@
 # c3767edf65716be08df25723d7dbb770de0e7037
-ImportDeclaration
-TSImportEqualsDeclaration
-ProgramtchStatement
-TSInterfaceBody
-TSTypeLiteral
-TSEnumDeclaration
-Program
-Program:exit
-TSAsExpression, TSTypeAssertion
-ExportNamedDeclaration
-MemberExpression
-BlockStatement
-StaticBlock
-SwitchStatement
-CallExpression[callee.name="require"]
-TSNonNullExpression > TSNonNullExpression
-MemberExpression[optional = true] > TSNonNullExpression.object
-CallExpression[optional = true] > TSNonNullExpression.callee
-TSExternalModuleReference
-ReturnStatement
+*
+ArrayExpression
+ArrayExpression, ArrayPattern
+ArrayExpression > SpreadElement
+ArrayPattern
+ArrowFunctionExpression
+ArrowFunctionExpression[async = false]
+ArrowFunctionExpression[async = true]:exit
+ArrowFunctionExpression[async = true] > :not(BlockStatement, AwaitExpression)
+ArrowFunctionExpression:exit
+ArrowFunctionExpression, FunctionDeclaration, FunctionExpression
+ArrowFunctionExpression, FunctionDeclaration, FunctionExpression, MethodDefinition
+ArrowFunctionExpression, FunctionDeclaration, FunctionExpression, MethodDefinition:exit
+ArrowFunctionExpression, FunctionDeclaration, FunctionExpression, TSCallSignatureDeclaration, TSConstructSignatureDeclaration, TSDeclareFunction, TSEmptyBodyFunctionExpression, TSFunctionType, TSMethodSignature
+ArrowFunctionExpression, FunctionExpression
 ArrowFunctionExpression > :not(BlockStatement).body
+ArrowFunctionExpression > TSTypeParameterDeclaration > TSTypeParameter[constraint]
+AssignmentExpression
+AssignmentExpression[operator='+=']
+AssignmentExpression[operator = "="], AssignmentPattern
+AssignmentExpression[operator = "+="], BinaryExpression[operator = "+"]
+AssignmentPattern
+AwaitExpression
+AwaitExpression, CallExpression, TaggedTemplateExpression
+BinaryExpression
+BinaryExpression, AssignmentExpression
+BinaryExpression > CallExpression.left > MemberExpression.callee[property.name='indexOf'][computed=false]
+BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="indexOf"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="indexOf"][computed=false]
+BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="lastIndexOf"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="lastIndexOf"][computed=false]
+BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="match"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="match"][computed=false]
+BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="slice"][computed=false], BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="substring"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="slice"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="substring"][computed=false]
+BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name='indexOf'][computed=false]
+BinaryExpression, LogicalExpression
+BinaryExpression > MemberExpression.left[computed=true], BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="charAt"][computed=false], BinaryExpression > ChainExpression.left > MemberExpression[computed=true], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="charAt"][computed=false]
+BinaryExpression[operator='+']
+BinaryExpression[operator='>']
+BinaryExpression[operator=/^[<>!=]?={0,2}$/]
+BlockStatement
+BlockStatement, ClassBody
+BlockStatement:exit
+BreakStatement
+CallExpression
 CallExpression[arguments.length=0] > MemberExpression[property.name='sort'][computed=false]
 CallExpression[arguments.length=0] > MemberExpression[property.name='toSorted'][computed=false]
-:not(TSClassImplements, TSInterfaceHeritage) > MemberExpression
-MemberExpression[computed = true] > *.property
-BinaryExpression, AssignmentExpression
-ClassBody
-AssignmentExpression[operator = "+="], BinaryExpression[operator = "+"]
-CallExpression > MemberExpression.callee > Identifier[name = "toString"].property
-TemplateLiteral
-MethodDefinition
-ClassBody:exit
-MethodDefinition, PropertyDefinition
 CallExpression[arguments.length=1] > MemberExpression.callee[property.name='match'][computed=false]
-TSNonNullExpression > ChainExpression
-ChainExpression > TSNonNullExpression
-TSModuleDeclaration
-TSModuleDeclaration > TSModuleBlock
-ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]
-ExportNamedDeclaration[declaration.type="TSEnumDeclaration"]
-TSModuleDeclaration:exit
-TSEnumDeclaration:exit
-ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]:exit
-ExportNamedDeclaration[declaration.type="TSEnumDeclaration"]:exit
-TSQualifiedName
-MemberExpression[computed=false]
-TSQualifiedName:exit
-MemberExpression:exit
-ArrowFunctionExpression
-FunctionDeclaration
-FunctionExpression
-ClassDeclaration
-ClassExpression
-TSInterfaceDeclaration
-TSInterfaceBody > TSConstructSignatureDeclaration
-TSMethodSignature[key.name='constructor']
-ClassBody > MethodDefinition[key.name='new']
-CallExpression
-NewExpression
-ClassBody > MethodDefinition
-ClassBody > PropertyDefinition
+CallExpression[arguments.length=1] > MemberExpression.callee[property.name="test"][computed=false]
+CallExpression > *.callee
+CallExpression[callee.name="require"]
 CallExpression > MemberExpression.callee
-VariableDeclarator[init.type='ThisExpression'], AssignmentExpression[right.type='ThisExpression']
-ImportDeclaration[importKind!="type"]
-ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier
-VariableDeclarator
+CallExpression > MemberExpression.callee > Identifier[name = "toString"].property
+CallExpression > MemberExpression.callee[property.name="test"][computed=false]
+CallExpression, NewExpression
+CallExpression[optional = true]
+CallExpression[optional = true] > TSNonNullExpression.callee
+ChainExpression > TSNonNullExpression
+ClassBody
+ClassBody:exit
+ClassBody > MethodDefinition
+ClassBody > MethodDefinition[key.name='new']
+ClassBody > PropertyDefinition
+ClassDeclaration
+ClassDeclaration, ClassExpression
+ClassDeclaration, ClassExpression:exit
+ClassDeclaration:exit
+ClassDeclaration[superClass], ClassExpression[superClass]
+ClassExpression
+ConditionalExpression
+ContinueStatement
+DebuggerStatement
+DoWhileStatement
+DoWhileStatement, WhileStatement, ForInStatement, ForOfStatement, WithStatement
+EmptyStatement
+*:exit
+ExperimentalSpreadProperty
+ExportAllDeclaration
+ExportDefaultDeclaration
+ExportNamedDeclaration
+ExportNamedDeclaration[declaration.type="TSEnumDeclaration"]
+ExportNamedDeclaration[declaration.type="TSEnumDeclaration"]:exit
+ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]
+ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]:exit
+ExportNamedDeclaration:not([source])
+ExportNamedDeclaration[source]
+ExportSpecifier
+ExpressionStatement
+ForInStatement
+ForOfStatement
+ForOfStatement[await = true]
+ForStatement
+ForStatement:exit
+ForStatement > *.init:exit
+FunctionDeclaration
+FunctionDeclaration[async = false]
+FunctionDeclaration:exit
+FunctionDeclaration, FunctionExpression
 FunctionDeclaration, TSDeclareFunction, FunctionExpression
 FunctionDeclaration, TSDeclareFunction, TSEmptyBodyFunctionExpression, FunctionExpression, ArrowFunctionExpression
-TSParameterProperty
-:not(ObjectPattern) > Property[computed = false][kind = "init"][value.type != "ArrowFunctionExpression"][value.type != "FunctionExpression"][value.type != "TSEmptyBodyFunctionExpression"]
-:matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type != "ArrowFunctionExpression"][value.type != "FunctionExpression"][value.type != "TSEmptyBodyFunctionExpression"]
-TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type != "TSFunctionType"]
-Property[computed = false][kind = "init"][value.type = "ArrowFunctionExpression"], Property[computed = false][kind = "init"][value.type = "FunctionExpression"], Property[computed = false][kind = "init"][value.type = "TSEmptyBodyFunctionExpression"]
-:matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "ArrowFunctionExpression"], :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "FunctionExpression"], :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "TSEmptyBodyFunctionExpression"], :matches(MethodDefinition, TSAbstractMethodDefinition)[computed = false][kind = "method"]
-TSMethodSignature[computed = false], TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type = "TSFunctionType"]
-Property[computed = false]:matches([kind = "get"], [kind = "set"])
-MethodDefinition[computed = false]:matches([kind = "get"], [kind = "set"])
-TSEnumMember[computed != true]
-ClassDeclaration, ClassExpression
-TSTypeAliasDeclaration
-TSTypeParameterDeclaration > TSTypeParameter
-CallExpression > *.callee
-TaggedTemplateExpression > *.tag
-ForInStatement
-UnaryExpression[operator=delete]
+FunctionExpression
+FunctionExpression[async = false]
+FunctionExpression:exit
+IfStatement
+ImportDeclaration
+ImportDeclaration[importKind = "type"]
+ImportDeclaration[importKind!="type"]
+ImportDeclaration[importKind=type]
+ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier
+ImportExpression
+ImportNamespaceSpecifier
+ImportSpecifier
+ImportSpecifier[importKind = "type"]
+JSXAttribute
+JSXAttribute[value]
+JSXAttribute[value != null]
+JSXClosingElement
+JSXClosingFragment
+JSXElement
+JSXExpressionContainer
+JSXFragment
+JSXOpeningElement
+JSXOpeningFragment
+JSXSpreadAttribute
 Literal
+LogicalExpression
+LogicalExpression[operator = "||"]
+LogicalExpression[operator!="??"]
+LogicalExpression[operator="||"], LogicalExpression[operator="??"]
+LogicalExpression[operator = "??"] > TSNonNullExpression.left
+:matches(ClassDeclaration, ClassExpression):exit
+:matches(DoWhileStatement, ForStatement, ForInStatement, ForOfStatement, IfStatement, WhileStatement, WithStatement):exit
+:matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "ArrowFunctionExpression"], :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "FunctionExpression"], :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "TSEmptyBodyFunctionExpression"], :matches(MethodDefinition, TSAbstractMethodDefinition)[computed = false][kind = "method"]
+:matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type != "ArrowFunctionExpression"][value.type != "FunctionExpression"][value.type != "TSEmptyBodyFunctionExpression"]
+MemberExpression
+MemberExpression[computed=false]
+MemberExpression[computed = true] > *.property
+MemberExpression:exit
+MemberExpression, JSXMemberExpression, MetaProperty
+MemberExpression[optional = true]
+MemberExpression[optional = true] > TSNonNullExpression.object
+MethodDefinition
+MethodDefinition[computed = false]:matches([kind = "get"], [kind = "set"])
+MethodDefinition[computed=true]
+MethodDefinition[kind="constructor"]
+MethodDefinition, PropertyDefinition
+MethodDefinition, PropertyDefinition, StaticBlock
+MethodDefinition, TSAbstractMethodDefinition
+NewExpression
+:not(ArrowFunctionExpression) > TSTypeParameterDeclaration > TSTypeParameter[constraint]
+:not(ObjectPattern) > Property
+:not(ObjectPattern) > Property[computed = false][kind = "init"][value.type != "ArrowFunctionExpression"][value.type != "FunctionExpression"][value.type != "TSEmptyBodyFunctionExpression"]
+:not(TSClassImplements, TSInterfaceHeritage) > MemberExpression
+ObjectExpression
+ObjectExpression, ObjectPattern
+ObjectPattern
+onCodePathEnd
+onCodePathStart
+Program
+Program:exit
+Program > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), Program > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)[declare = true]
+Property
+Property[computed = false][kind = "init"][value.type = "ArrowFunctionExpression"], Property[computed = false][kind = "init"][value.type = "FunctionExpression"], Property[computed = false][kind = "init"][value.type = "TSEmptyBodyFunctionExpression"]
+Property[computed = false]:matches([kind = "get"], [kind = "set"])
+PropertyDefinition
+PropertyDefinition > ArrowFunctionExpression.value
+PropertyDefinition > ArrowFunctionExpression.value:exit
+PropertyDefinition:exit
+PropertyDefinition > *.key:exit
+PropertyDefinition, TSAbstractPropertyDefinition
+PropertyDefinition[value != null]
+RestElement
+ReturnStatement
+SequenceExpression
+SpreadElement
+SpreadProperty
+:statement
+StaticBlock
+StaticBlock:exit
+Super
+SwitchCase
+SwitchCase:exit
+SwitchStatement
+SwitchStatement:exit
+TaggedTemplateExpression > *.tag
+TemplateLiteral
+ThisExpression
+ThisExpression, Super
+ThrowStatement
+TryStatement
+TSAbstractMethodDefinition
+TSAbstractMethodDefinition, TSAbstractPropertyDefinition
+TSAbstractPropertyDefinition
+TSAnyKeyword
+TSArrayType
+TSAsExpression
+TSAsExpression, TSTypeAssertion
+TSBigIntKeyword
+TSBooleanKeyword
+TSCallSignatureDeclaration
+TSClassImplements
+TSConditionalType
+TSConstructSignatureDeclaration
+TSDeclareFunction
+TSDeclareFunction:exit
+TSEmptyBodyFunctionExpression
+TSEnumDeclaration
+TSEnumDeclaration:exit
+TSEnumDeclaration, TSTypeLiteral
+TSEnumMember
+TSEnumMember[computed != true]
+TSExportAssignment
+TSExternalModuleReference
+TSImportEqualsDeclaration
+TSImportType
+TSIndexedAccessType
+TSIndexSignature, TSPropertySignature
+TSInterfaceBody
+TSInterfaceBody > TSConstructSignatureDeclaration
+TSInterfaceBody, TSModuleBlock
+TSInterfaceDeclaration
+TSInterfaceDeclaration:exit
+TSInterfaceDeclaration[extends.length > 0]
+TSInterfaceDeclaration TSThisType
+TSInterfaceDeclaration TSTypeLiteral
+TSInterfaceDeclaration TSTypeLiteral:exit
+TSInterfaceHeritage
+TSIntersectionType
+TSIntersectionType:exit
+TSMappedType
+TSMethodSignature
+TSMethodSignature[computed = false], TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type = "TSFunctionType"]
+TSMethodSignature[key.name='constructor']
+TSModuleBlock
+TSModuleBlock:exit
+TSModuleDeclaration
+TSModuleDeclaration[declare = true] > TSModuleBlock > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), TSModuleDeclaration[declare = true] > TSModuleBlock > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)
+TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModuleBlock > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModuleBlock > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)
+TSModuleDeclaration:exit
+TSModuleDeclaration[global!=true][id.type!='Literal']
+TSModuleDeclaration > TSModuleBlock
+TSModuleDeclaration > TSModuleDeclaration
+TSNeverKeyword
+TSNonNullExpression
+TSNonNullExpression > ChainExpression
+TSNonNullExpression > TSNonNullExpression
+TSNullKeyword
+TSNumberKeyword
+TSObjectKeyword
+TSParameterProperty
+TSPropertySignature
+TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type != "TSFunctionType"]
+TSQualifiedName
+TSQualifiedName:exit
+TSStringKeyword
+TSSymbolKeyword
+TSTupleType
+TSTypeAliasDeclaration
+TSTypeAliasDeclaration[typeAnnotation.type='TSTypeLiteral']
+TSTypeAnnotation
+TSTypeAssertion
+TSTypeLiteral
+TSTypeLiteral:exit
+TSTypeLiteral[members.length = 1]
+TSTypeParameterDeclaration
+TSTypeParameterDeclaration > TSTypeParameter
+TSTypeParameterInstantiation
+TSTypeReference
+TSUndefinedKeyword
+TSUnionType
+TSUnionType:exit
+TSUnknownKeyword
+TSVoidKeyword
 UnaryExpression
+UnaryExpression[operator="!"]
+UnaryExpression[operator="delete"]
+UnaryExpression[operator=delete]
 UnaryExpression[operator="void"]
+UpdateExpression
+VariableDeclaration
+VariableDeclaration:exit
+VariableDeclaration[kind = "await using"]
+VariableDeclarator
+VariableDeclarator, AssignmentExpression
+VariableDeclarator[init != null]
+VariableDeclarator[init.type='ThisExpression'], AssignmentExpression[right.type='ThisExpression']
+VariableDeclarator,PropertyDefinition,:matches(FunctionDeclaration,FunctionExpression) > AssignmentPattern
+WhileStatement
+WithStatement
+YieldExpression

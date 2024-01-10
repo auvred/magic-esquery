@@ -2,17 +2,14 @@ diff --git a/lib/linter/linter.js b/lib/linter/linter.js
 index 233cbed5b5ccdf89806df9786a0902a317dd451e..01009f051a0323f3ebb3a68eb823885f77cbecbe 100644
 --- a/lib/linter/linter.js
 +++ b/lib/linter/linter.js
-@@ -867,7 +867,13 @@ function parse(text, languageOptions, filePath) {
+@@ -867,7 +867,10 @@ function parse(text, languageOptions, filePath) {
   */
  function createRuleListeners(rule, ruleContext) {
      try {
 -        return rule.create(ruleContext);
 +        const listeners = rule.create(ruleContext);
-+        const fs = require('node:fs')
-+        let content = fs.existsSync('./listeners') ? fs.readFileSync('./listeners', 'utf8').split('\n') : []
-+        let changed = false
-+        Object.keys(listeners).forEach(l => content.includes(l) || (content.push(l), changed = true))
-+        if (changed) fs.writeFileSync('./listeners', content.join('\n'), 'utf8')
++        const {execSync} = require('node:child_process')
++        execSync(`echo ${JSON.stringify(JSON.stringify(Object.keys(listeners)))} >> listeners`)
 +        return listeners
      } catch (ex) {
          ex.message = `Error while loading rule '${ruleContext.id}': ${ex.message}`;

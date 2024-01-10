@@ -41,7 +41,7 @@ export type TestCases = [
   })
 }
 
-genFromSelectors('parse.test.ts', manualSelectors)
+genFromSelectors('parse.generated-test.ts', manualSelectors)
 
 const tsEslintSelectors = fs
   .readFileSync(path.join(__dirname, 'ts-eslint-selectors.txt'), 'utf8')
@@ -50,4 +50,4 @@ const tsEslintSelectors = fs
     const sel = selector.trim()
     return sel && !sel.startsWith('#')
   })
-genFromSelectors('ts-eslint-parse.test.ts', tsEslintSelectors)
+genFromSelectors('ts-eslint-parse.generated-test.ts', tsEslintSelectors)
