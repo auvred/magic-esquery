@@ -36,6 +36,7 @@ const spaces = ['', '   ']
 
 export const queries = [
   'Program',
+  '#Program',
   '*',
   ...genVariants(
     spaces,

@@ -1,11 +1,5 @@
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {}
 
-type IfEqual<X, Y, Then, Else> = (<T>() => T extends X ? 1 : 2) extends <
-  T,
->() => T extends Y ? 1 : 2
-  ? Then
-  : Else
-
 type IdentifierNameRestrictedSymbols =
   | ' '
   | '['
@@ -23,32 +17,34 @@ type IdentifierNameRestrictedSymbols =
   | '+'
   | '.'
 
+type AttrValueRestrictedSymbols = Exclude<IdentifierNameRestrictedSymbols, '.'>
+
 export type ParseIdentifierName<
   T extends string,
-  Restricted extends string,
-  N extends string = '',
+  RestrictedChars extends string,
+  Acc extends string = '',
 > = T extends ''
-  ? N extends ''
+  ? Acc extends ''
     ? 'identifierNameEmpty'
     : {
-        value: N
+        value: Acc
         rest: T
       }
   : T extends `${infer First}${infer Rest}`
-    ? First extends Restricted
-      ? N extends ''
+    ? First extends RestrictedChars
+      ? Acc extends ''
         ? 'identifierNameEmpty'
         : {
-            value: N
+            value: Acc
             rest: T
           }
-      : ParseIdentifierName<Rest, Restricted, `${N}${First}`>
+      : ParseIdentifierName<Rest, RestrictedChars, `${Acc}${First}`>
     : never
 
-type _ParseIdentifierNameToIdentifierAdapter<
+type ParseIdentifierInternal<
   T extends string,
-  Restricted extends string,
-> = ParseIdentifierName<T, Restricted> extends infer ParseRes
+  RestrictedChars extends string,
+> = ParseIdentifierName<T, RestrictedChars> extends infer ParseRes
   ? ParseRes extends { value: infer V; rest: infer R }
     ? {
         type: 'identifier'
@@ -62,10 +58,10 @@ type _ParseIdentifierNameToIdentifierAdapter<
 
 export type ParseIdentifier<
   T extends string,
-  Restricted extends string = IdentifierNameRestrictedSymbols,
+  RestrictedChars extends string = IdentifierNameRestrictedSymbols,
 > = T extends `#${infer Rest}`
-  ? _ParseIdentifierNameToIdentifierAdapter<Rest, Restricted>
-  : _ParseIdentifierNameToIdentifierAdapter<T, Restricted>
+  ? ParseIdentifierInternal<Rest, RestrictedChars>
+  : ParseIdentifierInternal<T, RestrictedChars>
 
 export type ParseWildcard<T extends string> = T extends `*${infer Rest}`
   ? { type: 'wildcard'; value: '*'; rest: Rest }
@@ -74,7 +70,7 @@ export type ParseWildcard<T extends string> = T extends `*${infer Rest}`
 export type ParseAttrValueType<T extends string> =
   T extends `type(${infer Inner})${infer Rest}`
     ? Rest extends ''
-      ? { type: 'type'; value: TrimS<Inner> }
+      ? { type: 'type'; value: TrimSpaces<Inner> }
       : 'attrValueTypeErr-somethingAfterClosingParen'
     : 'attrValueTypeErr-doesntMatch'
 
@@ -209,13 +205,6 @@ type Aaa<
       }
   : never
 
-export type SplitFirst<
-  T extends string,
-  Splitter extends string,
-> = T extends `${infer First}${Splitter}${infer Last}`
-  ? [TrimS<First>, TrimS<Last>]
-  : never
-
 type ParseAttrWithEq<
   RawAttrName extends string,
   AttrValue extends string,
@@ -223,7 +212,7 @@ type ParseAttrWithEq<
 > = RawAttrName extends `${infer AttrName}<`
   ? // branch for '<=' op
     ParseIdentifierName<
-      TrimS<AttrName>,
+      TrimSpaces<AttrName>,
       Exclude<IdentifierNameRestrictedSymbols, '.'>
     > extends infer IdentifierNameParseRes
     ? IdentifierNameParseRes extends 'identifierNameEmpty'
@@ -240,7 +229,7 @@ type ParseAttrWithEq<
   : RawAttrName extends `${infer AttrName}>`
     ? // branch for '>=' op
       ParseIdentifierName<
-        TrimS<AttrName>,
+        TrimSpaces<AttrName>,
         Exclude<IdentifierNameRestrictedSymbols, '.'>
       > extends infer IdentifierNameParseRes
       ? IdentifierNameParseRes extends 'identifierNameEmpty'
@@ -256,8 +245,8 @@ type ParseAttrWithEq<
       : 'attr Stub2'
     : // branch for '=' op
       ParseIdentifierName<
-          TrimS<RawAttrName>,
-          Exclude<IdentifierNameRestrictedSymbols, '.'>
+          TrimSpaces<RawAttrName>,
+          AttrValueRestrictedSymbols
         > extends infer IdentifierNameParseRes
       ? IdentifierNameParseRes extends 'identifierNameEmpty'
         ? 'attrNope-identifierNameNopeOnEqOp'
@@ -298,7 +287,7 @@ type ParseAttrWithStrictNotEq<
   Rest extends string,
 > = ParseIdentifierName<
   RawAttrName,
-  Exclude<IdentifierNameRestrictedSymbols, '.'>
+  AttrValueRestrictedSymbols
 > extends infer IdentifierNameParseRes
   ? IdentifierNameParseRes extends 'identifierNameEmpty'
     ? 'attrNope-identifierNameNopeOnLessOrEqOp'
@@ -312,72 +301,70 @@ type ParseAttrWithStrictNotEq<
       : never
   : 'attr Stub 999'
 
-// TODO: handle just '<' and '>'
-export type ParseAttr<T extends string> = T extends `[${infer _V}]${infer Rest}`
-  ? TrimS<_V> extends infer V
-    ? V extends string
-      ? V extends `${infer RawAttrName}=${infer AttrValue}`
-        ? RawAttrName extends string
-          ? AttrValue extends string
-            ? ParseAttrWithEq<TrimS<RawAttrName>, TrimS<AttrValue>, Rest>
-            : 'parseAttrErr-1-AttrValueIsNotString'
-          : 'parseAttrErr-2-RawAttrNameIsNotString'
-        : // V doesn't contain '=' sign
-          V extends `${infer RawAttrName}<${infer AttrValue}`
-          ? RawAttrName extends string
+export type ParseAttr<T extends string> =
+  T extends `[${infer InnerRaw}]${infer Rest}`
+    ? TrimSpaces<InnerRaw> extends infer Inner
+      ? Inner extends string
+        ? Inner extends `${infer AttrName}=${infer AttrValue}`
+          ? AttrName extends string
             ? AttrValue extends string
-              ? ParseAttrWithStrictNotEq<
-                  TrimS<RawAttrName>,
-                  TrimS<AttrValue>,
-                  '<',
+              ? ParseAttrWithEq<
+                  TrimSpaces<AttrName>,
+                  TrimSpaces<AttrValue>,
                   Rest
                 >
-              : 'parseAttrErr-3-AttrValueIsNotString'
-            : 'parseAttrErr-4-RawAttrNameIsNotString'
-          : V extends `${infer RawAttrName}>${infer AttrValue}`
-            ? RawAttrName extends string
+              : 'parseAttrErr-1-AttrValueIsNotString'
+            : 'parseAttrErr-2-RawAttrNameIsNotString'
+          : // Inner doesn't contain '=' sign
+            Inner extends `${infer AttrName}<${infer AttrValue}`
+            ? AttrName extends string
               ? AttrValue extends string
                 ? ParseAttrWithStrictNotEq<
-                    TrimS<RawAttrName>,
-                    TrimS<AttrValue>,
-                    '>',
+                    TrimSpaces<AttrName>,
+                    TrimSpaces<AttrValue>,
+                    '<',
                     Rest
                   >
-                : 'parseAttrErr-5-AttrValueIsNotString'
-              : 'parseAttrErr-6-RawAttrNameIsNotString'
-            : //  [name.path]
-              ParseIdentifierName<
-                  V,
-                  Exclude<IdentifierNameRestrictedSymbols, '.'>
-                > extends infer IdentifierNameParseRes
-              ? IdentifierNameParseRes extends 'identifierNameEmpty'
-                ? // []
-                  'attrNope-identifierNameNopeWithoutOp'
-                : // [something]
-                  IdentifierNameParseRes extends {
-                      value: infer IdentifierNameParseResValue
-                      rest: infer IdentifierNameParseResRest
-                    }
-                  ? IdentifierNameParseResRest extends ''
-                    ? // [nice.attr.without.op]
-                      {
-                        type: 'attribute'
-                        name: IdentifierNameParseResValue
-                        rest: Rest
+                : 'parseAttrErr-3-AttrValueIsNotString'
+              : 'parseAttrErr-4-RawAttrNameIsNotString'
+            : Inner extends `${infer AttrName}>${infer AttrValue}`
+              ? AttrName extends string
+                ? AttrValue extends string
+                  ? ParseAttrWithStrictNotEq<
+                      TrimSpaces<AttrName>,
+                      TrimSpaces<AttrValue>,
+                      '>',
+                      Rest
+                    >
+                  : 'parseAttrErr-5-AttrValueIsNotString'
+                : 'parseAttrErr-6-RawAttrNameIsNotString'
+              : //  [name.path]
+                ParseIdentifierName<
+                    Inner,
+                    AttrValueRestrictedSymbols
+                  > extends infer IdentifierNameParseRes
+                ? IdentifierNameParseRes extends 'identifierNameEmpty'
+                  ? // []
+                    'attrNope-identifierNameNopeWithoutOp'
+                  : // [something]
+                    IdentifierNameParseRes extends {
+                        value: infer IdentifierNameParseResValue
+                        rest: infer IdentifierNameParseResRest
                       }
-                    : // [something+wrong]
-                      'attrNope-withoutOpWrongIdentifierName'
-                  : never
-              : 'attr Stub4'
-      : 'attrNope-squareBrackets'
-    : never
-  : 'attrNope-doesnthaveSquareBrackets'
-export declare const sellRes: ParseAttr<'[aaa.bbb.ccc]'>
-//                    ^?
-//                     {"type":"attribute","name":"aaa.bbb.ccc","operator":"<=","value":{"type":"literal","value":" string "}}
-
-export declare const resn: ParseAttr<'[aaa]'>
-//                    ^?
+                    ? IdentifierNameParseResRest extends ''
+                      ? // [nice.attr.without.op]
+                        {
+                          type: 'attribute'
+                          name: IdentifierNameParseResValue
+                          rest: Rest
+                        }
+                      : // [something+wrong]
+                        'attrNope-withoutOpWrongIdentifierName'
+                    : never
+                : 'attr Stub4'
+        : 'attrNope-squareBrackets'
+      : never
+    : 'attrNope-doesnthaveSquareBrackets'
 
 export type ParseAtom<T extends string> =
   ParseWildcard<T> extends infer WildcardParseRes
@@ -386,7 +373,7 @@ export type ParseAtom<T extends string> =
         ? IdentifierParseRes extends string
           ? ParseAttr<T> extends infer AttrParseRes
             ? AttrParseRes extends string
-              ? 'super next Stub'
+              ? 'super next Stub (unimplemented)'
               : AttrParseRes
             : never
           : IdentifierParseRes
@@ -396,26 +383,21 @@ export type ParseAtom<T extends string> =
 
 export type ParseSequence<
   T extends string,
-  Memo extends unknown[] = [],
-> = ParseAtom<T> extends infer Atom
-  ? Atom extends string
+  Acc extends unknown[] = [],
+> = ParseAtom<T> extends infer AtomParseRes
+  ? AtomParseRes extends string
     ? {
-        selectors: Memo
+        selectors: Acc
         rest: T
       }
-    : Atom extends {
+    : AtomParseRes extends {
           rest: infer Rest
         }
       ? Rest extends string
-        ? ParseSequence<Rest, [...Memo, Simplify<Omit<Atom, 'rest'>>]>
+        ? ParseSequence<Rest, [...Acc, Simplify<Omit<AtomParseRes, 'rest'>>]>
         : never
       : never
   : never
-
-export declare const pAttr: ParseSequence<'a[aa] a'>
-//                      ^?
-export declare const pAtom: ParseSequence<'[name.path] x, some rest'>
-//                     ^?
 
 export type TrimLeft<
   T extends string,
@@ -436,19 +418,11 @@ export type Trim<
       ? TrimRight<Rest, R>
       : T
 
-export type TrimSLeft<T extends string> = TrimLeft<T, ' '>
-export type TrimSRight<T extends string> = T extends `${infer Rest} `
-  ? TrimSRight<Rest>
-  : T
-export type TrimS<T extends string> = T extends ` ${infer Rest} `
-  ? TrimS<Rest>
-  : T extends ` ${infer Rest}`
-    ? TrimSLeft<Rest>
-    : T extends `${infer Rest} `
-      ? TrimSRight<Rest>
-      : T
+export type TrimSpacesLeft<T extends string> = TrimLeft<T, ' '>
+export type TrimSpacesRight<T extends string> = TrimRight<T, ' '>
+export type TrimSpaces<T extends string> = Trim<T, ' '>
 
-export type ParseBinaryOp<T extends string> = TrimSLeft<T> extends infer Op
+export type ParseBinaryOp<T extends string> = TrimSpacesLeft<T> extends infer Op
   ? Op extends `>${infer Rest}`
     ? { op: 'child'; rest: Rest }
     : Op extends `~${infer Rest}`
@@ -470,32 +444,34 @@ type SimplifySeq<S> = S extends {
     : never
   : never
 
-// TODO: add support for subject indicator ('!')
 export type ParseSelectorRequrser<
   T extends string,
-  Memo,
+  Acc,
 > = ParseBinaryOp<T> extends infer BinaryOpParseRes
   ? BinaryOpParseRes extends string
     ? // invalid binary op
       {
         error: `recursersequenceErr-atomParseFailed-${BinaryOpParseRes}`
-        memo: Memo
+        acc: Acc
         rest: T
       }
     : // valid binary op
-      // op: > ; rest: '   Identifier > Identifier'
+      // op: >
+      // rest: '   Identifier > Identifier'
       BinaryOpParseRes extends {
           op: infer Op
           rest: infer BinaryOpParseResRest
         }
       ? // just assertion
         BinaryOpParseResRest extends string
-        ? ParseSequence<TrimS<BinaryOpParseResRest>> extends infer SeqParseRes
+        ? ParseSequence<
+            TrimSpaces<BinaryOpParseResRest>
+          > extends infer SeqParseRes
           ? SeqParseRes extends string | never
             ? // wrong Seq
               {
                 error: `recursersequenceErr-SeqParseFailed-${SeqParseRes}`
-                memo: Memo
+                acc: Acc
                 rest: T
               }
             : // nice Seq/or seq before comma
@@ -509,7 +485,7 @@ export type ParseSelectorRequrser<
                   ? // Seq is last in selector
                     {
                       type: Op
-                      left: Memo
+                      left: Acc
                       right: SimplifySeq<SeqParseRes>
                     }
                   : // Seq is not last
@@ -518,25 +494,22 @@ export type ParseSelectorRequrser<
                         Rest,
                         {
                           type: Op
-                          left: Memo
+                          left: Acc
                           right: SimplifySeq<SeqParseRes>
                         }
                       >
-                    : 5
+                    : never
                 : // seq is closing the selectors chain
                   {
                     error: `recursersequenceErr-SeqParseFailed-${'todo'}`
-                    memo: Memo
+                    acc: Acc
                     rest: BinaryOpParseResRest
                   }
               : 'here Stub'
-          : 1
-        : 2
-      : 3
-  : 4
-
-export declare const adfeqw: ParseIt<' A > B ~ C '>
-//                      ^?
+          : never
+        : never
+      : never
+  : never
 
 export type ParseSelector<T extends string> =
   ParseSequence<T> extends infer SeqParseRes
@@ -559,22 +532,19 @@ export type ParseSelector<T extends string> =
     : never
 
 export type _ParseSelectorsTrimCommaAtStart<T extends string> =
-  TrimSLeft<T> extends infer R
+  TrimSpacesLeft<T> extends infer R
     ? R extends `,${infer Rest}`
-      ? { res: TrimSLeft<Rest> }
+      ? { res: TrimSpacesLeft<Rest> }
       : `commaErr`
-    : // : `commaErr-${R}`
-      never
-
-// export type _ParseSelectorsRecurser<T extends string, SelMemo> =
+    : never
 
 export type ParseSelectors<
   T extends string,
-  SelMemo extends unknown[] = [],
+  Acc extends unknown[] = [],
 > = ParseSelector<T> extends infer SelectorParseRes
   ? SelectorParseRes extends {
       error: unknown
-      memo: infer Memo
+      acc: infer SelectorAcc
       rest: infer Rest
     }
     ? Rest extends string
@@ -586,7 +556,7 @@ export type ParseSelectors<
                 res: infer RestWithoutCommaRes
               }
             ? RestWithoutCommaRes extends string
-              ? ParseSelectors<RestWithoutCommaRes, [...SelMemo, Memo]>
+              ? ParseSelectors<RestWithoutCommaRes, [...Acc, SelectorAcc]>
               : never
             : never
         : never
@@ -595,25 +565,22 @@ export type ParseSelectors<
           rest: infer Rest
         }
       ? {
-          selectors: [...SelMemo, Simplify<Omit<SelectorParseRes, 'rest'>>]
+          selectors: [...Acc, Simplify<Omit<SelectorParseRes, 'rest'>>]
           rest: Rest
         }
       : // all symbols consumed
         {
-          selectors: [...SelMemo, Simplify<Omit<SelectorParseRes, 'rest'>>]
+          selectors: [...Acc, Simplify<Omit<SelectorParseRes, 'rest'>>]
           rest: ''
         }
   : never
 
-export declare const selsRes: ParseIt<'a[aa]'>
-//                    ^?
-
 export type ParseIt<T extends string> = ParseSelectors<
-  TrimS<T>
-> extends infer Res
-  ? Res extends string
-    ? Res
-    : Res extends {
+  TrimSpaces<T>
+> extends infer SelectorsParseRes
+  ? SelectorsParseRes extends string
+    ? SelectorsParseRes
+    : SelectorsParseRes extends {
           selectors: infer Selectors
         }
       ? Selectors extends [infer First, ...infer Rest]

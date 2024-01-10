@@ -3,6 +3,7 @@ import type { ParseIt } from '../../src/hhh'
 
 export type TestCases = [
 Expect<Equal<ParseIt<"Program">, {"type":"identifier","value":"Program"}>>,
+Expect<Equal<ParseIt<"#Program">, {"type":"identifier","value":"Program"}>>,
 Expect<Equal<ParseIt<"*">, {"type":"wildcard","value":"*"}>>,
 Expect<Equal<ParseIt<"ProgramCallExpression">, {"type":"identifier","value":"ProgramCallExpression"}>>,
 Expect<Equal<ParseIt<"   ProgramCallExpression">, {"type":"identifier","value":"ProgramCallExpression"}>>,
