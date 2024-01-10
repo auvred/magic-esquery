@@ -145,9 +145,7 @@ export const queries = (
     genVariants(
       'Program',
       spaces,
-      ':',
-      ['not'],
-      '(',
+      ':not(',
       spaces,
       ['A > B', 'A , B', 'A[b] ~ B[a]'],
       spaces,
@@ -155,9 +153,19 @@ export const queries = (
       spaces,
       ['', '>'],
       spaces,
+      ':matches(A > B)',
+      spaces,
+    ),
+
+    genVariants(
+      spaces,
       ':',
-      ['not'],
-      '(A > B)',
+      ['not', 'matches', 'has'],
+      '(',
+      spaces,
+      ['A > B', 'A , B', 'A[b] ~ B[a]'],
+      spaces,
+      ')',
       spaces,
     ),
   ] satisfies GenVariantArgs

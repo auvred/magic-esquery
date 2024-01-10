@@ -390,18 +390,24 @@ export type ParseField<T extends string> = T extends `.${infer Rest}`
     : 'field stub'
   : 'field not starts with dot'
 
-export type ParseNegation<T extends string> =
-  T extends `:not(${infer Inner})${infer Rest}`
-    ? ParseSelectors<TrimSpaces<Inner>> extends infer SelectorsParseRes
-      ? SelectorsParseRes extends string
-        ? SelectorsParseRes
-        : SelectorsParseRes extends {
-              selectors: infer Selectors
-            }
-          ? { type: 'not'; selectors: Selectors; rest: Rest }
-          : 'nope'
-      : never
-    : 'is not negation'
+export type ParsePseudoClass<
+  T extends string,
+  PseudoClassName extends string,
+> = T extends `:${PseudoClassName}(${infer Inner})${infer Rest}`
+  ? ParseSelectors<TrimSpaces<Inner>> extends infer SelectorsParseRes
+    ? SelectorsParseRes extends string
+      ? SelectorsParseRes
+      : SelectorsParseRes extends {
+            selectors: infer Selectors
+          }
+        ? { type: PseudoClassName; selectors: Selectors; rest: Rest }
+        : 'nope'
+    : never
+  : `is not ${PseudoClassName} pseudo class`
+
+export type ParseNegation<T extends string> = ParsePseudoClass<T, 'not'>
+export type ParseMatches<T extends string> = ParsePseudoClass<T, 'matches'>
+export type ParseHas<T extends string> = ParsePseudoClass<T, 'has'>
 
 export declare const asdf: ParseIt<':not(a, b)'>
 //                     ^?
@@ -417,7 +423,15 @@ export type ParseAtom<T extends string> =
                 ? FieldParseRes extends string
                   ? ParseNegation<T> extends infer NegationParseRes
                     ? NegationParseRes extends string
-                      ? 'super next Stub (unimplemented)'
+                      ? ParseMatches<T> extends infer MatchesParseRes
+                        ? MatchesParseRes extends string
+                          ? ParseHas<T> extends infer HasParseRes
+                            ? HasParseRes extends string
+                              ? 'super next Stub (unimplemented)'
+                              : HasParseRes
+                            : never
+                          : MatchesParseRes
+                        : never
                       : NegationParseRes
                     : never
                   : FieldParseRes
