@@ -409,7 +409,27 @@ export type ParseNegation<T extends string> = ParsePseudoClass<T, 'not'>
 export type ParseMatches<T extends string> = ParsePseudoClass<T, 'matches'>
 export type ParseHas<T extends string> = ParsePseudoClass<T, 'has'>
 
-export declare const asdf: ParseIt<':not(a, b)'>
+export type ParseClass<T extends string> = T extends `:${infer Class}`
+  ? ParseIdentifierName<
+      Class,
+      IdentifierNameRestrictedSymbolsWithDot
+    > extends infer IdentifierNameParseRes
+    ? IdentifierNameParseRes extends 'identifierNameEmpty'
+      ? 'classErr-identifierNameNope'
+      : IdentifierNameParseRes extends {
+            value: infer IdentifierNameParseResValue
+            rest: infer IdentifierNameParseResRest
+          }
+        ? {
+            type: 'class'
+            name: IdentifierNameParseResValue
+            rest: IdentifierNameParseResRest
+          }
+        : never
+    : 'field stub'
+  : 'not class'
+
+export declare const asdf: ParseIt<'Program:exit'>
 //                     ^?
 
 export type ParseAtom<T extends string> =
@@ -427,7 +447,11 @@ export type ParseAtom<T extends string> =
                         ? MatchesParseRes extends string
                           ? ParseHas<T> extends infer HasParseRes
                             ? HasParseRes extends string
-                              ? 'super next Stub (unimplemented)'
+                              ? ParseClass<T> extends infer ClassParseRes
+                                ? ClassParseRes extends string
+                                  ? 'super next Stub (unimplemented)'
+                                  : ClassParseRes
+                                : never
                               : HasParseRes
                             : never
                           : MatchesParseRes

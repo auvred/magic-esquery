@@ -168,5 +168,17 @@ export const queries = (
       ')',
       spaces,
     ),
+
+    'Program:exit',
+    genVariants(
+      spaces,
+      'Some:Clas',
+      spaces,
+      ':not(Aa > Bb:class)',
+      ',',
+      spaces,
+      'Mega:Class:Class:Aaa',
+      spaces,
+    ),
   ] satisfies GenVariantArgs
 ).flat(Number.POSITIVE_INFINITY)
