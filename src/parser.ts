@@ -412,7 +412,7 @@ export type ParseHas<T extends string> = ParsePseudoClass<T, 'has'>
 export type ParseClass<T extends string> = T extends `:${infer Class}`
   ? ParseIdentifierName<
       Class,
-      IdentifierNameRestrictedSymbolsWithDot
+      IdentifierNameRestrictedSymbols
     > extends infer IdentifierNameParseRes
     ? IdentifierNameParseRes extends 'identifierNameEmpty'
       ? 'classErr-identifierNameNope'

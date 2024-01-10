@@ -180,5 +180,7 @@ export const queries = (
       'Mega:Class:Class:Aaa',
       spaces,
     ),
+
+    '*Mega.field:Class.anotherField:Aaa[attr=yes]Bbb:ccc:not(A):has(something):matches(one , of).ffiieelldd',
   ] satisfies GenVariantArgs
 ).flat(Number.POSITIVE_INFINITY)
