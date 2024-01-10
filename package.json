@@ -1,6 +1,11 @@
 {
   "scripts": {
-    "test": "tsx tests/utils/gen-parser-tests.ts && tsc --noEmit -p tsconfig.tests.json"
+    "gen-parser-tests": "tsx tests/utils/gen-parser-tests.ts",
+    "extract-ts-eslint-selectors": "tsx scripts/extract-ts-eslint-selectors/run.ts",
+    "test": "tsc --noEmit -p tsconfig.tests.json"
+  },
+  "dependencies": {
+    "type-fest": "^4.9.0"
   },
   "devDependencies": {
     "@auvred/eslint-config": "^0.6.0",
@@ -13,8 +18,5 @@
     "prettier": "^3.1.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "type-fest": "^4.9.0"
   }
 }

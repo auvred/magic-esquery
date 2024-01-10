@@ -34,7 +34,7 @@ function genVariants(...args: GenVariantArgs): string[] {
 
 const spaces = ['', '   ']
 
-export const queries = (
+export const selectors = (
   [
     'Program',
     '#Program',
@@ -56,8 +56,12 @@ export const queries = (
       spaces,
       [
         '',
-        ['=', spaces, ['type(number)', '/^aaa bbb$/ims']],
-        [['=', '>', '<', '>=', '<='], spaces, ['a', '10.4', '" string "']],
+        [['=', '!='], spaces, ['type(number)', '/^aaa bbb$/ims']],
+        [
+          ['=', '!=', '>', '<', '>=', '<='],
+          spaces,
+          ['a', '10.4', '" string "'],
+        ],
       ],
       spaces,
       ']',
@@ -183,4 +187,4 @@ export const queries = (
 
     '*Mega.field:Class.anotherField:Aaa[attr=yes]Bbb:ccc:not(A):has(something):matches(one , of).ffiieelldd',
   ] satisfies GenVariantArgs
-).flat(Number.POSITIVE_INFINITY)
+).flat(Number.POSITIVE_INFINITY) as string[]
