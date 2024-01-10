@@ -2,15 +2,12 @@
   "scripts": {
     "test": "tsx tests/utils/gen-parser-tests.ts && tsc --noEmit -p tsconfig.tests.json"
   },
-  "dependencies": {
-    "@typescript-eslint/typescript-estree": "^6.18.0",
-    "hotscript": "^1.0.13"
-  },
   "devDependencies": {
     "@auvred/eslint-config": "^0.6.0",
     "@type-challenges/utils": "^0.1.1",
     "@types/esquery": "^1.5.3",
     "@types/node": "^20.10.7",
+    "@typescript-eslint/typescript-estree": "^6.18.0",
     "eslint": "^8.56.0",
     "esquery": "^1.5.0",
     "prettier": "^3.1.1",
