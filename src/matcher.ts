@@ -10,6 +10,21 @@ type PostProcessCompoundSelectors<Selectors> = Simplify<
   UnionToIntersection<Extract<Selectors, { type: 'identifier' }>>
 >
 
+type PostProcessChildWithField<Left, Right> =
+  Right extends `${infer Path}.${infer Rest}`
+    ? Extract<Left, { [K in Path]: any }> extends infer ExtractRes
+      ? ExtractRes extends never
+        ? `Right (${Right}) is not a keyof Prev`
+        : PostProcessChildWithField<ExtractRes[Path], Rest>
+      : never
+    : Right extends ''
+      ? Left
+      : Extract<Left, { [K in Right]: any }> extends infer ExtractRes
+        ? ExtractRes extends never
+          ? `Right is not a keyof Prev`
+          : ExtractRes[Right]
+        : never
+
 export type MatchIt<T, AST> = T extends {
   type: 'identifier'
   value: infer IdentifierName
@@ -29,12 +44,23 @@ export type MatchIt<T, AST> = T extends {
       ? Selectors extends unknown[]
         ? MatchIt<PostProcessCompoundSelectors<Selectors[number]>, AST>
         : never
-      : unknown
+      : T extends {
+            type: 'child'
+            left: infer Left
+            right: infer Right
+          }
+        ? Right extends {
+            type: 'field'
+            name: infer RightName
+          }
+          ? PostProcessChildWithField<MatchIt<Left, AST>, RightName>
+          : MatchIt<Right, AST>
+        : unknown
 
-type Y = 'CallExpression[a], MemberExpression[a], CallExpression'
+type Y = 'MemberExpression > Identifier'
 
 type Parsed = ParseIt<Y>
 //    ^?
 
-export declare const res: MatchIt<ParseIt<Y>, TSESTree.Node>
+export declare const res: MatchIt<Parsed, TSESTree.Node>
 //                    ^?
