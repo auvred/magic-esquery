@@ -36,6 +36,8 @@ const spaces = ['', '   ']
 
 export const selectors = (
   [
+    ' *Mega.field:Class.anotherField:Aaa[attr=yes]Bbb:ccc:not(A):has(something):matches(one , of).ffiieelldd , and > even ~ sequence + of   selectors ',
+
     'Program',
     '#Program',
     '*',
@@ -184,7 +186,5 @@ export const selectors = (
       'Mega:Class:Class:Aaa',
       spaces,
     ),
-
-    '*Mega.field:Class.anotherField:Aaa[attr=yes]Bbb:ccc:not(A):has(something):matches(one , of).ffiieelldd',
   ] satisfies GenVariantArgs
 ).flat(Number.POSITIVE_INFINITY) as string[]
