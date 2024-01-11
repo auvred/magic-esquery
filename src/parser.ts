@@ -481,85 +481,223 @@ type GenParseAttrRes<
 
 export type IfString<T, U> = T extends string ? U : T
 
-type ParseAttr<T extends string> =
-  T extends `[${infer AttrName}=${infer AfterAttrName}`
-    ? // <=, >=, !=, =
-      TrimSpacesLeft<AfterAttrName> extends infer TrimmedAfterAttrName
-      ? TrimmedAfterAttrName extends string
-        ? AttrName extends `${infer RawAttrName}<`
-          ? // <=
-            GenParseAttrRes<
-              RawAttrName,
-              '<=',
-              ParseAttrValueForOps<TrimmedAfterAttrName>
-            >
-          : // >=
-            AttrName extends `${infer RawAttrName}>`
-            ? GenParseAttrRes<
-                RawAttrName,
-                '>=',
-                ParseAttrValueForOps<TrimmedAfterAttrName>
+type PartitionBy<
+  Tuple extends [string, string][],
+  CompareTo extends string,
+  LeftAcc extends [string, string][] = [],
+  RightAcc extends [string, string][] = [],
+> = Tuple extends [infer First, ...infer Rest]
+  ? Rest extends [string, string][]
+    ? First extends [infer PairFirst, infer PairLast]
+      ? PairFirst extends string
+        ? PairLast extends string
+          ? PairFirst extends `${CompareTo}${string}`
+            ? PartitionBy<
+                Rest,
+                CompareTo,
+                LeftAcc,
+                [...RightAcc, [PairFirst, PairLast]]
               >
-            : // TODO: try eqOps
-              // !=
-              AttrName extends `${infer RawAttrName}!`
-              ? IfString<
-                  GenParseAttrRes<
-                    RawAttrName,
-                    '!=',
-                    ParseAttrValueForOps<TrimmedAfterAttrName>
-                  >,
-                  GenParseAttrRes<
-                    RawAttrName,
-                    '!=',
-                    ParseAttrValueForEqOps<TrimmedAfterAttrName>
-                  >
-                >
-              : // =
-                IfString<
-                  GenParseAttrRes<
-                    AttrName,
-                    '=',
-                    ParseAttrValueForOps<TrimmedAfterAttrName>
-                  >,
-                  GenParseAttrRes<
-                    AttrName,
-                    '=',
-                    ParseAttrValueForEqOps<TrimmedAfterAttrName>
-                  >
-                >
+            : PartitionBy<
+                Rest,
+                CompareTo,
+                [...LeftAcc, [PairFirst, PairLast]],
+                RightAcc
+              >
+          : never
         : never
       : never
-    : // <, >, without value, wrong
-      T extends `[${infer AttrName}<${infer AfterAttrName}`
+    : never
+  : [LeftAcc, RightAcc]
+
+type SortPairsByShortestTemplateLiteral<Pairs extends [string, string][]> =
+  Pairs extends [infer Head, ...infer Tail]
+    ? Tail extends [string, string][]
+      ? Head extends [infer HeadFirst, infer _]
+        ? HeadFirst extends string
+          ? PartitionBy<Tail, HeadFirst> extends [infer Left, infer Right]
+            ? Left extends [string, string][]
+              ? Right extends [string, string][]
+                ? [
+                    ...SortPairsByShortestTemplateLiteral<Left>,
+                    Head,
+                    ...SortPairsByShortestTemplateLiteral<Right>,
+                  ]
+                : never
+              : never
+            : never
+          : never
+        : never
+      : never
+    : []
+
+// prettier-ignore
+export type testSortPairsByShortestTemplateLiteral = [
+  Expect<Equal<
+    SortPairsByShortestTemplateLiteral<[['123', '1'], ['1234', '2'], ['12', '3']]>,
+    [['12','3'],['123','1'],['1234','2']]
+  >>,
+]
+
+type TryToSplitBy<
+  T,
+  S extends string,
+> = T extends `${infer Before}${S}${infer After}`
+  ? [Before, `${S}${After}`]
+  : false
+
+type TryToSplitByAngleBracket<
+  T,
+  S extends '>' | '<',
+> = T extends `${infer Before}${S}${infer After}`
+  ? After extends `=${string}`
+    ? [`${Before}${S}`, After]
+    : [Before, `${S}${After}`]
+  : false
+
+type FilterTuple<T extends any[], Acc extends any[] = []> = T extends [
+  infer First,
+  ...infer Rest,
+]
+  ? First extends false
+    ? FilterTuple<Rest, Acc>
+    : FilterTuple<Rest, [...Acc, First]>
+  : Acc
+type SplitToClosingSquareBracketOrEqualSignOrAngleBracket<T extends string> =
+  SortPairsByShortestTemplateLiteral<
+    FilterTuple<
+      [
+        TryToSplitByAngleBracket<T, '>'>,
+        TryToSplitByAngleBracket<T, '<'>,
+        TryToSplitBy<T, '='>,
+        TryToSplitBy<T, ']'>,
+      ]
+    >
+  > extends [infer First, ...infer _]
+    ? First
+    : 'cant find splitter'
+
+// prettier-ignore
+export type testSplitToClosingSquareBracketOrEqualSignOrAngleBracket = [
+  Expect<Equal<
+    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa]bb'>,
+    ['aa', ']bb']
+  >>,
+  Expect<Equal<
+    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa][bb=1]'>,
+    ['aa', '][bb=1]']
+  >>,
+  Expect<Equal<
+    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa=1]bb'>,
+    ['aa', '=1]bb']
+  >>,
+  Expect<Equal<
+    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa=1][bb=1]'>,
+    ['aa', '=1][bb=1]']
+  >>,
+  Expect<Equal<
+    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa<1][bb=1]'>,
+    ['aa', '<1][bb=1]']
+  >>,
+]
+
+// example: AttrName='aa' _AfterAttrName='=4][bbb = 1]'
+// example: AttrName='aa' _AfterAttrName='bbb'
+type ParseAttrImpl<
+  AttrName extends string,
+  _AfterAttrName extends string,
+> = _AfterAttrName extends `=${infer AfterAttrName}`
+  ? // <=, >=, !=, =
+    TrimSpacesLeft<AfterAttrName> extends infer TrimmedAfterAttrName
+    ? TrimmedAfterAttrName extends string
+      ? AttrName extends `${infer RawAttrName}<`
+        ? // <=
+          GenParseAttrRes<
+            RawAttrName,
+            '<=',
+            ParseAttrValueForOps<TrimmedAfterAttrName>
+          >
+        : // >=
+          AttrName extends `${infer RawAttrName}>`
+          ? GenParseAttrRes<
+              RawAttrName,
+              '>=',
+              ParseAttrValueForOps<TrimmedAfterAttrName>
+            >
+          : // TODO: try eqOps
+            // !=
+            AttrName extends `${infer RawAttrName}!`
+            ? IfString<
+                GenParseAttrRes<
+                  RawAttrName,
+                  '!=',
+                  ParseAttrValueForOps<TrimmedAfterAttrName>
+                >,
+                GenParseAttrRes<
+                  RawAttrName,
+                  '!=',
+                  ParseAttrValueForEqOps<TrimmedAfterAttrName>
+                >
+              >
+            : // =
+              IfString<
+                GenParseAttrRes<
+                  AttrName,
+                  '=',
+                  ParseAttrValueForOps<TrimmedAfterAttrName>
+                >,
+                GenParseAttrRes<
+                  AttrName,
+                  '=',
+                  ParseAttrValueForEqOps<TrimmedAfterAttrName>
+                >
+              >
+      : never
+    : never
+  : // <, >, without value, wrong
+    _AfterAttrName extends `<${infer AfterAttrName}`
+    ? // <
+      TrimSpacesLeft<AfterAttrName> extends infer TrimmedAfterAttrName
+      ? TrimmedAfterAttrName extends string
+        ? GenParseAttrRes<
+            AttrName,
+            '<',
+            ParseAttrValueForOps<TrimmedAfterAttrName>
+          >
+        : never
+      : never
+    : _AfterAttrName extends `>${infer AfterAttrName}`
       ? // <
         TrimSpacesLeft<AfterAttrName> extends infer TrimmedAfterAttrName
         ? TrimmedAfterAttrName extends string
           ? GenParseAttrRes<
               AttrName,
-              '<',
+              '>',
               ParseAttrValueForOps<TrimmedAfterAttrName>
             >
           : never
         : never
-      : T extends `[${infer AttrName}>${infer AfterAttrName}`
-        ? // <
-          TrimSpacesLeft<AfterAttrName> extends infer TrimmedAfterAttrName
-          ? TrimmedAfterAttrName extends string
-            ? GenParseAttrRes<
-                AttrName,
-                '>',
-                ParseAttrValueForOps<TrimmedAfterAttrName>
-              >
+      : _AfterAttrName extends `]${infer Rest}`
+        ? ParseAttrName<AttrName> extends infer AttrNameParseRes
+          ? AttrNameParseRes extends string
+            ? `attrParseErr-${AttrNameParseRes}`
+            : Simplify<AttrNameParseRes & { rest: Rest }>
+          : never
+        : 'attrParseErr-wrongAttr'
+
+type ParseAttr<T extends string> = T extends `[${infer Rest}`
+  ? SplitToClosingSquareBracketOrEqualSignOrAngleBracket<Rest> extends infer SplitRes
+    ? SplitRes extends string
+      ? `attrParseErr-split-${SplitRes}`
+      : SplitRes extends [infer AttrName, infer AfterAttrName]
+        ? AttrName extends string
+          ? AfterAttrName extends string
+            ? ParseAttrImpl<AttrName, AfterAttrName>
             : never
           : never
-        : T extends `[${infer AttrName}]${infer Rest}`
-          ? ParseAttrName<AttrName> extends infer AttrNameParseRes
-            ? AttrNameParseRes extends string
-              ? `attrParseErr-${AttrNameParseRes}`
-              : Simplify<AttrNameParseRes & { rest: Rest }>
-            : never
-          : 'attrParseErr-wrongAttr'
+        : never
+    : never
+  : 'attrParseErr-cantFindOpeningSquareBracket'
 
 export type ParseField<T extends string> = T extends `.${infer Rest}`
   ? ParseIdentifierName<

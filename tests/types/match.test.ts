@@ -5,8 +5,6 @@ import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
 type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
 
-type a = T.Expression extends T.Node ? 1 : 2
-
 export type TestCases = [
   Expect<Equal<Match<'Program'>, T.Program>>,
   Expect<

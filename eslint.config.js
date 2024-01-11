@@ -13,6 +13,7 @@ module.exports = (async () => {
     })),
     {
       rules: {
+        'ts/no-explicit-any': 'off',
         'unused-imports/no-unused-vars': [
           'error',
           {

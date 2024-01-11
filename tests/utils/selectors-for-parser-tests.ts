@@ -51,6 +51,23 @@ export const selectors = (
       spaces,
     ),
     genVariants(
+      'Aaa',
+      spaces,
+      '[',
+      spaces,
+      ['aaa', 'aaa.bbb', 'aaa = 34'],
+      spaces,
+      ']',
+      spaces,
+      '[',
+      spaces,
+      ['aaa', 'aaa.bbb', 'aaa = 34'],
+      spaces,
+      ']',
+      spaces,
+      'Bbb',
+    ),
+    genVariants(
       '[ aaa = ',
       [
         ['type(', spaces, 'number', spaces, ')'],
