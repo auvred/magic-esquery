@@ -52,17 +52,17 @@ BinaryExpression
 BinaryExpression, AssignmentExpression
   T.BinaryExpression | T.AssignmentExpression
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name='indexOf'][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="indexOf"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="indexOf"][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="lastIndexOf"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="lastIndexOf"][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="match"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="match"][computed=false]
   T.MemberExpression
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="slice"][computed=false], BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="substring"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="slice"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="substring"][computed=false]
   T.MemberExpression
 BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name='indexOf'][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 BinaryExpression, LogicalExpression
   T.BinaryExpression | T.LogicalExpression
 BinaryExpression > MemberExpression.left[computed=true], BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="charAt"][computed=false], BinaryExpression > ChainExpression.left > MemberExpression[computed=true], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="charAt"][computed=false]
@@ -84,13 +84,13 @@ BreakStatement
 CallExpression
   T.CallExpression
 CallExpression[arguments.length=0] > MemberExpression[property.name='sort'][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 CallExpression[arguments.length=0] > MemberExpression[property.name='toSorted'][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 CallExpression[arguments.length=1] > MemberExpression.callee[property.name='match'][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 CallExpression[arguments.length=1] > MemberExpression.callee[property.name="test"][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 CallExpression > *.callee
   T.LeftHandSideExpression
 CallExpression[callee.name="require"]
@@ -98,9 +98,9 @@ CallExpression[callee.name="require"]
 CallExpression > MemberExpression.callee
   T.MemberExpression
 CallExpression > MemberExpression.callee > Identifier[name = "toString"].property
-  T.MemberExpression
+  T.Identifier
 CallExpression > MemberExpression.callee[property.name="test"][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 CallExpression, NewExpression
   T.CallExpression | T.NewExpression
 CallExpression[optional = true]
@@ -164,7 +164,7 @@ ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]:exit
 ExportNamedDeclaration:not([source])
   TODO
 ExportNamedDeclaration[source]
-  TODO
+  T.ExportNamedDeclarationWithSource
 ExportSpecifier
   T.ExportSpecifier
 ExpressionStatement
@@ -174,7 +174,7 @@ ForInStatement
 ForOfStatement
   T.ForOfStatement
 ForOfStatement[await = true]
-  TODO
+  T.ForOfStatement
 ForStatement
   T.ForStatement
 ForStatement:exit
@@ -184,7 +184,7 @@ ForStatement > *.init:exit
 FunctionDeclaration
   T.FunctionDeclaration
 FunctionDeclaration[async = false]
-  TODO
+  T.FunctionDeclaration
 FunctionDeclaration:exit
   T.FunctionDeclaration
 FunctionDeclaration, FunctionExpression
@@ -196,7 +196,7 @@ FunctionDeclaration, TSDeclareFunction, TSEmptyBodyFunctionExpression, FunctionE
 FunctionExpression
   T.FunctionExpression
 FunctionExpression[async = false]
-  TODO
+  T.FunctionExpression
 FunctionExpression:exit
   T.FunctionExpression
 IfStatement
@@ -204,11 +204,11 @@ IfStatement
 ImportDeclaration
   T.ImportDeclaration
 ImportDeclaration[importKind = "type"]
-  TODO
+  T.ImportDeclaration
 ImportDeclaration[importKind!="type"]
-  TODO
+  T.ImportDeclaration
 ImportDeclaration[importKind=type]
-  TODO
+  T.ImportDeclaration
 ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier
   T.ImportDefaultSpecifier | T.ImportNamespaceSpecifier | T.ImportSpecifier
 ImportExpression
@@ -218,13 +218,13 @@ ImportNamespaceSpecifier
 ImportSpecifier
   T.ImportSpecifier
 ImportSpecifier[importKind = "type"]
-  TODO
+  T.ImportSpecifier
 JSXAttribute
   T.JSXAttribute
 JSXAttribute[value]
-  TODO
+  T.JSXAttribute
 JSXAttribute[value != null]
-  TODO
+  T.JSXAttribute
 JSXClosingElement
   T.JSXClosingElement
 JSXClosingFragment
@@ -246,11 +246,11 @@ Literal
 LogicalExpression
   T.LogicalExpression
 LogicalExpression[operator = "||"]
-  TODO
+  T.LogicalExpression
 LogicalExpression[operator!="??"]
-  TODO
+  T.LogicalExpression
 LogicalExpression[operator="||"], LogicalExpression[operator="??"]
-  TODO
+  T.LogicalExpression
 LogicalExpression[operator = "??"] > TSNonNullExpression.left
   T.TSNonNullExpression
 :matches(ClassDeclaration, ClassExpression):exit
@@ -264,7 +264,7 @@ LogicalExpression[operator = "??"] > TSNonNullExpression.left
 MemberExpression
   T.MemberExpression
 MemberExpression[computed=false]
-  TODO
+  T.MemberExpressionNonComputedName
 MemberExpression[computed = true] > *.property
   TODO
 MemberExpression:exit
@@ -272,7 +272,7 @@ MemberExpression:exit
 MemberExpression, JSXMemberExpression, MetaProperty
   T.MemberExpression | T.JSXMemberExpression | T.MetaProperty
 MemberExpression[optional = true]
-  TODO
+  T.MemberExpression
 MemberExpression[optional = true] > TSNonNullExpression.object
   T.TSNonNullExpression
 MethodDefinition
@@ -280,9 +280,9 @@ MethodDefinition
 MethodDefinition[computed = false]:matches([kind = "get"], [kind = "set"])
   TODO
 MethodDefinition[computed=true]
-  TODO
+  T.MethodDefinitionComputedName
 MethodDefinition[kind="constructor"]
-  TODO
+  T.MethodDefinition
 MethodDefinition, PropertyDefinition
   T.MethodDefinition | T.PropertyDefinition
 MethodDefinition, PropertyDefinition, StaticBlock
@@ -368,7 +368,7 @@ TemplateLiteral
 ThisExpression
   T.ThisExpression
 ThisExpression, Super
-  T.ThisExpression
+  T.ThisExpression | T.Super
 ThrowStatement
   T.ThrowStatement
 TryStatement
@@ -414,7 +414,7 @@ TSEnumDeclaration, TSTypeLiteral
 TSEnumMember
   T.TSEnumMember
 TSEnumMember[computed != true]
-  TODO
+  T.TSEnumMemberNonComputedName
 TSExportAssignment
   T.TSExportAssignment
 TSExternalModuleReference
@@ -458,7 +458,7 @@ TSMethodSignature
 TSMethodSignature[computed = false], TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type = "TSFunctionType"]
   TODO
 TSMethodSignature[key.name='constructor']
-  TODO
+  T.TSMethodSignature
 TSModuleBlock
   T.TSModuleBlock
 TSModuleBlock:exit
@@ -472,7 +472,7 @@ TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModu
 TSModuleDeclaration:exit
   T.TSModuleDeclaration
 TSModuleDeclaration[global!=true][id.type!='Literal']
-  TODO
+  T.TSModuleDeclaration
 TSModuleDeclaration > TSModuleBlock
   T.TSModuleBlock
 TSModuleDeclaration > TSModuleDeclaration
@@ -496,7 +496,7 @@ TSParameterProperty
 TSPropertySignature
   T.TSPropertySignature
 TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type != "TSFunctionType"]
-  TODO
+  T.TSPropertySignatureNonComputedName
 TSQualifiedName
   T.TSQualifiedName
 TSQualifiedName:exit
@@ -510,7 +510,7 @@ TSTupleType
 TSTypeAliasDeclaration
   T.TSTypeAliasDeclaration
 TSTypeAliasDeclaration[typeAnnotation.type='TSTypeLiteral']
-  TODO
+  T.TSTypeAliasDeclaration
 TSTypeAnnotation
   T.TSTypeAnnotation
 TSTypeAssertion
@@ -542,13 +542,13 @@ TSVoidKeyword
 UnaryExpression
   T.UnaryExpression
 UnaryExpression[operator="!"]
-  TODO
+  T.UnaryExpression
 UnaryExpression[operator="delete"]
-  TODO
+  T.UnaryExpression
 UnaryExpression[operator=delete]
-  TODO
+  T.UnaryExpression
 UnaryExpression[operator="void"]
-  TODO
+  T.UnaryExpression
 UpdateExpression
   T.UpdateExpression
 VariableDeclaration
@@ -556,13 +556,13 @@ VariableDeclaration
 VariableDeclaration:exit
   T.VariableDeclaration
 VariableDeclaration[kind = "await using"]
-  TODO
+  T.VariableDeclaration
 VariableDeclarator
   T.VariableDeclarator
 VariableDeclarator, AssignmentExpression
   T.VariableDeclarator | T.AssignmentExpression
 VariableDeclarator[init != null]
-  TODO
+  T.LetOrConstOrVarDeclarator | T.UsingInNomalConextDeclarator
 VariableDeclarator[init.type='ThisExpression'], AssignmentExpression[right.type='ThisExpression']
   TODO
 VariableDeclarator,PropertyDefinition,:matches(FunctionDeclaration,FunctionExpression) > AssignmentPattern

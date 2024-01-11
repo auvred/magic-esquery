@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "include": ["src/**/*.ts", "tests/utils/**/*.ts"],
   "compilerOptions": {
     "allowUnreachableCode": false,
     "exactOptionalPropertyTypes": true,

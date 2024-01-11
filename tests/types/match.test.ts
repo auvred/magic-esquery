@@ -11,6 +11,8 @@ export type TestCases = [
   Expect<
     Equal<Match<'Program, MemberExpression'>, T.Program | T.MemberExpression>
   >,
+  Expect<Equal<Match<'[attr]'>, T.Node>>,
+  Expect<Equal<Match<'[attr][bbb=asdf]'>, T.Node>>,
   Expect<Equal<Match<'Program[body][bbbody="aa"]'>, T.Program>>,
   Expect<Equal<Match<'Program[body]Program'>, T.Program>>,
   Expect<Equal<Match<'Program[body]CallExpression'>, never>>,
@@ -47,4 +49,55 @@ export type TestCases = [
       | (T.DestructuringPattern | null)[]
     >
   >,
+
+  Expect<
+    Equal<
+      Match<'ExportNamedDeclaration[source]'>,
+      T.ExportNamedDeclarationWithSource
+    >
+  >,
+  Expect<
+    Equal<
+      Match<'ExportNamedDeclaration[source!=null]'>,
+      T.ExportNamedDeclarationWithSource
+    >
+  >,
+  Expect<
+    Equal<
+      Match<'ExportNamedDeclaration[source!="null"]'>,
+      T.ExportNamedDeclarationWithSource
+    >
+  >,
+  Expect<
+    Equal<
+      Match<'ExportNamedDeclaration[source=null]'>,
+      | T.ExportNamedDeclarationWithoutSourceWithMultiple
+      | T.ExportNamedDeclarationWithoutSourceWithSingle
+    >
+  >,
+
+  Expect<
+    Equal<
+      Match<'MemberExpression[computed=false]'>,
+      T.MemberExpressionNonComputedName
+    >
+  >,
+  Expect<
+    Equal<
+      Match<'MemberExpression[computed!=false]'>,
+      T.MemberExpressionComputedName
+    >
+  >,
+  Expect<
+    Equal<
+      Match<'MemberExpression[computed=true]'>,
+      T.MemberExpressionComputedName
+    >
+  >,
+  Expect<
+    Equal<Match<'MemberExpression[computed!="asdf"]'>, T.MemberExpression>
+  >,
+
+  Expect<Equal<Match<'Identifier[name = aaa]'>, T.Identifier>>,
+  Expect<Equal<Match<'Identifier[name != aaa]'>, T.Identifier>>,
 ]
