@@ -205,4 +205,10 @@ export type MatchIt<T, AST> = T extends {
                 type: 'attribute'
               }
             ? PostProcessCompoundSelectors<[T], AST>
-            : unknown
+            : T extends {
+                  type: 'descendant'
+                  // we don't care what's on left
+                  right: infer Right
+                }
+              ? MatchIt<Right, AST>
+              : unknown

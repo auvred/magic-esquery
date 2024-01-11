@@ -100,4 +100,21 @@ export type TestCases = [
 
   Expect<Equal<Match<'Identifier[name = aaa]'>, T.Identifier>>,
   Expect<Equal<Match<'Identifier[name != aaa]'>, T.Identifier>>,
+
+  Expect<
+    Equal<
+      Match<'VariableDeclarator :matches(Identifier,Literal)'>,
+      T.Identifier | T.Literal
+    >
+  >,
+  Expect<
+    Equal<
+      Match<'VariableDeclarator :matches(MemberExpression[computed=false],Literal)'>,
+      T.Literal | T.MemberExpressionNonComputedName
+    >
+  >,
+  Expect<
+    Equal<Match<':matches(Identifier,Literal)'>, T.Identifier | T.Literal>
+  >,
+  Expect<Equal<Match<'Identifier:matches(Identifier,Literal)'>, T.Identifier>>,
 ]
