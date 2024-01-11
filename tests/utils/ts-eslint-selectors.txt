@@ -426,7 +426,7 @@ TSImportType
 TSIndexedAccessType
   T.TSIndexedAccessType
 TSIndexSignature, TSPropertySignature
-  T.TSIndexSignatur | T.TSPropertySignaturee
+  T.TSIndexSignature | T.TSPropertySignature
 TSInterfaceBody
   T.TSInterfaceBody
 TSInterfaceBody > TSConstructSignatureDeclaration
