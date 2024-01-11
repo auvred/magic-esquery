@@ -1,2 +1,6 @@
-Found 49 errors in the same file, starting at: tests/types/ts-eslint-matcher.generated-test.ts[90m:17[0m
+Found 113 errors in 3 files.
 
+Errors  Files
+     2  src/matcher.ts[90m:262[0m
+    36  tests/types/match.test.ts[90m:10[0m
+    75  tests/types/ts-eslint-matcher.generated-test.ts[90m:12[0m

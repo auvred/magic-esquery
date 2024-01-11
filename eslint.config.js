@@ -26,7 +26,7 @@ module.exports = (async () => {
       },
     },
     {
-      ignores: ['tests/types/*.generated-test.ts'],
+      ignores: ['tests/types/*.ts'],
     },
   ]
 })()

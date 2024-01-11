@@ -58,9 +58,9 @@ BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="lastIndexOf"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="lastIndexOf"][computed=false]
   T.MemberExpressionNonComputedName
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="match"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="match"][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="slice"][computed=false], BinaryExpression > CallExpression.left > MemberExpression.callee[property.name="substring"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="slice"][computed=false], BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name="substring"][computed=false]
-  T.MemberExpression
+  T.MemberExpressionNonComputedName
 BinaryExpression > ChainExpression.left > CallExpression > MemberExpression.callee[property.name='indexOf'][computed=false]
   T.MemberExpressionNonComputedName
 BinaryExpression, LogicalExpression
