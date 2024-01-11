@@ -1,7 +1,7 @@
-// eslint-disable-next-line ts/ban-types
-export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {}
+import type { Equal, Expect } from '@type-challenges/utils'
+import type { Simplify } from 'type-fest'
 
-type IdentifierNameRestrictedSymbols =
+export type IdentifierNameRestrictedSymbols =
   | ' '
   | '['
   | ']'
@@ -18,7 +18,7 @@ type IdentifierNameRestrictedSymbols =
   | '+'
   | '.'
 
-type IdentifierNameRestrictedSymbolsWithDot = Exclude<
+export type IdentifierNameRestrictedSymbolsWithDot = Exclude<
   IdentifierNameRestrictedSymbols,
   '.'
 >
@@ -78,61 +78,6 @@ export type ParseAttrValueType<T extends string> =
       : 'attrValueTypeErr-somethingAfterClosingParen'
     : 'attrValueTypeErr-doesntMatch'
 
-// https://github.com/estools/esquery/blob/909bea6745d33d33870b5d2c3382b4561d00d923/grammar.pegjs#L88
-type _AttrValueRegexFlags = 'i' | 'm' | 's' | 'u'
-export type _ParseAttrValueRegexFlags<T extends string> = T extends ''
-  ? 'regexEmptyFlags'
-  : T extends `${infer First}${infer Rest}`
-    ? First extends _AttrValueRegexFlags
-      ? Rest extends ''
-        ? { res: First }
-        : _ParseAttrValueRegexFlags<Rest> extends infer NestedRes
-          ? NestedRes extends string
-            ? NestedRes
-            : NestedRes extends {
-                  res: infer NestedResRes
-                }
-              ? First extends NestedResRes
-                ? // duplicated flag
-                  `regexDuplicatedFlag-${First}`
-                : { res: First | NestedResRes }
-              : never
-          : never
-      : `regexUnknownFlag-${First}`
-    : never
-
-export type _ParseAttrValueRegex<T extends string> =
-  T extends `/${infer _}/${infer PossiblyFlags}`
-    ? PossiblyFlags extends ''
-      ? { ok: 'yes' }
-      : _ParseAttrValueRegexFlags<PossiblyFlags> extends infer ParsedFlags
-        ? ParsedFlags extends string
-          ? `regexErrInFlags-${ParsedFlags}`
-          : ParsedFlags extends {
-                res: infer ParsedFlagsRes
-              }
-            ? ParsedFlagsRes extends string
-              ? //`${Inner}${PossiblyFlags}`
-                { ok: 'yes' }
-              : never
-            : never
-        : never
-    : 'attrValueTypeErr-doesntMatch'
-export type __ParseAttrValueRegex<T extends string> =
-  _ParseAttrValueRegex<T> extends infer Res
-    ? Res extends string
-      ? Res
-      : [T]
-    : never
-export type ParseAttrValueRegex<T extends string> =
-  __ParseAttrValueRegex<T> extends infer Res
-    ? Res extends string
-      ? Res
-      : Res extends [infer R]
-        ? { type: 'regexp'; value: R }
-        : never
-    : never
-
 export type Replace<
   T extends string,
   From extends string,
@@ -141,247 +86,480 @@ export type Replace<
   ? Replace<`${Before}${To}${After}`, From, To>
   : T
 
-export type ParseAttrValueString<T extends string> =
-  T extends `"${infer Inner}"`
-    ? { type: 'literal'; value: Replace<Inner, '\\"', '"'> }
-    : T extends `'${infer Inner}'`
-      ? { type: 'literal'; value: Replace<Inner, "\\'", "'"> }
-      : 'arrValueStringErr'
+type ParseStringAttrValueRecurser<
+  T extends string,
+  Q extends '"' | "'",
+> = T extends `${infer BeforeQuote}${Q}${infer Rest}`
+  ? BeforeQuote extends `${string}\\`
+    ? ParseStringAttrValueRecurser<Rest, Q> extends infer Res
+      ? Res extends string
+        ? // error - BeforeQuote ends with \\, so there is quote without pair
+          'unterminatedString'
+        : Res extends {
+              res: infer ResRes
+              rest: infer ResRest
+            }
+          ? ResRes extends string
+            ? { res: `${BeforeQuote}${Q}${ResRes}`; rest: ResRest }
+            : never
+          : never
+      : never
+    : { res: BeforeQuote; rest: Rest }
+  : 'no'
 
-// TODO: better numbers handling
-// export type ParseAttrValueNumber<T extends string> = TrimLeft<
-//   T,
-//   '0'
-// > extends `${infer N extends number}`
-//   ? { type: 'literal'; value: N }
-//   : `arrValueNumberErr`
-export type ParseAttrValueNumber<T extends string> =
+// prettier-ignore
+export type testParseStringAttrValueRecurser = [
+  Expect<Equal<
+    ParseStringAttrValueRecurser<'aaa\\"bbb"ccc', '"'>,
+    { res: 'aaa\\"bbb'; rest: 'ccc' }
+  >>,
+  Expect<Equal<
+    ParseStringAttrValueRecurser<'aaa\\"bbb\\"ccc', '"'>,
+    'unterminatedString'
+  >>,
+  Expect<Equal<
+    ParseStringAttrValueRecurser<"aaa\\'bbb'ccc", "'">,
+    { res: "aaa\\'bbb"; rest: 'ccc' }
+  >>,
+  Expect<Equal<
+    ParseStringAttrValueRecurser<"aaa\\'bbb\\'ccc", "'">,
+    'unterminatedString'
+  >>,
+
+  Expect<Equal<
+    ParseStringAttrValueRecurser<'aaa', '"'>,
+    'no'
+  >>
+]
+
+type ParseStringAttrValueImpl<
+  T extends string,
+  Q extends '"' | "'",
+> = ParseStringAttrValueRecurser<T, Q> extends infer Res
+  ? Res extends string
+    ? `stringParseErr-${Res}`
+    : Res extends {
+          res: infer ResRes
+          rest: infer ResRest
+        }
+      ? ResRes extends string
+        ? {
+            type: 'literal'
+            value: Replace<ResRes, `\\${Q}`, Q>
+            rest: ResRest
+          }
+        : never
+      : never
+  : never
+
+type ParseStringAttrValue<T extends string> = T extends `"${infer Rest}`
+  ? ParseStringAttrValueImpl<Rest, '"'>
+  : T extends `'${infer Rest}`
+    ? ParseStringAttrValueImpl<Rest, "'">
+    : 'stringParseErr-itDoesntStartWithQuotes'
+
+// prettier-ignore
+export type testParseStringAttrValue = [
+  Expect<Equal<
+    ParseStringAttrValue<'"aaa\\"bbb"ccc'>,
+    { type: 'literal'; value: 'aaa"bbb'; rest: 'ccc' }
+  >>,
+  Expect<Equal<
+    ParseStringAttrValue<"'aaa\\'bbb'ccc">,
+    { type: 'literal'; value: "aaa'bbb"; rest: 'ccc' }
+  >>,
+ 
+  Expect<Equal<
+    ParseStringAttrValue<'"aaa"bbb'>,
+    { type: 'literal'; value: 'aaa'; rest: 'bbb' }
+  >>,
+  Expect<Equal<
+    ParseStringAttrValue<'"aaa\\"bbb"'>,
+    { type: 'literal'; value: 'aaa"bbb'; rest: '' }
+  >>,
+  Expect<Equal<
+    ParseStringAttrValue<'"a]aa\\"b]bb"  ]'>,
+    { type: 'literal'; value: 'a]aa"b]bb'; rest: '  ]' }
+  >>,
+  Expect<Equal<
+    ParseStringAttrValue<'aaa\\"bbb'>,
+    'stringParseErr-itDoesntStartWithQuotes'
+  >>,
+]
+
+//  number
+//    = a:([0-9]* ".")? b:[0-9]+ {
+//      // Can use `a.flat().join('')` once supported
+//      const leadingDecimals = a ? [].concat.apply([], a).join('') : '';
+//      return { type: 'literal', value: parseFloat(leadingDecimals + b.join('')) };
+//    }
+// TODO: better numbers handling for cases like 010
+export type ParseNumberAttrValue<T extends string> =
   T extends `${infer N extends number}`
     ? { type: 'literal'; value: N }
     : 'arrValueNumberErr'
 
-export declare const aqe: ParseAttrValueNumber<'10.4'>
-//                    ^?
-
-type Aaa<
-  Name,
-  Rest,
-  Operator,
-  AttrValue extends string,
-> = ParseAttrValueString<AttrValue> extends infer AttrValueStringParseRes
-  ? AttrValueStringParseRes extends string
-    ? ParseAttrValueNumber<AttrValue> extends infer AttrValueNumberParseRes
-      ? AttrValueNumberParseRes extends string
-        ? ParseIdentifierName<
-            AttrValue,
-            IdentifierNameRestrictedSymbols
-          > extends infer AttrValueIdNameParseRes
-          ? AttrValueIdNameParseRes extends string
-            ? `nope-${AttrValueIdNameParseRes}`
-            : AttrValueIdNameParseRes extends {
-                  value: infer AttrValueIdNameValueParseRes
-                  rest: infer AttrValueIdNameRestParseRes
-                }
-              ? AttrValueIdNameRestParseRes extends ''
-                ? {
-                    type: 'attribute'
-                    name: Name
-                    operator: Operator
-                    value: {
-                      type: 'literal'
-                      value: AttrValueIdNameValueParseRes
-                    }
-                    rest: Rest
-                  }
-                : 'unsupportedShit'
-              : never
-          : never
-        : {
-            type: 'attribute'
-            name: Name
-            operator: Operator
-            value: AttrValueNumberParseRes
-            rest: Rest
-          }
+//  path = i:identifierName { return { type: 'literal', value: i }; }
+export type ParsePathAttrValue<T extends string> = ParseIdentifierName<
+  T,
+  IdentifierNameRestrictedSymbols
+> extends infer Res
+  ? Res extends string
+    ? `pathParseErr-${Res}`
+    : Res extends {
+          value: infer ResValue
+          rest: infer ResRest
+        }
+      ? ResRest extends ''
+        ? { type: 'literal'; value: ResValue }
+        : `pathParseErr-hasSomeRest`
       : never
-    : {
-        type: 'attribute'
-        name: Name
-        operator: Operator
-        value: AttrValueStringParseRes
-        rest: Rest
-      }
   : never
 
-type ParseAttrWithEqOrNotEq<
-  AttrName extends string,
-  AttrValue extends string,
-  Op extends '=' | '!=',
-  Rest extends string,
-> = ParseIdentifierName<
-  TrimSpaces<AttrName>,
-  IdentifierNameRestrictedSymbolsWithDot
-> extends infer IdentifierNameParseRes
-  ? IdentifierNameParseRes extends 'identifierNameEmpty'
-    ? 'attrNope-identifierNameNopeOnEqOp'
-    : IdentifierNameParseRes extends {
-          value: infer IdentifierNameParseResValue
-          rest: infer IdentifierNameParseResRest
-        }
-      ? IdentifierNameParseResRest extends ''
-        ? ParseAttrValueType<AttrValue> extends infer AttrValueTypeParseRes
-          ? AttrValueTypeParseRes extends string
-            ? ParseAttrValueRegex<AttrValue> extends infer AttrValueRegexParseRes
-              ? AttrValueRegexParseRes extends string
-                ? Aaa<IdentifierNameParseResValue, Rest, Op, AttrValue>
-                : {
-                    type: 'attribute'
-                    name: IdentifierNameParseResValue
-                    operator: Op
-                    value: AttrValueRegexParseRes
-                    rest: Rest
-                  }
-              : never
-            : {
-                type: 'attribute'
-                name: IdentifierNameParseResValue
-                operator: Op
-                value: AttrValueTypeParseRes
-                rest: Rest
-              }
-          : never
-        : 'attrNope-eqOpWrongIdentifierName'
-      : never
-  : 'attr Stub3'
-
-type ParseAttrWithEq<
-  RawAttrName extends string,
-  AttrValue extends string,
-  Rest extends string,
-> = RawAttrName extends `${infer AttrName}<`
-  ? // branch for '<=' op
-    ParseIdentifierName<
-      TrimSpaces<AttrName>,
-      Exclude<IdentifierNameRestrictedSymbols, '.'>
-    > extends infer IdentifierNameParseRes
-    ? IdentifierNameParseRes extends 'identifierNameEmpty'
-      ? 'attrNope-identifierNameNopeOnLessOrEqOp'
-      : IdentifierNameParseRes extends {
-            value: infer IdentifierNameParseResValue
-            rest: infer IdentifierNameParseResRest
-          }
-        ? IdentifierNameParseResRest extends ''
-          ? Aaa<IdentifierNameParseResValue, Rest, '<=', AttrValue>
-          : 'attrNope-lessOrEqOpWrongIdentifierName'
+//  type = "type(" _ t:[^ )]+ _ ")" { return { type: 'type', value: t.join('') }; }
+//  matches one word inside parens
+export type ParseTypeAttrValue<T extends string> =
+  T extends `type(${infer Inner})${infer Rest}`
+    ? Rest extends ''
+      ? TrimSpaces<Inner> extends infer TrimmedInner
+        ? TrimmedInner extends ''
+          ? // type(  )
+            'typeParseErr-emptyType'
+          : { type: 'type'; value: TrimmedInner }
         : never
-    : 'attr Stub1'
-  : RawAttrName extends `${infer AttrName}>`
-    ? // branch for '>=' op
-      ParseIdentifierName<
-        TrimSpaces<AttrName>,
-        Exclude<IdentifierNameRestrictedSymbols, '.'>
-      > extends infer IdentifierNameParseRes
-      ? IdentifierNameParseRes extends 'identifierNameEmpty'
-        ? 'attrNope-identifierNameNopeOnGreaterOrEqOp'
-        : IdentifierNameParseRes extends {
-              value: infer IdentifierNameParseResValue
-              rest: infer IdentifierNameParseResRest
-            }
-          ? IdentifierNameParseResRest extends ''
-            ? Aaa<IdentifierNameParseResValue, Rest, '>=', AttrValue>
-            : 'attrNope-greaterOrEqOpWrongIdentifierName'
+      : 'attrValueTypeErr-somethingAfterClosingParen'
+    : 'attrValueTypeErr-doesntMatch'
+
+// https://github.com/estools/esquery/blob/909bea6745d33d33870b5d2c3382b4561d00d923/grammar.pegjs#L88
+type AllowedRegexAttrValueFlag = 'i' | 'm' | 's' | 'u'
+export type ParseRegexAttrValueFlags<T extends string> = T extends ''
+  ? 'regexEmptyFlags'
+  : T extends `${infer First}${infer Rest}`
+    ? First extends AllowedRegexAttrValueFlag
+      ? Rest extends ''
+        ? { acc: First; res: First; rest: '' }
+        : ParseRegexAttrValueFlags<Rest> extends infer NestedRes
+          ? NestedRes extends string
+            ? NestedRes
+            : NestedRes extends {
+                  acc: infer NestedResAcc
+                  res: infer NestedResRes
+                  rest: infer NestedResRest
+                }
+              ? First extends NestedResAcc
+                ? // duplicated flag
+                  `regexDuplicatedFlag-${First}`
+                : NestedResRes extends string
+                  ? {
+                      acc: First | NestedResAcc
+                      res: `${First}${NestedResRes}`
+                      rest: NestedResRest
+                    }
+                  : never
+              : never
           : never
-      : 'attr Stub2'
-    : // branch for '=' and '!=' ops
-      RawAttrName extends `${infer AttrName}!`
-      ? ParseAttrWithEqOrNotEq<AttrName, AttrValue, '!=', Rest>
-      : ParseAttrWithEqOrNotEq<RawAttrName, AttrValue, '=', Rest>
+      : { acc: never; res: ''; rest: T }
+    : never
 
-type ParseAttrWithStrictNotEq<
-  RawAttrName extends string,
-  AttrValue extends string,
-  Op extends string,
-  Rest extends string,
-> = ParseIdentifierName<
-  RawAttrName,
-  IdentifierNameRestrictedSymbolsWithDot
-> extends infer IdentifierNameParseRes
-  ? IdentifierNameParseRes extends 'identifierNameEmpty'
-    ? 'attrNope-identifierNameNopeOnLessOrEqOp'
-    : IdentifierNameParseRes extends {
-          value: infer IdentifierNameParseResValue
-          rest: infer IdentifierNameParseResRest
+export type bbb = ParseRegexAttrValueFlags<'msiu'>
+//           ^?
+
+// prettier-ignore
+export type testParseRegexAttrValueFlags = [
+  Expect<Equal<
+    ParseRegexAttrValueFlags<'msiu'>,
+    { acc: 'm' | 's' | 'i' | 'u'; res: 'msiu'; rest: '' }
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValueFlags<'ms ]'>,
+    { acc: 'm' | 's'; res: 'ms'; rest: ' ]' }
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValueFlags<' ms ]'>,
+    { acc: never; res: ''; rest: ' ms ]' }
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValueFlags<'mm ]'>,
+    'regexDuplicatedFlag-m'
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValueFlags<''>,
+    'regexEmptyFlags'
+  >>,
+]
+
+export type ParseRegexAttrValueImpl<T extends string> =
+  // inheritting this bug for better consistency
+  // https://github.com/estools/esquery/issues/68
+  T extends `/${infer Inner}/${infer Rest}`
+    ? ParseRegexAttrValueFlags<Rest> extends infer ParsedFlags
+      ? ParsedFlags extends string
+        ? ParsedFlags extends 'regexEmptyFlags'
+          ? {
+              res: `/${Inner}/`
+              rest: Rest
+            }
+          : `regexErrInFlags-${ParsedFlags}`
+        : ParsedFlags extends {
+              res: infer ParsedFlagsRes
+              rest: infer ParsedFlagsRest
+            }
+          ? ParsedFlagsRes extends string
+            ? {
+                res: `/${Inner}/${ParsedFlagsRes}`
+                rest: ParsedFlagsRest
+              }
+            : never
+          : never
+      : never
+    : 'regexParseErr-doesntMatch'
+
+//  regex = "/" d:[^/]+ "/" flgs:flags? { return {
+//    type: 'regexp', value: new RegExp(d.join(''), flgs ? flgs.join('') : '') };
+//  }
+export type ParseRegexAttrValue<T extends string> =
+  ParseRegexAttrValueImpl<T> extends infer Res
+    ? Res extends string
+      ? Res
+      : Res extends {
+            res: infer ResRes
+            rest: infer Rest
+          }
+        ? {
+            type: 'regexp'
+            value: ResRes
+            rest: Rest
+          }
+        : never
+    : never
+
+// prettier-ignore
+export type testParseRegexAttrValue = [
+  Expect<Equal<
+    ParseRegexAttrValue<'/aa/'>,
+    { type: 'regexp'; value: '/aa/'; rest: '' }
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValue<'/aa/aa'>,
+    { type: 'regexp'; value: '/aa/'; rest: 'aa' }
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValue<'/aa/ms]'>,
+    { type: 'regexp'; value: '/aa/ms'; rest: ']' }
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValue<'/a]a/ ] '>,
+    { type: 'regexp'; value: '/a]a/'; rest: ' ] ' }
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValue<'/a]a/m ] '>,
+    { type: 'regexp'; value: '/a]a/m'; rest: ' ] ' }
+  >>,
+  Expect<Equal<
+    ParseRegexAttrValue<'/a]a/mm ] '>,
+    'regexErrInFlags-regexDuplicatedFlag-m'
+  >>,
+]
+
+type PostProcessAttrValueWithRest<V, Next> = V extends infer ParseRes
+  ? ParseRes extends string
+    ? Next
+    : ParseRes extends {
+          rest: infer Rest
         }
-      ? IdentifierNameParseResRest extends ''
-        ? Aaa<IdentifierNameParseResValue, Rest, Op, AttrValue>
-        : `attrNope-${Op}-OpWrongIdentifierName`
+      ? Rest extends string
+        ? TrimSpacesLeft<Rest> extends `]${infer RestRest}`
+          ? {
+              res: Simplify<Omit<ParseRes, 'rest'>>
+              rest: RestRest
+            }
+          : 'attrParseErr-unterminatedAttrSquareBracket'
+        : never
       : never
-  : 'attr Stub 999'
+  : never
 
-export type ParseAttr<T extends string> =
-  T extends `[${infer InnerRaw}]${infer Rest}`
-    ? TrimSpaces<InnerRaw> extends infer Inner
-      ? Inner extends string
-        ? Inner extends `${infer AttrName}=${infer AttrValue}`
-          ? AttrName extends string
-            ? AttrValue extends string
-              ? ParseAttrWithEq<
-                  TrimSpaces<AttrName>,
-                  TrimSpaces<AttrValue>,
-                  Rest
-                >
-              : 'parseAttrErr-1-AttrValueIsNotString'
-            : 'parseAttrErr-2-RawAttrNameIsNotString'
-          : // Inner doesn't contain '=' sign
-            Inner extends `${infer AttrName}<${infer AttrValue}`
-            ? AttrName extends string
-              ? AttrValue extends string
-                ? ParseAttrWithStrictNotEq<
-                    TrimSpaces<AttrName>,
-                    TrimSpaces<AttrValue>,
-                    '<',
-                    Rest
-                  >
-                : 'parseAttrErr-3-AttrValueIsNotString'
-              : 'parseAttrErr-4-RawAttrNameIsNotString'
-            : Inner extends `${infer AttrName}>${infer AttrValue}`
-              ? AttrName extends string
-                ? AttrValue extends string
-                  ? ParseAttrWithStrictNotEq<
-                      TrimSpaces<AttrName>,
-                      TrimSpaces<AttrValue>,
-                      '>',
-                      Rest
-                    >
-                  : 'parseAttrErr-5-AttrValueIsNotString'
-                : 'parseAttrErr-6-RawAttrNameIsNotString'
-              : //  [name.path]
-                ParseIdentifierName<
-                    Inner,
-                    IdentifierNameRestrictedSymbolsWithDot
-                  > extends infer IdentifierNameParseRes
-                ? IdentifierNameParseRes extends 'identifierNameEmpty'
-                  ? // []
-                    'attrNope-identifierNameNopeWithoutOp'
-                  : // [something]
-                    IdentifierNameParseRes extends {
-                        value: infer IdentifierNameParseResValue
-                        rest: infer IdentifierNameParseResRest
-                      }
-                    ? IdentifierNameParseResRest extends ''
-                      ? // [nice.attr.without.op]
-                        {
-                          type: 'attribute'
-                          name: IdentifierNameParseResValue
-                          rest: Rest
-                        }
-                      : // [something+wrong]
-                        'attrNope-withoutOpWrongIdentifierName'
-                    : never
-                : 'attr Stub4'
-        : 'attrNope-squareBrackets'
+//   attrEqOps = a:"!"? "="  { return (a || '') + '='; }
+//   !=, =
+//   value(type / regex)
+type ParseAttrValueForEqOps<AttrValue extends string> =
+  PostProcessAttrValueWithRest<
+    ParseRegexAttrValue<AttrValue>,
+    // not a regex -> it may be type
+    // but only regex can contain ']', so we can safely split AttrValue
+    AttrValue extends `${infer FullAttrValue}]${infer Rest}`
+      ? TrimSpaces<FullAttrValue> extends infer TrimmedFullAttrValue
+        ? TrimmedFullAttrValue extends string
+          ? ParseTypeAttrValue<TrimmedFullAttrValue> extends infer TypeParseRes
+            ? TypeParseRes extends string
+              ? 'parseAttrValueForEqOpsErr-doesntMatch'
+              : {
+                  res: TypeParseRes
+                  rest: Rest
+                }
+            : never
+          : never
+        : never
+      : 'parseAttrValueForOpsErr-unterminatedAttrSquareBracket'
+  >
+
+//   attrOps = a:[><!]? "=" { return (a || '') + '='; } / [><]
+//   >=, <=, !=, =, >, <
+//   value(string / number / path)
+type ParseAttrValueForOps<AttrValue extends string> =
+  PostProcessAttrValueWithRest<
+    ParseStringAttrValue<AttrValue>,
+    // not a string -> it may be number / path
+    // but only strings can contain ']', so we can safely split AttrValue
+    AttrValue extends `${infer FullAttrValue}]${infer Rest}`
+      ? TrimSpaces<FullAttrValue> extends infer TrimmedFullAttrValue
+        ? TrimmedFullAttrValue extends string
+          ? ParseNumberAttrValue<TrimmedFullAttrValue> extends infer NumberParseRes
+            ? NumberParseRes extends string
+              ? // not a number
+                ParsePathAttrValue<TrimmedFullAttrValue> extends infer PathParseRes
+                ? PathParseRes extends string
+                  ? 'parseAttrValueForOpsErr-doesntMatch'
+                  : {
+                      res: PathParseRes
+                      rest: Rest
+                    }
+                : never
+              : {
+                  res: NumberParseRes
+                  rest: Rest
+                }
+            : never
+          : never
+        : never
+      : 'parseAttrValueForOpsErr-unterminatedAttrSquareBracket'
+  >
+
+// TODO: check if name starts with dot
+type ParseAttrName<RawAttrName> = RawAttrName extends string
+  ? ParseIdentifierName<
+      TrimSpaces<RawAttrName>,
+      IdentifierNameRestrictedSymbolsWithDot
+    > extends infer AttrNameParseRes
+    ? AttrNameParseRes extends string
+      ? `genParseAttrResErr-${AttrNameParseRes}`
+      : AttrNameParseRes extends {
+            value: infer AttrNameParseResValue
+            rest: infer AttrNameParseResRest
+          }
+        ? AttrNameParseResRest extends ''
+          ? {
+              type: 'attribute'
+              name: AttrNameParseResValue
+            }
+          : 'genParseAttrResErr-wrongAttrName'
+        : never
+    : never
+  : never
+
+type GenParseAttrRes<
+  RawAttrName,
+  Op extends string,
+  ParseRes,
+> = ParseRes extends string
+  ? `parseAttrErr-${ParseRes}`
+  : ParseRes extends {
+        res: infer ParseResRes
+        rest: infer ParseResRest
+      }
+    ? ParseAttrName<RawAttrName> extends infer AttrNameParseRes
+      ? AttrNameParseRes extends string
+        ? `genParseAttrResErr-${AttrNameParseRes}`
+        : Simplify<
+            AttrNameParseRes & {
+              operator: Op
+              value: ParseResRes
+              rest: ParseResRest
+            }
+          >
       : never
-    : 'attrNope-doesnthaveSquareBrackets'
+    : never
+
+export type IfString<T, U> = T extends string ? U : T
+
+type ParseAttr<T extends string> =
+  T extends `[${infer AttrName}=${infer AfterAttrName}`
+    ? // <=, >=, !=, =
+      TrimSpacesLeft<AfterAttrName> extends infer TrimmedAfterAttrName
+      ? TrimmedAfterAttrName extends string
+        ? AttrName extends `${infer RawAttrName}<`
+          ? // <=
+            GenParseAttrRes<
+              RawAttrName,
+              '<=',
+              ParseAttrValueForOps<TrimmedAfterAttrName>
+            >
+          : // >=
+            AttrName extends `${infer RawAttrName}>`
+            ? GenParseAttrRes<
+                RawAttrName,
+                '>=',
+                ParseAttrValueForOps<TrimmedAfterAttrName>
+              >
+            : // TODO: try eqOps
+              // !=
+              AttrName extends `${infer RawAttrName}!`
+              ? IfString<
+                  GenParseAttrRes<
+                    RawAttrName,
+                    '!=',
+                    ParseAttrValueForOps<TrimmedAfterAttrName>
+                  >,
+                  GenParseAttrRes<
+                    RawAttrName,
+                    '!=',
+                    ParseAttrValueForEqOps<TrimmedAfterAttrName>
+                  >
+                >
+              : // =
+                IfString<
+                  GenParseAttrRes<
+                    AttrName,
+                    '=',
+                    ParseAttrValueForOps<TrimmedAfterAttrName>
+                  >,
+                  GenParseAttrRes<
+                    AttrName,
+                    '=',
+                    ParseAttrValueForEqOps<TrimmedAfterAttrName>
+                  >
+                >
+        : never
+      : never
+    : // <, >, without value, wrong
+      T extends `[${infer AttrName}<${infer AfterAttrName}`
+      ? // <
+        TrimSpacesLeft<AfterAttrName> extends infer TrimmedAfterAttrName
+        ? TrimmedAfterAttrName extends string
+          ? GenParseAttrRes<
+              AttrName,
+              '<',
+              ParseAttrValueForOps<TrimmedAfterAttrName>
+            >
+          : never
+        : never
+      : T extends `[${infer AttrName}>${infer AfterAttrName}`
+        ? // <
+          TrimSpacesLeft<AfterAttrName> extends infer TrimmedAfterAttrName
+          ? TrimmedAfterAttrName extends string
+            ? GenParseAttrRes<
+                AttrName,
+                '>',
+                ParseAttrValueForOps<TrimmedAfterAttrName>
+              >
+            : never
+          : never
+        : T extends `[${infer AttrName}]${infer Rest}`
+          ? ParseAttrName<AttrName> extends infer AttrNameParseRes
+            ? AttrNameParseRes extends string
+              ? `attrParseErr-${AttrNameParseRes}`
+              : Simplify<AttrNameParseRes & { rest: Rest }>
+            : never
+          : 'attrParseErr-wrongAttr'
 
 export type ParseField<T extends string> = T extends `.${infer Rest}`
   ? ParseIdentifierName<
