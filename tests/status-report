@@ -1,6 +1,5 @@
-Found 113 errors in 3 files.
+Found 87 errors in 2 files.
 
 Errors  Files
-     2  src/matcher.ts[90m:262[0m
-    36  tests/types/match.test.ts[90m:10[0m
-    75  tests/types/ts-eslint-matcher.generated-test.ts[90m:12[0m
+    22  tests/types/match.test.ts[90m:10[0m
+    65  tests/types/ts-eslint-matcher.generated-test.ts[90m:17[0m

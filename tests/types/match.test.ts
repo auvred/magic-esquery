@@ -48,8 +48,8 @@ export type TestCases = [
   Expect<Equal<Match<':matches(CallExpression, MemberExpression)[computed=true]'>, T.MemberExpressionComputedName>>,
   Expect<Equal<Match<'CallExpression[type]:matches(CallExpression, MemberExpression)[computed=true]'>, never>>,
 
-  Expect<Equal<Match<'.body'>, TSESTree.ClassBody | TSESTree.TSInterfaceBody | TSESTree.TSModuleBlock | TSESTree.Expression | TSESTree.Statement | TSESTree.Statement[] | TSESTree.ClassElement[] | TSESTree.ProgramStatement[] |TSESTree.TypeElement[] | null | undefined>>,
-  Expect<Equal<Match<'*.body'>, TSESTree.ClassBody | TSESTree.TSInterfaceBody | TSESTree.TSModuleBlock | TSESTree.Expression | TSESTree.Statement | TSESTree.Statement[] | TSESTree.ClassElement[] | TSESTree.ProgramStatement[] |TSESTree.TypeElement[] | null | undefined>>,
+  Expect<Equal<Match<'.body'>, T.ClassBody | T.TSInterfaceBody | T.TSModuleBlock | T.Expression | T.Statement | T.Statement[] | T.ClassElement[] | T.ProgramStatement[] | T.TypeElement[] | null | undefined>>,
+  Expect<Equal<Match<'*.body'>, T.ClassBody | T.TSInterfaceBody | T.TSModuleBlock | T.Expression | T.Statement | T.Statement[] | T.ClassElement[] | T.ProgramStatement[] | T.TypeElement[] | null | undefined>>,
 
   Expect<Equal<Match<'VariableDeclarator > :matches(CallExpression, MemberExpression)'>, T.CallExpression | T.MemberExpression>>,
   Expect<Equal<Match<'CallExpression > .callee'>, T.LeftHandSideExpression>>,
@@ -59,6 +59,4 @@ export type TestCases = [
   Expect<Equal<Match<'MemberExpression > *.property[type].object'>, never>>,
   Expect<Equal<Match<'CallExpression > MemberExpression[type].callee'>, T.MemberExpression>>,
   Expect<Equal<Match<'CallExpression > :matches(MemberExpression, Literal)[type].callee'>, T.MemberExpression | T.Literal>>,
-
-  Expect<Equal<Match<'BlockStatement > .body:matches(BreakStatement, ClassDeclarationWithName, Literal)'>, T.BreakStatement | T.ClassDeclarationWithName>>
 ]

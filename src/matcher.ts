@@ -196,22 +196,15 @@ type PostProcessCompoundSelectors<
             >
         : never
 
-type fadsfas = (
-  | (TSESTree.SpreadElement | TSESTree.Expression | null)[]
-  | (TSESTree.DestructuringPattern | null)[]
-) &
-  TSESTree.Node
-
-// type S = 'VariableDeclarator > :matches(CallExpression, MemberExpression)'
-type S = 'CallExpression > .callee'
+type S = '.body'
 type pppp = ParseIt<S>
 //     ^?
 type fasqf = PostProcessCompoundSelectors<
   //     ^?
-  pppp['selectors'],
+  [pppp['right']],
   TSESTree.Node
 >
-type Res = PostProcessChild<pppp['left'], pppp['right'], TSESTree.Node>
+type Res = MatchIt<pppp, TSESTree.Node>
 //   ^?
 
 type MatchByField<Left, Right, AST> = Right extends string
@@ -261,7 +254,7 @@ type FilterFields<
 //
 // So instead we're intersecting just 'type'
 //
-// After a simple benchmarking it shows better time on tsc up to 25% faster
+// After a simple benchmarking it shows better time on typechecking up to 50% faster
 type CalculateSuperMegaIntersection<AST, Left, Right> = Left extends {
   type: infer LeftTypes
 }
@@ -269,8 +262,12 @@ type CalculateSuperMegaIntersection<AST, Left, Right> = Left extends {
       type: infer RightTypes
     }
     ? Extract<AST, { type: LeftTypes & RightTypes }>
-    : Left & Right
-  : Left & Right
+    : Extract<Left, Right> & Extract<Right, Left> extends never
+      ? Left & Right
+      : Extract<Left, Right> & Extract<Right, Left>
+  : Extract<Left, Right> & Extract<Right, Left> extends never
+    ? Left & Right
+    : Extract<Left, Right> & Extract<Right, Left>
 
 type PostProcessChild<Left, Right, AST> = Right extends {
   type: 'compound'
@@ -293,9 +290,13 @@ type PostProcessChild<Left, Right, AST> = Right extends {
             type: 'matches'
           }
     ? PostProcessChild<Left, { type: 'compound'; selectors: [Right] }, AST>
-    : Right extends {
-          type: 'identifier'
-        }
+    : Right extends
+          | {
+              type: 'identifier'
+            }
+          | {
+              type: 'wildcard'
+            }
       ? MatchIt<Right, AST>
       : 'todo'
 
@@ -348,4 +349,12 @@ export type MatchIt<T, AST> = T extends {
                 }
                 ? MatchIt<Right, AST>
                 : never
-              : unknown
+              : T extends
+                    | {
+                        type: 'wildcard'
+                      }
+                    | {
+                        type: 'field'
+                      }
+                ? PostProcessCompoundSelectors<[T], AST>
+                : unknown

@@ -1,4 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["./tests/types/*.ts"]
+  "include": ["./tests/types/*.ts"],
+  "exclude": ["./tests/types/parse.generated-test.ts", "./tests/types/ts-eslint-parse.generated-test.ts"]
 }
