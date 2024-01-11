@@ -55,7 +55,11 @@ export type MatchIt<T, AST> = T extends {
           }
           ? PostProcessChildWithField<MatchIt<Left, AST>, RightName>
           : MatchIt<Right, AST>
-        : unknown
+        : T extends {
+              type: 'wildcard'
+            }
+          ? AST
+          : unknown
 
 type Y = 'MemberExpression > Identifier'
 

@@ -7,6 +7,7 @@ type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
 
 export type TestCases = [
   Expect<Equal<Match<'Program'>, T.Program>>,
+  Expect<Equal<Match<'Program > *'>, T.Node>>,
   Expect<
     Equal<Match<'Program, MemberExpression'>, T.Program | T.MemberExpression>
   >,
