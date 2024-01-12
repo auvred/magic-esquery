@@ -180,7 +180,7 @@ ForStatement
 ForStatement:exit
   T.ForStatement
 ForStatement > *.init:exit
-  TODO
+  T.Expression | T.VariableDeclaration
 FunctionDeclaration
   T.FunctionDeclaration
 FunctionDeclaration[async = false]
@@ -254,19 +254,19 @@ LogicalExpression[operator="||"], LogicalExpression[operator="??"]
 LogicalExpression[operator = "??"] > TSNonNullExpression.left
   T.TSNonNullExpression
 :matches(ClassDeclaration, ClassExpression):exit
-  TODO
+  T.ClassDeclaration | T.ClassExpression
 :matches(DoWhileStatement, ForStatement, ForInStatement, ForOfStatement, IfStatement, WhileStatement, WithStatement):exit
-  TODO
+  T.DoWhileStatement | T.ForStatement | T.ForInStatement | T.ForOfStatement | T.IfStatement | T.WhileStatement | T.WithStatement
 :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "ArrowFunctionExpression"], :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "FunctionExpression"], :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type = "TSEmptyBodyFunctionExpression"], :matches(MethodDefinition, TSAbstractMethodDefinition)[computed = false][kind = "method"]
-  TODO
+  T.PropertyDefinitionNonComputedName | T.TSAbstractPropertyDefinitionNonComputedName | T.MethodDefinitionNonComputedName | T.TSAbstractMethodDefinitionNonComputedName
 :matches(PropertyDefinition, TSAbstractPropertyDefinition)[computed = false][value.type != "ArrowFunctionExpression"][value.type != "FunctionExpression"][value.type != "TSEmptyBodyFunctionExpression"]
-  TODO
+  T.PropertyDefinitionNonComputedName | T.TSAbstractPropertyDefinitionNonComputedName
 MemberExpression
   T.MemberExpression
 MemberExpression[computed=false]
   T.MemberExpressionNonComputedName
 MemberExpression[computed = true] > *.property
-  TODO
+  T.Expression
 MemberExpression:exit
   T.MemberExpression
 MemberExpression, JSXMemberExpression, MetaProperty
@@ -278,7 +278,7 @@ MemberExpression[optional = true] > TSNonNullExpression.object
 MethodDefinition
   T.MethodDefinition
 MethodDefinition[computed = false]:matches([kind = "get"], [kind = "set"])
-  TODO
+  T.MethodDefinitionNonComputedName
 MethodDefinition[computed=true]
   T.MethodDefinitionComputedName
 MethodDefinition[kind="constructor"]
@@ -318,9 +318,9 @@ Program > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), Program > :m
 Property
   T.Property
 Property[computed = false][kind = "init"][value.type = "ArrowFunctionExpression"], Property[computed = false][kind = "init"][value.type = "FunctionExpression"], Property[computed = false][kind = "init"][value.type = "TSEmptyBodyFunctionExpression"]
-  TODO
+  T.PropertyNonComputedName
 Property[computed = false]:matches([kind = "get"], [kind = "set"])
-  TODO
+  T.PropertyNonComputedName
 PropertyDefinition
   T.PropertyDefinition
 PropertyDefinition > ArrowFunctionExpression.value
@@ -330,7 +330,7 @@ PropertyDefinition > ArrowFunctionExpression.value:exit
 PropertyDefinition:exit
   T.PropertyDefinition
 PropertyDefinition > *.key:exit
-  T.PropertyNameComputed | T.PropertyNameNonComputed
+  T.PropertyName
 PropertyDefinition, TSAbstractPropertyDefinition
   T.PropertyDefinition | T.TSAbstractPropertyDefinition
 PropertyDefinition[value != null]
@@ -456,7 +456,7 @@ TSMappedType
 TSMethodSignature
   T.TSMethodSignature
 TSMethodSignature[computed = false], TSPropertySignature[computed = false][typeAnnotation.typeAnnotation.type = "TSFunctionType"]
-  TODO
+  T.TSMethodSignatureNonComputedName | T.TSPropertySignatureNonComputedName
 TSMethodSignature[key.name='constructor']
   T.TSMethodSignature
 TSModuleBlock
@@ -466,9 +466,9 @@ TSModuleBlock:exit
 TSModuleDeclaration
   T.TSModuleDeclaration
 TSModuleDeclaration[declare = true] > TSModuleBlock > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), TSModuleDeclaration[declare = true] > TSModuleBlock > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)
-  TODO
+  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclaration | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclaration | T.VariableDeclaration
 TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModuleBlock > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModuleBlock > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)
-  TODO
+  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclaration | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclaration | T.VariableDeclaration
 TSModuleDeclaration:exit
   T.TSModuleDeclaration
 TSModuleDeclaration[global!=true][id.type!='Literal']
@@ -564,7 +564,7 @@ VariableDeclarator, AssignmentExpression
 VariableDeclarator[init != null]
   T.LetOrConstOrVarDeclarator | T.UsingInNomalConextDeclarator
 VariableDeclarator[init.type='ThisExpression'], AssignmentExpression[right.type='ThisExpression']
-  TODO
+  T.VariableDeclarator | T.AssignmentExpression
 VariableDeclarator,PropertyDefinition,:matches(FunctionDeclaration,FunctionExpression) > AssignmentPattern
   T.VariableDeclarator | T.PropertyDefinition | T.AssignmentPattern
 WhileStatement

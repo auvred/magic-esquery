@@ -34,53 +34,55 @@ type MergeAttrs<
       name: infer AttrName
     }
     ? AttrName extends string
-      ? First extends {
-          operator: infer AttrOp
-          value: infer AttrValue
-        }
-        ? AttrValue extends {
-            type: 'literal'
-            value: infer AttrValueValue
-          }
-          ? AttrOp extends '='
-            ? MergeAttrs<
-                Rest,
-                {
-                  implicitInclude: Acc['implicitInclude'] &
-                    TryToParseAttrValue<AttrValueValue> extends AttrValueIsUnsafeToIntersect
-                    ? unknown
-                    : {
-                        [K in AttrName]: TryToParseAttrValue<AttrValueValue>
-                      }
-                  implicitExclude: Acc['implicitExclude']
-                  explicit: Acc['explicit']
-                }
-              >
-            : MergeAttrs<
-                Rest,
-                {
-                  implicitInclude: Acc['implicitInclude']
-                  implicitExclude:
-                    | Acc['implicitExclude']
-                    | {
-                        [K in AttrName]: TryToParseAttrValue<AttrValueValue>
-                      }
-                  explicit: Acc['explicit']
-                }
-              >
-          : MergeAttrs<Rest, Acc>
-        : MergeAttrs<
-            Rest,
-            {
-              implicitInclude: Acc['implicitInclude']
-              implicitExclude: Acc['implicitExclude']
-              explicit: Acc['explicit'] & {
-                // https://github.com/estools/esquery/blob/909bea6745d33d33870b5d2c3382b4561d00d923/esquery.js#L221
-                // != null
-                [K in AttrName]: string | number | boolean | symbol | object
-              }
+      ? // TODO: add support for nested fields narrowing
+        AttrName extends `${string}.${string}`
+        ? MergeAttrs<Rest, Acc>
+        : First extends {
+              operator: infer AttrOp
+              value: infer AttrValue
             }
-          >
+          ? AttrValue extends {
+              type: 'literal'
+              value: infer AttrValueValue
+            }
+            ? AttrOp extends '='
+              ? TryToParseAttrValue<AttrValueValue> extends AttrValueIsUnsafeToIntersect
+                ? MergeAttrs<Rest, Acc>
+                : MergeAttrs<
+                    Rest,
+                    {
+                      implicitInclude: Acc['implicitInclude'] & {
+                        [K in AttrName]: TryToParseAttrValue<AttrValueValue>
+                      }
+                      implicitExclude: Acc['implicitExclude']
+                      explicit: Acc['explicit']
+                    }
+                  >
+              : MergeAttrs<
+                  Rest,
+                  {
+                    implicitInclude: Acc['implicitInclude']
+                    implicitExclude:
+                      | Acc['implicitExclude']
+                      | {
+                          [K in AttrName]: TryToParseAttrValue<AttrValueValue>
+                        }
+                    explicit: Acc['explicit']
+                  }
+                >
+            : MergeAttrs<Rest, Acc>
+          : MergeAttrs<
+              Rest,
+              {
+                implicitInclude: Acc['implicitInclude']
+                implicitExclude: Acc['implicitExclude']
+                explicit: Acc['explicit'] & {
+                  // https://github.com/estools/esquery/blob/909bea6745d33d33870b5d2c3382b4561d00d923/esquery.js#L221
+                  // != null
+                  [K in AttrName]: string | number | boolean | symbol | object
+                }
+              }
+            >
       : never
     : never
   : Acc
@@ -92,6 +94,7 @@ type TryToNarrowByExtracting<T, U> = Extract<T, U> extends never
 type PostProcessCompoundSelectors<
   Selectors extends any[],
   AST,
+  NarrowFromParent = unknown,
   Acc extends {
     identifier: any
     field: string | null
@@ -108,6 +111,7 @@ type PostProcessCompoundSelectors<
     ? PostProcessCompoundSelectors<
         Rest,
         AST,
+        NarrowFromParent,
         {
           identifier: Acc['identifier']
           attrs: Acc['attrs']
@@ -120,6 +124,7 @@ type PostProcessCompoundSelectors<
       ? PostProcessCompoundSelectors<
           Rest,
           AST,
+          NarrowFromParent,
           {
             identifier: Acc['identifier']
             attrs: [...Acc['attrs'], First]
@@ -135,6 +140,7 @@ type PostProcessCompoundSelectors<
             ? PostProcessCompoundSelectors<
                 Rest,
                 AST,
+                NarrowFromParent,
                 {
                   identifier: Acc['identifier']
                   attrs: Acc['attrs']
@@ -145,6 +151,7 @@ type PostProcessCompoundSelectors<
               ? PostProcessCompoundSelectors<
                   Rest,
                   AST,
+                  NarrowFromParent,
                   {
                     identifier: Acc['identifier']
                     attrs: Acc['attrs']
@@ -157,6 +164,7 @@ type PostProcessCompoundSelectors<
           ? PostProcessCompoundSelectors<
               Rest,
               AST,
+              NarrowFromParent,
               {
                 identifier: MatchIt<First, AST>
                 attrs: Acc['attrs']
@@ -169,6 +177,7 @@ type PostProcessCompoundSelectors<
               : PostProcessCompoundSelectors<
                   Rest,
                   AST,
+                  NarrowFromParent,
                   {
                     identifier: Acc['identifier'] & Matched
                     attrs: Acc['attrs']
@@ -180,31 +189,48 @@ type PostProcessCompoundSelectors<
     ? // wrong fields combination
       never
     : Acc['identifier'] extends null
-      ? MatchByField<AST, Acc['field'], AST>
+      ? CalculateSuperMegaIntersection<
+          AST,
+          MatchByField<AST, Acc['field'], AST>,
+          NarrowFromParent
+        >
       : MergeAttrs<Acc['attrs']> extends {
             implicitExclude: infer ImplicitExclude
             implicitInclude: infer ImplicitInclude
             explicit: infer Explicit
           }
-        ? Extract<MatchByField<AST, Acc['field'], AST>, { type: any }> &
+        ? //CalculateSuperMegaIntersection<
+          // AST,
+          // [
+          // [
+          //   ImplicitInclude,
+          // ImplicitExclude
+          TryToNarrowByExtracting<
             TryToNarrowByExtracting<
-              TryToNarrowByExtracting<
-                Exclude<Acc['identifier'], ImplicitExclude>,
-                Explicit
+              Exclude<
+                CalculateSuperMegaIntersection<
+                  AST,
+                  Acc['identifier'] & NarrowFromParent,
+                  Extract<MatchByField<AST, Acc['field'], AST>, { type: any }>
+                >,
+                ImplicitExclude
               >,
-              ImplicitInclude
-            >
+              Explicit
+            >,
+            ImplicitInclude
+          >
         : never
 
-type S = '.body'
+type S = 'PropertyDefinition > *.key:exit'
 type pppp = ParseIt<S>
 //     ^?
 type fasqf = PostProcessCompoundSelectors<
   //     ^?
-  [pppp['right']],
+  pppp['selectors'],
   TSESTree.Node
+  // TSESTree.MemberExpression['property']
 >
-type Res = MatchIt<pppp, TSESTree.Node>
+type _Res = MatchIt<pppp, TSESTree.Node>
 //   ^?
 
 type MatchByField<Left, Right, AST> = Right extends string
@@ -252,9 +278,9 @@ type FilterFields<
 // if we try to intersect these types manually, tsserver just says:
 //  - "Expression produces a union type that is too complex to represent"
 //
-// So instead we're intersecting just 'type'
+// So instead we're trying to intersect just 'type'
 //
-// After a simple benchmarking it shows better time on typechecking up to 50% faster
+// After a simple benchmarking, it shows a better time on typechecking (up to 50% faster)
 type CalculateSuperMegaIntersection<AST, Left, Right> = Left extends {
   type: infer LeftTypes
 }
@@ -269,19 +295,33 @@ type CalculateSuperMegaIntersection<AST, Left, Right> = Left extends {
     ? Left & Right
     : Extract<Left, Right> & Extract<Right, Left>
 
+type CalculateSuperMega<AST, Left extends any, Right extends any> =
+  //   Left extends {
+  //   type: infer LeftTypes
+  // }
+  //   ? Right extends {
+  //       type: infer RightTypes
+  //     }
+  [Left['type'] & Right['type']] // Extract<AST, { type: LeftTypes & RightTypes }>
+//   : Extract<Left, Right> & Extract<Right, Left> extends never
+//     ? Left & Right
+//     : Extract<Left, Right> & Extract<Right, Left>
+// : Extract<Left, Right> & Extract<Right, Left> extends never
+//   ? Left & Right
+//   : Extract<Left, Right> & Extract<Right, Left>
+
 type PostProcessChild<Left, Right, AST> = Right extends {
   type: 'compound'
   selectors: infer Selectors
 }
   ? Selectors extends unknown[]
-    ? // MatchByField<MatchIt<Left, AST>, FilterFields<Selectors>, AST>,
-      // PostProcessCompoundSelectors<Selectors, AST>,
-      CalculateSuperMegaIntersection<
+    ? PostProcessCompoundSelectors<
+        Selectors,
         AST,
-        MatchByField<MatchIt<Left, AST>, FilterFields<Selectors>, AST>,
-        PostProcessCompoundSelectors<Selectors, AST>
+        MatchByField<MatchIt<Left, AST>, FilterFields<Selectors>, AST>
       >
-    : never
+    : // ]
+      never
   : Right extends
         | {
             type: 'field'
@@ -309,8 +349,8 @@ export type MatchIt<T, AST> = T extends {
         type: 'matches'
         selectors: infer Selectors
       }
-    ? Selectors extends unknown[]
-      ? MatchIt<Selectors[number], AST>
+    ? Selectors extends [infer First, ...infer Rest]
+      ? MatchIt<First, AST> | MatchIt<{ type: 'matches'; selectors: Rest }, AST>
       : never
     : T extends {
           type: 'compound'
