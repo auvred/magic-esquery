@@ -722,15 +722,13 @@ export type ParseField<T extends string> = T extends `.${infer Rest}`
 export type ParsePseudoClass<
   T extends string,
   PseudoClassName extends string,
-> = T extends `:${PseudoClassName}(${infer Inner})${infer Rest}`
-  ? ParseSelectors<TrimSpaces<Inner>> extends infer SelectorsParseRes
-    ? SelectorsParseRes extends string
-      ? SelectorsParseRes
-      : SelectorsParseRes extends {
-            selectors: infer Selectors
-          }
-        ? { type: PseudoClassName; selectors: Selectors; rest: Rest }
-        : 'nope'
+> = T extends `:${PseudoClassName}(${infer Rest}`
+  ? { type: PseudoClassName } & ParseSelectors<
+      TrimSpaces<Rest>,
+      [],
+      EndOfSelectorsList.ClosingParen
+    > extends infer SelectorsParseRes
+    ? SelectorsParseRes
     : never
   : `is not ${PseudoClassName} pseudo class`
 
@@ -950,12 +948,18 @@ export type _ParseSelectorsTrimCommaAtStart<T extends string> =
   TrimSpacesLeft<T> extends infer R
     ? R extends `,${infer Rest}`
       ? { res: TrimSpacesLeft<Rest> }
-      : `commaErr`
+      : `commaErr-${T}`
     : never
+
+enum EndOfSelectorsList {
+  None,
+  ClosingParen,
+}
 
 export type ParseSelectors<
   T extends string,
   Acc extends unknown[] = [],
+  Eosl extends EndOfSelectorsList = EndOfSelectorsList.None,
 > = ParseSelector<T> extends infer SelectorParseRes
   ? SelectorParseRes extends {
       error: unknown
@@ -966,12 +970,20 @@ export type ParseSelectors<
       ? _ParseSelectorsTrimCommaAtStart<Rest> extends infer RestWithoutComma
         ? RestWithoutComma extends string
           ? //todo here
-            'nanoStub'
+            Eosl extends EndOfSelectorsList.None
+            ? `${Rest}-nanoStub-${RestWithoutComma}`
+            : Eosl extends EndOfSelectorsList.ClosingParen
+              ? TrimSpacesLeft<Rest> extends infer R
+                ? R extends `)${infer RestRest}`
+                  ? { selectors: [...Acc, SelectorAcc]; rest: RestRest }
+                  : `commaErr-${T}`
+                : never
+              : never
           : RestWithoutComma extends {
                 res: infer RestWithoutCommaRes
               }
             ? RestWithoutCommaRes extends string
-              ? ParseSelectors<RestWithoutCommaRes, [...Acc, SelectorAcc]>
+              ? ParseSelectors<RestWithoutCommaRes, [...Acc, SelectorAcc], Eosl>
               : never
             : never
         : never

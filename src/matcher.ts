@@ -1,4 +1,3 @@
-import type { ParseIt } from './parser'
 import type { TSESTree } from '@typescript-eslint/typescript-estree'
 
 type PickNode<T, AST> = Extract<AST, { type: T }>
@@ -221,17 +220,19 @@ type PostProcessCompoundSelectors<
           >
         : never
 
-type S = 'PropertyDefinition > *.key:exit'
-type pppp = ParseIt<S>
-//     ^?
-type fasqf = PostProcessCompoundSelectors<
-  //     ^?
-  pppp['selectors'],
-  TSESTree.Node
-  // TSESTree.MemberExpression['property']
+type ExtractChildDeps<T, AST> = NonNullable<
+  {
+    [K in keyof T]: K extends 'parent'
+      ? never
+      : T[K] extends AST
+        ? CalculateSuperMegaIntersection<AST, AST, T[K]>
+        : T[K] extends [...infer Els]
+          ? Els[number] extends AST
+            ? CalculateSuperMegaIntersection<AST, AST, Els[number]>
+            : never
+          : never
+  }[keyof T]
 >
-type _Res = MatchIt<pppp, TSESTree.Node>
-//   ^?
 
 type MatchByField<Left, Right, AST> = Right extends string
   ? Right extends `${infer Path}.${infer Rest}`
@@ -275,6 +276,13 @@ type FilterFields<
     : FilterFields<Rest, Acc>
   : Acc
 
+type dasfabsf = CalculateSuperMegaIntersection<
+  //      ^?
+  TSESTree.Node,
+  ExtractChildDeps<TSESTree.Program, TSESTree.Node>,
+  MatchIt<{ type: 'wildcard' }, TSESTree.Node>
+>
+
 // if we try to intersect these types manually, tsserver just says:
 //  - "Expression produces a union type that is too complex to represent"
 //
@@ -295,31 +303,38 @@ type CalculateSuperMegaIntersection<AST, Left, Right> = Left extends {
     ? Left & Right
     : Extract<Left, Right> & Extract<Right, Left>
 
-type CalculateSuperMega<AST, Left extends any, Right extends any> =
-  //   Left extends {
-  //   type: infer LeftTypes
-  // }
-  //   ? Right extends {
-  //       type: infer RightTypes
-  //     }
-  [Left['type'] & Right['type']] // Extract<AST, { type: LeftTypes & RightTypes }>
-//   : Extract<Left, Right> & Extract<Right, Left> extends never
-//     ? Left & Right
-//     : Extract<Left, Right> & Extract<Right, Left>
-// : Extract<Left, Right> & Extract<Right, Left> extends never
-//   ? Left & Right
-//   : Extract<Left, Right> & Extract<Right, Left>
-
+// matches +
+// compound +
+// wildcard +
+// identifier +
+// attribute +
+// literal /
+// type /
+// regexp /
+// field +
+// not
+// has
+// class
 type PostProcessChild<Left, Right, AST> = Right extends {
   type: 'compound'
   selectors: infer Selectors
 }
   ? Selectors extends unknown[]
-    ? PostProcessCompoundSelectors<
-        Selectors,
-        AST,
-        MatchByField<MatchIt<Left, AST>, FilterFields<Selectors>, AST>
-      >
+    ? MatchIt<Left, AST> extends infer Res
+      ? PostProcessCompoundSelectors<
+          Selectors,
+          AST,
+          FilterFields<Selectors> extends infer FilteredFields
+            ? FilteredFields extends string
+              ? // ? CalculateSuperMegaIntersection<
+                //     AST,
+                //     ExtractChildDeps<Res, AST>,
+                MatchByField<Res, FilteredFields, AST>
+              : // >
+                AST // ExtractChildDeps<Res, AST>
+            : unknown
+        >
+      : never
     : // ]
       never
   : Right extends
@@ -329,16 +344,15 @@ type PostProcessChild<Left, Right, AST> = Right extends {
         | {
             type: 'matches'
           }
+        | {
+            type: 'attribute'
+          }
     ? PostProcessChild<Left, { type: 'compound'; selectors: [Right] }, AST>
-    : Right extends
-          | {
-              type: 'identifier'
-            }
-          | {
-              type: 'wildcard'
-            }
-      ? MatchIt<Right, AST>
-      : 'todo'
+    : // CalculateSuperMegaIntersection<
+      //   AST,
+      ExtractChildDeps<MatchIt<Left, AST>, AST>
+//   MatchIt<Right, AST>
+// >
 
 export type MatchIt<T, AST> = T extends {
   type: 'identifier'

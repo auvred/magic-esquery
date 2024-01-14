@@ -7,7 +7,7 @@ type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
 
 export type TestCases = [
   Expect<Equal<Match<'Program'>, T.Program>>,
-  Expect<Equal<Match<'Program > *'>, T.Node>>,
+  Expect<Equal<Match<'Program > *'>, T.ProgramStatement>>,
   Expect<Equal<Match<'Program, MemberExpression'>, T.Program | T.MemberExpression>>,
   Expect<Equal<Match<'[attr]'>, T.Node>>,
   Expect<Equal<Match<'[attr][bbb=asdf]'>, T.Node>>,
@@ -19,7 +19,11 @@ export type TestCases = [
   Expect<Equal<Match<'Program:body.field[attr], MemberExpression[name=1].expression, CallExpression'>, T.MemberExpression | T.CallExpression>>,
   Expect<Equal<Match<'Identifier.id'>, T.Identifier>>,
   Expect<Equal<Match<'MemberExpression > Identifier'>, T.Identifier>>,
-  Expect<Equal<Match<'MemberExpression > Identifier[attr] > CallExpression[attr=value]'>, T.CallExpression>>,
+  // Identifier can't contain CallExpression
+  Expect<Equal<Match<'Identifier > CallExpression'>, never>>,
+  Expect<Equal<Match<'CallExpression[callee] > Identifier[type]'>, T.Identifier>>,
+  Expect<Equal<Match<'MemberExpression > Identifier[type] > CallExpression[callee]'>, never>>,
+  Expect<Equal<Match<'MemberExpression > Identifier[attr] > CallExpression[attr=value]'>, never>>,
   Expect<Equal<Match<'MemberExpression > .property'>, T.PrivateIdentifier | T.Expression>>,
   Expect<Equal<Match<'MemberExpression > .property > .elements'>, (T.SpreadElement | T.Expression | null)[] | (T.DestructuringPattern | null)[]>>,
   Expect<Equal<Match<'MemberExpression > .property.elements'>, (T.SpreadElement | T.Expression | null)[] | (T.DestructuringPattern | null)[]>>,
@@ -53,6 +57,9 @@ export type TestCases = [
 
   Expect<Equal<Match<'VariableDeclarator > :matches(CallExpression, MemberExpression)'>, T.CallExpression | T.MemberExpression>>,
   Expect<Equal<Match<'CallExpression > .callee'>, T.LeftHandSideExpression>>,
+  Expect<Equal<Match<'CallExpression > [object]'>, T.MemberExpression>>,
+  Expect<Equal<Match<'CallExpression > :not(VariableDeclaration)'>, T.MemberExpression>>,
+  Expect<Equal<Match<'CallExpression > *:not(VariableDeclaration)'>, T.MemberExpression>>,
   Expect<Equal<Match<'CallExpression > *.callee'>, T.LeftHandSideExpression>>,
   Expect<Equal<Match<'CallExpression > *[type].callee'>, T.LeftHandSideExpression>>,
   Expect<Equal<Match<'CallExpression > *.callee[type].callee'>, T.LeftHandSideExpression>>,
