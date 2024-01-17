@@ -584,7 +584,7 @@ type MegaCollapseBoundariesRecurser<
         ? [Res] extends [never]
           ? Acc
           : [...Acc, Res]
-        : [1]
+        : never
     >
   : Acc
 
@@ -621,7 +621,8 @@ type ooo1 = CollapseBoundariesAndPostprocessedSelector<
 >
 
 type ipursed =
-  ParseIt<'CallExpression > :matches(CallExpression > MemberExpression)'>
+  // ParseIt<'CallExpression > :matches(CallExpression > Identifier):matches(CallExpression > MemberExpression, Identifier)'>
+  ParseIt<'CallExpression > :matches(:matches(MemberExpression[computed=true], Identifier),:matches(ArrayPattern, ArrayExpression))'>
 // ParseIt<':matches([l1]:matches([l2]:matches([l3]:matches(Aa[l4]))), Bb)'>
 // // ParseIt<'[root]:matches([l1]:matches([l2]:matches([l3]Aaa, [l3][3])), [2]):matches(Aaa)'>
 // // ParseIt<':matches(:matches(Aaa):matches(Aaa[1], Bbb[2]), :matches(Aaa[3], Bbb[4])):matches(Aaa)'>

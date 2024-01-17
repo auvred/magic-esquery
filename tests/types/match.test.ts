@@ -1,16 +1,18 @@
-import type { MatchIt } from '../../src/matcher'
+import type { MatchIt } from '../../src/super-white-sheet'
 import type { ParseIt } from '../../src/parser'
 import type { Equal, Expect } from '@type-challenges/utils'
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
-type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
+type Match<_T extends string> = MatchIt<ParseIt<_T>>
 
 export type TestCases = [
   Expect<Equal<Match<'Program'>, T.Program>>,
   Expect<Equal<Match<'Program > *'>, T.ProgramStatement>>,
   Expect<Equal<Match<'Program, MemberExpression'>, T.Program | T.MemberExpression>>,
-  Expect<Equal<Match<'[attr]'>, T.Node>>,
-  Expect<Equal<Match<'[attr][bbb=asdf]'>, T.Node>>,
+  Expect<Equal<Match<'[attr]'>, never>>,
+  Expect<Equal<Match<'[callee]'>, T.CallExpression | T.NewExpression>>,
+  Expect<Equal<Match<'[callee][type]'>, T.CallExpression | T.NewExpression>>,
+  Expect<Equal<Match<'[attr][bbb=asdf]'>, never>>,
   Expect<Equal<Match<'Program[body][bbbody="aa"]'>, T.Program>>,
   Expect<Equal<Match<'Program[body]Program'>, T.Program>>,
   Expect<Equal<Match<'Program[body]CallExpression'>, never>>,
@@ -52,8 +54,8 @@ export type TestCases = [
   Expect<Equal<Match<':matches(CallExpression, MemberExpression)[computed=true]'>, T.MemberExpressionComputedName>>,
   Expect<Equal<Match<'CallExpression[type]:matches(CallExpression, MemberExpression)[computed=true]'>, never>>,
 
-  Expect<Equal<Match<'.body'>, T.ClassBody | T.TSInterfaceBody | T.TSModuleBlock | T.Expression | T.Statement | T.Statement[] | T.ClassElement[] | T.ProgramStatement[] | T.TypeElement[] | null | undefined>>,
-  Expect<Equal<Match<'*.body'>, T.ClassBody | T.TSInterfaceBody | T.TSModuleBlock | T.Expression | T.Statement | T.Statement[] | T.ClassElement[] | T.ProgramStatement[] | T.TypeElement[] | null | undefined>>,
+  Expect<Equal<Match<'.body'>, T.ClassBody | T.TSInterfaceBody | T.TSModuleBlock | T.Expression | T.Statement>>,
+  Expect<Equal<Match<'*.body'>, T.ClassBody | T.TSInterfaceBody | T.TSModuleBlock | T.Expression | T.Statement>>,
 
   Expect<Equal<Match<'VariableDeclarator > :matches(CallExpression, MemberExpression)'>, T.CallExpression | T.MemberExpression>>,
   Expect<Equal<Match<'CallExpression > .callee'>, T.LeftHandSideExpression>>,
@@ -66,4 +68,11 @@ export type TestCases = [
   Expect<Equal<Match<'MemberExpression > *.property[type].object'>, never>>,
   Expect<Equal<Match<'CallExpression > MemberExpression[type].callee'>, T.MemberExpression>>,
   Expect<Equal<Match<'CallExpression > :matches(MemberExpression, Literal)[type].callee'>, T.MemberExpression | T.Literal>>,
+
+  Expect<Equal<Match<':matches(CallExpression)'>, T.CallExpression>>,
+  Expect<Equal<Match<':matches(CallExpression, CallExpression)'>, T.CallExpression>>,
+  Expect<Equal<Match<':matches(CallExpression):matches(Identifier)'>, never>>,
+  Expect<Equal<Match<'CallExpression:matches(CallExpression, CallExpression):matches(CallExpression)'>, T.CallExpression>>,
+  Expect<Equal<Match<'CallExpression:matches(CallExpression, Identifier):matches(CallExpression)'>, T.CallExpression>>,
+  Expect<Equal<Match<':matches(:matches(:matches(CallExpression))):matches(CallExpression)'>, T.CallExpression>>,
 ]
