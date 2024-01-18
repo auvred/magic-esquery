@@ -1,26 +1,40 @@
 // sorry for bad type names, but I just wan't to finish this dnf stuff
 // will rename it later
-type CartesianInner<F, Args, Acc = []> = Args extends [
-  infer First,
-  ...infer Rest,
-]
-  ? CartesianInner<F, Rest, [...Acc, [...F, ...First]]>
+type CartesianInner<
+  F extends any[],
+  Args,
+  Acc extends any[] = [],
+> = Args extends [infer First, ...infer Rest]
+  ? First extends any[]
+    ? CartesianInner<F, Rest, [...Acc, [...F, ...First]]>
+    : never
   : Acc
 
-type CartesianSemiInner<FArgs, Head, Acc = []> = FArgs extends [
+type CartesianSemiInner<FArgs, Head, Acc extends any[] = []> = FArgs extends [
   infer First,
   ...infer Rest,
 ]
-  ? CartesianSemiInner<
-      Rest,
-      Head,
-      [...Acc, ...CartesianInner<First['args'], Head>]
-    >
+  ? First extends {
+      args: any[]
+    }
+    ? CartesianSemiInner<
+        Rest,
+        Head,
+        [...Acc, ...CartesianInner<First['args'], Head>]
+      >
+    : never
   : Acc
 type Cartesian<Dnfs> = Dnfs extends [infer First, ...infer Rest]
-  ? CartesianSemiInner<First['args'], Cartesian<Rest>>
+  ? First extends {
+      args: any[]
+    }
+    ? CartesianSemiInner<First['args'], Cartesian<Rest>>
+    : never
   : [[]]
-type WrapCartesian<C, Acc = []> = C extends [infer First, ...infer Rest]
+type WrapCartesian<C, Acc extends any[] = []> = C extends [
+  infer First,
+  ...infer Rest,
+]
   ? WrapCartesian<
       Rest,
       [
@@ -33,32 +47,52 @@ type WrapCartesian<C, Acc = []> = C extends [infer First, ...infer Rest]
     >
   : Acc
 
-type FlatWithArgs<T, Acc = []> = T extends [infer First, ...infer Rest]
-  ? FlatWithArgs<Rest, [...Acc, First['args']]>
-  : never
-
-type DnfArgs<Args, Flat extends boolean, Acc = []> = Args extends [
+type FlatWithArgs<T, Acc extends any[] = []> = T extends [
   infer First,
   ...infer Rest,
 ]
+  ? First extends {
+      args: any[]
+    }
+    ? FlatWithArgs<Rest, [...Acc, First['args']]>
+    : never
+  : never
+
+type DnfArgs<
+  Args,
+  Flat extends boolean,
+  Acc extends any[] = [],
+> = Args extends [infer First, ...infer Rest]
   ? DnfArgs<
       Rest,
       Flat,
       Dnf<First> extends infer Res
-        ? Flat extends true
-          ? Res extends [...any[]]
-            ? [...Acc, ...FlatWithArgs<Res>]
-            : [...Acc, ...Res['args']]
-          : [...Acc, Res]
+        ? Res extends {
+            args: any[]
+          }
+          ? Flat extends true
+            ? Res extends [...any[]]
+              ? [...Acc, ...FlatWithArgs<Res>]
+              : [...Acc, ...Res['args']]
+            : [...Acc, Res]
+          : never
         : never
     >
   : Acc
 
-type NegatedArgs<Args, Acc = []> = Args extends [infer First, ...infer Rest]
+type NegatedArgs<Args, Acc extends any[] = []> = Args extends [
+  infer First,
+  ...infer Rest,
+]
   ? NegatedArgs<Rest, [...Acc, { type: 'not'; arg: First }]>
   : Acc
 
-type NotDnf<T> = IsNotDnf<T, 2> extends true
+type NotDnf<
+  T extends {
+    type: 'not'
+    arg: any
+  },
+> = IsNotDnf<T, 2> extends true
   ? {
       type: 'or'
       args: [
@@ -72,6 +106,7 @@ type NotDnf<T> = IsNotDnf<T, 2> extends true
 
 type NegatedDnf<T> = T extends {
   type: 'or'
+  args: any[]
 }
   ? Dnf<{
       type: 'and'
@@ -79,6 +114,7 @@ type NegatedDnf<T> = T extends {
     }>
   : T extends {
         type: 'and'
+        args: any[]
       }
     ? Dnf<{
         type: 'or'
@@ -86,16 +122,27 @@ type NegatedDnf<T> = T extends {
       }>
     : T extends {
           type: 'not'
+          arg: any
         }
       ? Dnf<T['arg']>
       : never
 
-type ConjunctionDnf<T> = unknown & {
+type ConjunctionDnf<
+  T extends {
+    type: 'and'
+    args: any[]
+  },
+> = unknown & {
   type: 'or'
   args: WrapCartesian<Cartesian<DnfArgs<T['args'], false>>>
 }
 
-type DisjunctionDnf<T> = IsDisjunctionDnf<T, 0> extends true
+type DisjunctionDnf<
+  T extends {
+    type: 'or'
+    args: any[]
+  },
+> = IsDisjunctionDnf<T, 0> extends true
   ? T
   : {
       type: 'or'
@@ -114,31 +161,48 @@ type EveryArgIsDnf<Args, Depth> = Args extends [infer First, ...infer Rest]
     ? IsVariableDnf<Depth>
     : First extends {
           type: 'and'
+          args: any[]
         }
       ? IsConjunctionDnf<First, Depth> extends true
         ? EveryArgIsDnf<Rest, Depth>
         : false
       : First extends {
             type: 'or'
+            args: any[]
           }
         ? IsDisjunctionDnf<First, Depth> extends true
           ? EveryArgIsDnf<Rest, Depth>
           : false
         : First extends {
               type: 'not'
+              arg: any
             }
           ? IsNotDnf<First, Depth> extends true
             ? EveryArgIsDnf<Rest, Depth>
             : false
           : never
   : true
-type IsNotDnf<T, Depth> = Depth extends 2 ? EveryArgIsDnf<[T['arg']], 3> : false
-type IsDisjunctionDnf<T, Depth> = Depth extends 0
-  ? EveryArgIsDnf<T['args'], 1>
-  : false
-type IsConjunctionDnf<T, Depth> = Depth extends 1
-  ? EveryArgIsDnf<T['args'], 2>
-  : false
+type IsNotDnf<
+  T extends {
+    type: 'not'
+    arg: any
+  },
+  Depth,
+> = Depth extends 2 ? EveryArgIsDnf<[T['arg']], 3> : false
+type IsDisjunctionDnf<
+  T extends {
+    type: 'or'
+    args: any[]
+  },
+  Depth,
+> = Depth extends 0 ? EveryArgIsDnf<T['args'], 1> : false
+type IsConjunctionDnf<
+  T extends {
+    type: 'and'
+    args: any[]
+  },
+  Depth,
+> = Depth extends 1 ? EveryArgIsDnf<T['args'], 2> : false
 
 type Dnf<T> = T extends string
   ? // variable
@@ -153,14 +217,17 @@ type Dnf<T> = T extends string
     }
   : T extends {
         type: 'or'
+        args: any[]
       }
     ? DisjunctionDnf<T>
     : T extends {
           type: 'and'
+          args: any[]
         }
       ? ConjunctionDnf<T>
       : T extends {
             type: 'not'
+            arg: any
           }
         ? NotDnf<T>
         : never
@@ -180,7 +247,16 @@ type formula = unknown & {
           'c',
           {
             type: 'not'
-            arg: 'd'
+            arg: {
+              type: 'or'
+              args: [
+                '11',
+                {
+                  type: 'not'
+                  arg: '22'
+                },
+              ]
+            }
           },
         ]
       }
@@ -188,4 +264,4 @@ type formula = unknown & {
   ]
 }
 
-type OOOOOHHHHHHHHHHHHHHHHHHHHHITSWORKINGGGGGGGGGGGGGG = Dnf<formula>
+type _OOOOOHHHHHHHHHHHHHHHHHHHHHITSWORKINGGGGGGGGGGGGGG = Dnf<formula>
