@@ -1,4 +1,7 @@
 // sorry for bad type names, but I just wan't to finish this dnf stuff
+
+import type { MetaAcc } from './utils'
+
 // will rename it later
 type CartesianInner<
   F extends any[],
@@ -157,7 +160,7 @@ type IsVariableDnf<Depth> = Depth extends 0
     : true
 
 type EveryArgIsDnf<Args, Depth> = Args extends [infer First, ...infer Rest]
-  ? First extends string
+  ? First extends MetaAcc
     ? IsVariableDnf<Depth>
     : First extends {
           type: 'and'
@@ -204,7 +207,7 @@ type IsConjunctionDnf<
   Depth,
 > = Depth extends 1 ? EveryArgIsDnf<T['args'], 2> : false
 
-type Dnf<T> = T extends string
+export type Dnf<T> = T extends MetaAcc
   ? // variable
     {
       type: 'or'

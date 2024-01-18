@@ -14,6 +14,7 @@ module.exports = (async () => {
     {
       rules: {
         'ts/no-explicit-any': 'off',
+        'ts/consistent-type-definitions': 'off',
         'unused-imports/no-unused-vars': [
           'error',
           {
