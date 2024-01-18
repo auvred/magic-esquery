@@ -165,16 +165,31 @@ type _testMergeTwoMetaFields = [
 // ForStatement > :not([type]:matches(:not([name=update]), .init), .test)
 // ForStatement > :not([type]:not([name=update]), [type].init, .test)
 //
-// NOTE: if :not contains child :not, then it ignores all other childs and
-// behaves like it just common selector (selector from child :not).
-//
-// NOTE: if :not contains more than one child :not, it behaves like never
-// (it can't match any node, because it contains logical conflict
-//
 // NOTE: we ignore any non-compound child of :not
 // child, sibling, adjacent, descendant
 // These things are filtering nodes that live in some context. In most cases
 // that I can imagine it doesn't really change the type of matched nodes
+//
+// so:
+// expand nots,matches, etc
+//
+// :not(a, b) = not(a) and not(b)
+// :not(:not(a), :not(b)) = a and b
+// :not(:not(a, b)) = not(not(a) and not(b)) = not(not(a)) or not(not(b)) = a or b
+// :not(:not(a, b), c, d) = (a or b) and not(c) and not(d) = (a and not(c) and not(d)) or (b and not(c) and not(d))
+//
+// okay, we should convert it to disjunctive normal form, this may be a bit painful to implement on type-level
+// https://stackoverflow.com/a/70847281
+//
+// :matches(:not(a, b), c) = (not(a) and not(b)) or c
+//
+//
+// :matches(:matches(CallExpression > MemberExpression), :matches(Literal)):matches([computed=true], * > [bigint])
+// (n:MemberExpression or s:Literal) and (s:[computed=true] or n:BigIntLiteral)
+// (n:MemberExpression and s:[computed=true]) or (s:Literal and s:[computed=true]) or (n:MemberExpression and n:BigIntLiteral) or (s:Literal and n:BigIntLiteral)
+// n:MemberExpression|s:[computed=true] or s:Literal[computed=true] or false or n:BigIntLiteral|s:Literal
+// n:MemberExpressionComputedName or false or false or n:BigIntLiteral
+// n:MemberExpressionComputedName or n:BigIntLiteral
 //
 
 export type MergeTwoMetas<

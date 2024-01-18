@@ -175,6 +175,10 @@ type MergeTwoSelectors<
                 extract: Simplify<L['extract'] & R['extract']>
                 exclude: L['exclude'] | R['exclude']
                 subSelectors: IntersectedSelectors
+                matchesNodes: [
+                  ...(L['matchesNodes'] extends null ? [] : L['matchesNodes']),
+                  ...(R['matchesNodes'] extends null ? [] : R['matchesNodes']),
+                ]
               }
           : never
       : NeverError
@@ -523,7 +527,8 @@ export type MatchIt<T> = PostprocessParsedSelector<T> extends infer Res
     : TupleToUnion<Res['matchesNodes']>
   : never
 
-type _parsed = ParseIt<':matches(CallExpression, CallExpression > Identifier)'>
+type _parsed =
+  ParseIt<':matches(CallExpression, :matches(CallExpression > MemberExpression, CallExpression > Identifier))'>
 // ParseIt<'CallExpression > :matches(ArrayExpression, CallExpression > MemberExpression, CallExpression > Identifier):matches(ArrayExpression, CallExpression > MemberExpression[computed=false], CallExpression > Identifier)'>
 type _aaa = MatchIt<_parsed>
 //     ^?
