@@ -217,24 +217,6 @@ export type MergeTwoMetas<
       : NeverError
   : NeverError
 
-export type PatchMeta<
-  T extends MetaAcc,
-  Field extends keyof MetaAcc,
-  Value,
-> = MergeTwoMetas<
-  T,
-  // @ts-expect-error - Field is keyof T
-  { [K in Field]: Value } & Omit<WildcardMeta, Field>
->
-
-export type WildcardMeta = {
-  identifier: null
-  field: null
-  extract: unknown
-  exclude: never
-  inferredNodes: null
-}
-
 // prettier-ignore
 type _testMergeTwoMetas = [
   Expect<Equal<MergeTwoMetas<{
@@ -291,6 +273,24 @@ type _testMergeTwoMetas = [
     inferredNodes: TSESTree.BigIntLiteral | TSESTree.BooleanLiteral
   }>>,
 ]
+
+export type PatchMeta<
+  T extends MetaAcc,
+  Field extends keyof MetaAcc,
+  Value,
+> = MergeTwoMetas<
+  T,
+  // @ts-expect-error - Field is keyof T
+  { [K in Field]: Value } & Omit<WildcardMeta, Field>
+>
+
+export type WildcardMeta = {
+  identifier: null
+  field: null
+  extract: unknown
+  exclude: never
+  inferredNodes: null
+}
 
 // TODO:
 // :matches(MemberExpression, Literal):not([computed=true]):not(:matches(:not(:matches(:not(Program MemberExpression)))))

@@ -48,48 +48,20 @@
 
 import type { Dnf } from './dnf'
 import type { PatchMeta, WildcardMeta } from './merge-metas'
-import type { MetaAcc, NeverError } from './utils'
-import type { ParseIt } from '../parser'
 import type {
-  AST_NODE_TYPES,
-  TSESTree,
-} from '@typescript-eslint/typescript-estree'
+  AttrValueIsUnsafeToIntersect,
+  ExtractChildDeps,
+  FilterNodes,
+  MetaAcc,
+  NeverError,
+  PickNode,
+  TryToNarrowByExtracting,
+  TryToParseAttrValue,
+} from './utils'
+import type { ParseIt } from '../parser'
+import type { Equal } from '@type-challenges/utils'
+import type { TSESTree } from '@typescript-eslint/typescript-estree'
 import type { Simplify } from 'type-fest'
-
-type TryToNarrowByExtracting<T, U> = Extract<T, U> extends never
-  ? Extract<T, { [K in keyof U]: any }>
-  : Extract<T, U>
-
-type PickNode<T> = [T] extends [any]
-  ? Extract<TSESTree.Node, { type: T }>
-  : never
-
-export declare const AttrValueIsUnsafeToIntersect: unique symbol
-type AttrValueIsUnsafeToIntersect = typeof AttrValueIsUnsafeToIntersect
-
-type FilterNodes<T> = NonNullable<T>['type'] extends AST_NODE_TYPES
-  ? NonNullable<T>
-  : NonNullable<T> extends [...infer Els]
-    ? NonNullable<Els[number]>['type'] extends AST_NODE_TYPES
-      ? NonNullable<Els[number]>
-      : never
-    : never
-
-type ExtractChildDeps<Node> = NonNullable<
-  {
-    [K in keyof Node]: K extends 'parent' ? never : FilterNodes<Node[K]>
-  }[keyof Node]
->
-
-type TryToParseAttrValue<T> = T extends 'true'
-  ? true
-  : T extends 'false'
-    ? false
-    : T extends 'null'
-      ? null
-      : T extends 'undefined'
-        ? undefined
-        : AttrValueIsUnsafeToIntersect
 
 type PrepreprocessCompoundSelector<
   Selectors extends any[],
@@ -129,43 +101,35 @@ type PrepreprocessCompoundSelector<
         [...Acc['selectors'], ...Acc['matches'], ...Acc['nots']],
         SelectorAcc
       >
-    : //[
-      //  Acc['selectors'],
-      PreprocessCompoundSelector<
+    : PreprocessCompoundSelector<
         [
-          {
-            type: 'matches'
-            selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
-          },
-          ...Acc['nots'],
+          ...Acc['selectors'],
+          ...(Acc['nots'] extends [infer _, ...infer __]
+            ? [
+                {
+                  type: 'matches'
+                  selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
+                },
+                ...Acc['nots'],
+              ]
+            : []),
         ],
         SelectorAcc
       >
-// ]
 
 type sdafsdfaweeqefew = ParseIt<':matches(aa[bb])'>
+
 type eirqweri1 = PrepreprocessCompoundSelector<
-  ParseIt<'MemberExpression:matches([aa]):not([bb])'>['selectors'],
+  ParseIt<'MemberExpression:matches(MemberExpression):not([bb])'>['selectors'],
   WildcardMeta
 >
 type eirqweri2 = PrepreprocessCompoundSelector<
-  ParseIt<'MemberExpression[aa]:not([bb])'>['selectors'],
+  ParseIt<'MemberExpression:not([bb])'>['selectors'],
   WildcardMeta
 >
 // TODO: ^ they should be equal
 
-type daf = PreprocessCompoundSelector<
-  //    ^?
-  [
-    {
-      type: 'matches'
-      selectors: [
-        { type: 'compound'; selectors: [{ type: 'identifier'; value: 'aa' }] },
-      ]
-    },
-  ],
-  WildcardMeta
->
+type aaabfd = Equal<eirqweri1, eirqweri2>
 
 // TODO: filter it before all to support :matches(...)[bbb]
 type PreprocessCompoundSelector<
@@ -327,8 +291,6 @@ type aasdfa = MatchSplittedConjunction<
   fdsaf
 >
 
-type ddafa = CollapsePositivesFromConjunction<TSESTree.Program, fdsaf['and']>
-
 type MatchSplittedConjunction<Left, Splitted> = Extract<
   CollapsePositivesFromConjunction<Left, Splitted['and']>,
   CollapseNegativesFromConjunction<Left, Splitted['not']>
@@ -389,13 +351,8 @@ type CollapsePositivesFromConjunction<
       >
     : never
   : Acc
-
-type PostprocessDnf<D> = D extends {
-  type: 'or'
-  args: any[]
-}
-  ? q
-  : NeverError<['D is not "or"', D]>
+type ddafa = CollapsePositivesFromConjunction<TSESTree.Program, fdsaf['and']>
+//     ^?
 
 type CollapseChildRelations<Left, Right, Acc = []> = Right extends [
   infer First,
@@ -442,8 +399,8 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
       ? {
           type: 'and'
           // a: [T, SelectorAcc]
-          args: PreprocessCompoundSelector<T['selectors'], SelectorAcc>
-          // args: PrepreprocessCompoundSelector<T['selectors'], SelectorAcc>
+          // args: PreprocessCompoundSelector<T['selectors'], SelectorAcc>
+          args: PrepreprocessCompoundSelector<T['selectors'], SelectorAcc>
         }
       : T extends { type: 'child' }
         ? 'the most complicated thing'
