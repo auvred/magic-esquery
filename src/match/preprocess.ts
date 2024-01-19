@@ -91,6 +91,82 @@ type TryToParseAttrValue<T> = T extends 'true'
         ? undefined
         : AttrValueIsUnsafeToIntersect
 
+type PrepreprocessCompoundSelector<
+  Selectors extends any[],
+  SelectorAcc extends MetaAcc,
+  Acc extends {
+    selectors: any[]
+    matches: any[]
+    nots: any[]
+  } = {
+    selectors: []
+    matches: []
+    nots: []
+  },
+> = Selectors extends [infer Selector, ...infer Rest]
+  ? Selector extends { type: 'matches' }
+    ? PrepreprocessCompoundSelector<
+        Rest,
+        SelectorAcc,
+        { matches: [...Acc['matches'], Selector] } & Omit<Acc, 'matches'>
+      >
+    : Selector extends { type: 'not' }
+      ? PrepreprocessCompoundSelector<
+          Rest,
+          SelectorAcc,
+          { nots: [...Acc['nots'], Selector] } & Omit<Acc, 'nots'>
+        >
+      : PrepreprocessCompoundSelector<
+          Rest,
+          SelectorAcc,
+          { selectors: [...Acc['selectors'], Selector] } & Omit<
+            Acc,
+            'selectors'
+          >
+        >
+  : Acc['matches'] extends [infer _, ...infer __]
+    ? PreprocessCompoundSelector<
+        [...Acc['selectors'], ...Acc['matches'], ...Acc['nots']],
+        SelectorAcc
+      >
+    : //[
+      //  Acc['selectors'],
+      PreprocessCompoundSelector<
+        [
+          {
+            type: 'matches'
+            selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
+          },
+          ...Acc['nots'],
+        ],
+        SelectorAcc
+      >
+// ]
+
+type sdafsdfaweeqefew = ParseIt<':matches(aa[bb])'>
+type eirqweri1 = PrepreprocessCompoundSelector<
+  ParseIt<'MemberExpression:matches([aa]):not([bb])'>['selectors'],
+  WildcardMeta
+>
+type eirqweri2 = PrepreprocessCompoundSelector<
+  ParseIt<'MemberExpression[aa]:not([bb])'>['selectors'],
+  WildcardMeta
+>
+// TODO: ^ they should be equal
+
+type daf = PreprocessCompoundSelector<
+  //    ^?
+  [
+    {
+      type: 'matches'
+      selectors: [
+        { type: 'compound'; selectors: [{ type: 'identifier'; value: 'aa' }] },
+      ]
+    },
+  ],
+  WildcardMeta
+>
+
 // TODO: filter it before all to support :matches(...)[bbb]
 type PreprocessCompoundSelector<
   Selectors extends any[],
@@ -365,7 +441,9 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
     : T extends { type: 'compound'; selectors: any }
       ? {
           type: 'and'
+          // a: [T, SelectorAcc]
           args: PreprocessCompoundSelector<T['selectors'], SelectorAcc>
+          // args: PrepreprocessCompoundSelector<T['selectors'], SelectorAcc>
         }
       : T extends { type: 'child' }
         ? 'the most complicated thing'
