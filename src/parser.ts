@@ -1017,3 +1017,5 @@ export type ParseIt<T extends string> = ParseSelectors<
         : never
       : never
   : never
+
+type aaa = ParseIt<'.aaa'>
