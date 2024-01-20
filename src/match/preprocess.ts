@@ -12,8 +12,6 @@ import type {
   TryToParseAttrValue,
 } from './utils'
 import type { MatchIt } from '../matcher'
-import type { ParseIt } from '../parser'
-import type { Equal } from '@type-challenges/utils'
 import type { TSESTree } from '@typescript-eslint/typescript-estree'
 import type { Simplify } from 'type-fest'
 
@@ -50,63 +48,30 @@ type PrepreprocessCompoundSelector<
             'selectors'
           >
         >
-  : Acc['matches'] extends [infer _, ...infer __]
-    ? PreprocessCompoundSelector<
-        [
-          ...(Acc['matches'] extends [infer _, ...infer __]
+  : PreprocessCompoundSelector<
+      [
+        ...(Acc['matches'] extends [infer _, ...infer __]
+          ? [
+              {
+                type: 'matches'
+                selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
+              },
+            ]
+          : Acc['nots'] extends [infer _, ...infer __]
             ? [
                 {
                   type: 'matches'
                   selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
                 },
               ]
-            : Acc['nots'] extends [infer _, ...infer __]
-              ? [
-                  {
-                    type: 'matches'
-                    selectors: [
-                      { type: 'compound'; selectors: Acc['selectors'] },
-                    ]
-                  },
-                ]
-              : Acc['selectors']),
+            : Acc['selectors']),
 
-          ...Acc['matches'],
-          ...Acc['nots'],
-        ],
-        SelectorAcc
-      >
-    : PreprocessCompoundSelector<
-        [
-          ...Acc['selectors'],
-          ...(Acc['nots'] extends [infer _, ...infer __]
-            ? [
-                {
-                  type: 'matches'
-                  selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
-                },
-                ...Acc['nots'],
-              ]
-            : []),
-        ],
-        SelectorAcc
-      >
+        ...Acc['matches'],
+        ...Acc['nots'],
+      ],
+      SelectorAcc
+    >
 
-type sdafsdfaweeqefew = ParseIt<':matches(aa[bb])'>
-
-type eirqweri1 = PrepreprocessCompoundSelector<
-  ParseIt<'MemberExpression:matches(MemberExpression):not([bb])'>['selectors'],
-  WildcardMeta
->
-type eirqweri2 = PrepreprocessCompoundSelector<
-  ParseIt<'MemberExpression:not([bb])'>['selectors'],
-  WildcardMeta
->
-// TODO: ^ they should be equal
-
-type aaabfd = Equal<eirqweri1, eirqweri2>
-
-// TODO: filter it before all to support :matches(...)[bbb]
 type PreprocessCompoundSelector<
   Selectors extends any[],
   SelectorAcc extends MetaAcc,
@@ -246,7 +211,10 @@ type PrecollapseCollectChildBoundaries<
   ? ExtractChildDeps<Boundary>
   : FilterNodes<Extract<Boundary, { [K in Ctx['field']]: any }>[Ctx['field']]>
 
-type MatchSplittedConjunction<Left, Splitted> = Extract<
+type MatchSplittedConjunction<
+  Left,
+  Splitted extends { and: any; not: any },
+> = Extract<
   CollapsePositivesFromConjunction<Left, Splitted['and']>,
   CollapseNegativesFromConjunction<Left, Splitted['not']>
 >
@@ -345,19 +313,21 @@ type CollapsePositivesFromConjunction<
     : never
   : Acc
 
-export type CollapseChildRelations<Left, Right, Acc = []> = Right extends [
-  infer First,
-  ...infer Rest,
-]
-  ? CollapseChildRelations<
-      Left,
-      Rest,
-      [
-        ...Acc,
-        // SplitConjunction<First['args']>,
-        MatchSplittedConjunction<Left, SplitConjunction<First['args']>>,
-      ]
-    >
+export type CollapseChildRelations<
+  Left,
+  Right,
+  Acc extends unknown[] = [],
+> = Right extends [infer First, ...infer Rest]
+  ? First extends { args: any[] }
+    ? CollapseChildRelations<
+        Left,
+        Rest,
+        [
+          ...Acc,
+          MatchSplittedConjunction<Left, SplitConjunction<First['args']>>,
+        ]
+      >
+    : never
   : Acc[number]
 
 type PreprocessSelectorsList<
@@ -392,10 +362,14 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
           type: 'and'
           args: PrepreprocessCompoundSelector<T['selectors'], SelectorAcc>
         }
-      : T extends { type: 'child' }
+      : T extends { type: 'child'; left: any; right: any }
         ? CollapseChildRelations<
             MatchIt<T['left']>,
-            Dnf<PreprocessSelector<T['right'], WildcardMeta>>['args']
+            Dnf<PreprocessSelector<T['right'], WildcardMeta>> extends infer Res
+              ? Res extends { args: any[] }
+                ? Res['args']
+                : never
+              : never
           > extends infer InferredNodes
           ? [InferredNodes] extends [never]
             ? never

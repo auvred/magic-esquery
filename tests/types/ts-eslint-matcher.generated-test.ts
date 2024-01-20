@@ -3,7 +3,7 @@ import type { ParseIt } from '../../src/parser'
 import type { Equal, Expect } from '@type-challenges/utils'
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
-type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
+type Match<_T extends string> = MatchIt<ParseIt<_T>/*, T.Node*/>
 
 export type TestCases = [
 Expect<Equal<Match<"*">, T.Node>>,
@@ -159,8 +159,8 @@ Expect<Equal<Match<":not(TSClassImplements, TSInterfaceHeritage) > MemberExpress
 Expect<Equal<Match<"ObjectExpression">, T.ObjectExpression>>,
 Expect<Equal<Match<"ObjectExpression, ObjectPattern">, T.ObjectExpression | T.ObjectPattern>>,
 Expect<Equal<Match<"ObjectPattern">, T.ObjectPattern>>,
-Expect<Equal<Match<"onCodePathEnd">, T.onCodePathEnd>>,
-Expect<Equal<Match<"onCodePathStart">, T.onCodePathStart>>,
+Expect<Equal<Match<"onCodePathEnd">, never /* https://github.com/typescript-eslint/typescript-eslint/issues/6993 */>>,
+Expect<Equal<Match<"onCodePathStart">, never /* https://github.com/typescript-eslint/typescript-eslint/issues/6993 */>>,
 Expect<Equal<Match<"Program">, T.Program>>,
 Expect<Equal<Match<"Program:exit">, T.Program>>,
 Expect<Equal<Match<"Program > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), Program > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)[declare = true]">, T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclarationWithName | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared | T.LetOrConstOrVarDeclaration>>,

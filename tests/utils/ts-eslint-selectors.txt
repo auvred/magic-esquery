@@ -306,9 +306,9 @@ ObjectExpression, ObjectPattern
 ObjectPattern
   T.ObjectPattern
 onCodePathEnd
-  T.onCodePathEnd
+  never /* https://github.com/typescript-eslint/typescript-eslint/issues/6993 */
 onCodePathStart
-  T.onCodePathStart
+  never /* https://github.com/typescript-eslint/typescript-eslint/issues/6993 */
 Program
   T.Program
 Program:exit

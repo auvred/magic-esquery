@@ -154,8 +154,11 @@ export type PatchMeta<
   Value,
 > = MergeTwoMetas<
   T,
-  // @ts-expect-error - Field is keyof T
-  { [K in Field]: Value } & Omit<WildcardMeta, Field>
+  { [K in Field]: Value } & Omit<WildcardMeta, Field> extends infer Res
+    ? Res extends MetaAcc
+      ? Res
+      : never
+    : never
 >
 
 export type WildcardMeta = {

@@ -756,9 +756,6 @@ export type ParseClass<T extends string> = T extends `:${infer Class}`
     : 'field stub'
   : 'not class'
 
-export declare const asdf: ParseIt<'Program:exit'>
-//                     ^?
-
 export type ParseAtom<T extends string> =
   ParseWildcard<T> extends infer WildcardParseRes
     ? WildcardParseRes extends string
@@ -1017,5 +1014,3 @@ export type ParseIt<T extends string> = ParseSelectors<
         : never
       : never
   : never
-
-type aaa = ParseIt<'.aaa'>

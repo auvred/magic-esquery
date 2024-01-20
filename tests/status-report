@@ -1,6 +1,2 @@
-Found 35 errors in 3 files.
+Found 1 error in tests/types/parse.generated-test.ts[90m:5753[0m
 
-Errors  Files
-     2  src/matcher.ts[90m:243[0m
-     7  tests/types/match.test.ts[90m:10[0m
-    26  tests/types/ts-eslint-matcher.generated-test.ts[90m:12[0m

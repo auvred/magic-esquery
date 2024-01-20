@@ -8,5 +8,9 @@ import type {
 
 export type MatchIt<T> = CollapseChildRelations<
   LeftIsAny,
-  Dnf<PreprocessSelector<T, WildcardMeta>>['args']
+  Dnf<PreprocessSelector<T, WildcardMeta>> extends infer Res
+    ? Res extends { args: any[] }
+      ? Res['args']
+      : never
+    : never
 >
