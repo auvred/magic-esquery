@@ -1,51 +1,3 @@
-// Aa:matches([a], [b]):not([ccc], [ddd]):matches(.field:matches([child]):matches([child2]))
-// {
-//   subSelectors: [
-//     {
-//       type: 'or'
-//       args: [
-//         { 'Aa[a]' },
-//         { 'Aa[b]' },
-//       ]
-//     },
-//     {
-//       type: 'not'
-//       arg: {
-//         type: 'or'
-//         args: [
-//           { 'Aa[ccc]' },
-//           { 'Aa[ddd]' },
-//         ]
-//       }
-//     },
-//     {
-//       type: 'or'
-//       args: [
-//         {
-//           type: 'and'
-//           args: [
-//             { 'Aa.field[child]' },
-//             { 'Aa.field[child2]' },
-//           ]
-//         }
-//       ]
-//     }
-//   ]
-// }
-//
-//
-//
-// [left]:matches(LogicalExpression, CallExpression > AssignmentExpression)
-// [
-//   {
-//     type: 'or'
-//     args: [
-//       { 'LogicalExpression[left]' },
-//       { AssignmentExpression & '[left]' },
-//     ]
-//   }
-// ]
-
 import type { Dnf } from './dnf'
 import type { PatchMeta, WildcardMeta } from './merge-metas'
 import type {
@@ -59,6 +11,7 @@ import type {
   TryToNarrowByExtracting,
   TryToParseAttrValue,
 } from './utils'
+import type { MatchIt } from '../matcher'
 import type { ParseIt } from '../parser'
 import type { Equal } from '@type-challenges/utils'
 import type { TSESTree } from '@typescript-eslint/typescript-estree'
@@ -99,7 +52,6 @@ type PrepreprocessCompoundSelector<
         >
   : Acc['matches'] extends [infer _, ...infer __]
     ? PreprocessCompoundSelector<
-        // [...Acc['selectors'], ...Acc['matches'], ...Acc['nots']],
         [
           ...(Acc['matches'] extends [infer _, ...infer __]
             ? [
@@ -121,27 +73,6 @@ type PrepreprocessCompoundSelector<
 
           ...Acc['matches'],
           ...Acc['nots'],
-
-          // ...Acc['selectors'],
-          // TODO: yep yep
-          // ...(Acc['matches'] extends [infer _, ...infer __]
-          //   ? [
-          //       {
-          //         type: 'matches'
-          //         selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
-          //       },
-          //       ...Acc['matches'],
-          //     ]
-          //   : []),
-          // ...(Acc['matches'] extends [infer _, ...infer __]
-          //   ? [
-          //       {
-          //         type: 'matches'
-          //         selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
-          //       },
-          //       ...Acc['matches'],
-          //     ]
-          //   : []),
         ],
         SelectorAcc
       >
@@ -205,28 +136,7 @@ type PreprocessCompoundSelector<
                   > extends infer AttrValue
                   ? AttrValue extends AttrValueIsUnsafeToIntersect
                     ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
-                    : // AttrValue extends boolean
-                      //   ? PatchMeta<
-                      //       SelectorAcc,
-                      //       'exclude',
-                      //       {
-                      //         [K in Selector['name']]: AttrValue extends true
-                      //           ? false
-                      //           : true
-                      //       }
-                      //     > extends infer Res
-                      //     ? Res extends MetaAcc
-                      //       ? PatchMeta<
-                      //           Res,
-                      //           'extract',
-                      //           {
-                      //             [K in Selector['name']]: boolean
-                      //           }
-                      //         >
-                      //       : NeverError<Res>
-                      //     : never
-                      //   :
-                      PatchMeta<
+                    : PatchMeta<
                           SelectorAcc,
                           'extract',
                           {
@@ -244,28 +154,7 @@ type PreprocessCompoundSelector<
                     > extends infer AttrValue
                     ? AttrValue extends AttrValueIsUnsafeToIntersect
                       ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
-                      : // AttrValue extends boolean
-                        //   ? PatchMeta<
-                        //       SelectorAcc,
-                        //       'exclude',
-                        //       {
-                        //         [K in Selector['name']]: AttrValue extends true
-                        //           ? true
-                        //           : true
-                        //       }
-                        //     > extends infer Res
-                        //     ? Res extends MetaAcc
-                        //       ? PatchMeta<
-                        //           Res,
-                        //           'extract',
-                        //           {
-                        //             [K in Selector['name']]: boolean
-                        //           }
-                        //         >
-                        //       : NeverError<Res>
-                        //     : never
-                        //   :
-                        PatchMeta<
+                      : PatchMeta<
                             SelectorAcc,
                             'exclude',
                             {
@@ -322,13 +211,9 @@ type PreprocessCompoundSelector<
 type SplitConjunction<
   T,
   Acc extends {
-    // field: string | null
-    // notFields: string[]
     and: MetaAcc[]
     not: MetaAcc[]
   } = {
-    // field: null
-    // notFields: []
     and: []
     not: []
   },
@@ -339,23 +224,17 @@ type SplitConjunction<
     }
     ? SplitConjunction<
         Rest,
-        // (First['arg']['field'] extends string
-        //   ? { notFields: [...Acc['notFields'], First['arg']['field']] }
-        //   : { notFields: Acc['notFields'] }) &
         {
           not: [...Acc['not'], First['arg']]
-        } & Omit<Acc, /*'notFields' |*/ 'not'>
+        } & Omit<Acc, 'not'>
       >
     : First extends MetaAcc
       ? SplitConjunction<
           Rest,
           // TODO: error if fields dont match ( merge them )
-          // (First['field'] extends string
-          //   ? { field: First['field'] }
-          //   : { field: Acc['field'] }) &
           {
             and: [...Acc['and'], First]
-          } & Omit<Acc, /*'field' |*/ 'and'>
+          } & Omit<Acc, 'and'>
         >
       : never
   : Simplify<Acc>
@@ -367,19 +246,13 @@ type PrecollapseCollectChildBoundaries<
   ? ExtractChildDeps<Boundary>
   : FilterNodes<Extract<Boundary, { [K in Ctx['field']]: any }>[Ctx['field']]>
 
-type aasdfa = MatchSplittedConjunction<
-  //    ^?
-  TSESTree.Program,
-  fdsaf
->
-
 type MatchSplittedConjunction<Left, Splitted> = Extract<
   CollapsePositivesFromConjunction<Left, Splitted['and']>,
   CollapseNegativesFromConjunction<Left, Splitted['not']>
 >
 
 declare const LeftIsAny: unique symbol
-type LeftIsAny = typeof LeftIsAny
+export type LeftIsAny = typeof LeftIsAny
 
 // TODO: extract inferredNodes too
 // TODO: change Acc default value accordingly
@@ -471,40 +344,8 @@ type CollapsePositivesFromConjunction<
       >
     : never
   : Acc
-type ddd34 = CollapsePositivesFromConjunction<
-  LeftIsAny,
-  [
-    //  ^?
-    {
-      identifier: 'VariableDeclarator'
-      field: null
-      extract: unknown
-      exclude: {
-        init: null
-      }
-      inferredNodes: null
-    },
-  ]
->
 
-type dreee = Extract<
-  Extract<
-    TSESTree.Node,
-    TSESTree.LetOrConstOrVarDeclarator | TSESTree.UsingInNomalConextDeclarator
-  >,
-  TSESTree.Identifier | TSESTree.UsingInNomalConextDeclarator
->
-type _dreeae = Extract<
-  TSESTree.LetOrConstOrVarDeclarator | TSESTree.UsingDeclarator,
-  TSESTree.LetOrConstOrVarDeclarator | TSESTree.UsingInNomalConextDeclarator
->
-//     TODO: ^^^^^ WTF??
-type dd = PrecollapseCollectChildBoundaries<
-  TSESTree.Node,
-  { field: 'decorators' }
->
-//   ^?
-type CollapseChildRelations<Left, Right, Acc = []> = Right extends [
+export type CollapseChildRelations<Left, Right, Acc = []> = Right extends [
   infer First,
   ...infer Rest,
 ]
@@ -518,15 +359,6 @@ type CollapseChildRelations<Left, Right, Acc = []> = Right extends [
       ]
     >
   : Acc[number]
-
-type dsafasd =
-  //     ^?
-  Dnf<PreprocessSelector<ParseIt<'TSModuleDeclaration'>, WildcardMeta>>
-
-export type Mmatch<T> = CollapseChildRelations<
-  LeftIsAny,
-  Dnf<PreprocessSelector<T, WildcardMeta>>['args']
->
 
 type PreprocessSelectorsList<
   Selectors extends any[],
@@ -562,7 +394,7 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
         }
       : T extends { type: 'child' }
         ? CollapseChildRelations<
-            /* Left */ Mmatch<T['left']>,
+            MatchIt<T['left']>,
             Dnf<PreprocessSelector<T['right'], WildcardMeta>>['args']
           > extends infer InferredNodes
           ? [InferredNodes] extends [never]
@@ -581,7 +413,6 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
             ? {
                 type: 'and'
                 args: [
-                  // SelectorAcc,
                   {
                     type: 'not'
                     arg: {

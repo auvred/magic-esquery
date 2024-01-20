@@ -314,7 +314,7 @@ Program
 Program:exit
   T.Program
 Program > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), Program > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)[declare = true]
-  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclaration | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclaration | T.VariableDeclaration
+  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclarationWithName | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared | T.LetOrConstOrVarDeclaration
 Property
   T.Property
 Property[computed = false][kind = "init"][value.type = "ArrowFunctionExpression"], Property[computed = false][kind = "init"][value.type = "FunctionExpression"], Property[computed = false][kind = "init"][value.type = "TSEmptyBodyFunctionExpression"]
@@ -344,7 +344,7 @@ SequenceExpression
 SpreadElement
   T.SpreadElement
 SpreadProperty
-  T.SpreadProperty
+  never /* deprecated */
 :statement
   T.Node
 StaticBlock

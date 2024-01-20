@@ -40,7 +40,6 @@ type _testCarefullyIntersectNodes = [
 export type TryToNarrowByExtracting<T, U> = Extract<T, U> extends never
   ? Extract<T, { [K in keyof U]: any }>
   : Extract<T, U>
-// export type TryToNarrowByExtracting<T, U> = Extract<T, U>
 
 // prettier-ignore
 type _testTryToNarrowByExtracting = [
@@ -126,19 +125,3 @@ export type PreprocessExtract<T> = {
       : never
   }
 }
-
-type aaafsad = unknown extends 1 ? 1 : 2
-//
-// type dddd = PreprocessExtract<{
-//   //   ^?
-//   computed: false
-//   ddd: string
-// }>
-//
-// type excll<T extends MetaAcc> = Exclude<
-//   TryToNarrowByExtracting<
-//     T['identifier'] extends null ? TSESTree.Node : PickNode<T['identifier']>,
-//     First['extract']
-//   >,
-//   First['exclude']
-// >

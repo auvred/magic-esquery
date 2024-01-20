@@ -1,14 +1,9 @@
-import type { Mmatch } from '../../src/match/preprocess'
+import type { MatchIt } from '../../src/matcher'
 import type { ParseIt } from '../../src/parser'
 import type { Equal, Expect } from '@type-challenges/utils'
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
-type Match<_T extends string> = Mmatch<ParseIt<_T>>
-
-type dded = Exclude<Match<'[declare=true]:matches(TSModuleDeclaration)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared>
-type ddd2 = Exclude<Match<'[declare=true]:matches(TSModuleDeclaration, TSDeclareFunction)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared | T.TSDeclareFunction>
-type ddd = Match<'Identifier:not([declare=true])'>
-//   ^?
+type Match<_T extends string> = MatchIt<ParseIt<_T>>
 
 export type TestCases = [
   Expect<Equal<Match<'Program'>, T.Program>>,
@@ -26,8 +21,7 @@ export type TestCases = [
   Expect<Equal<Match<'Program:body.field[attr], MemberExpression[name=1].expression, CallExpression'>, T.MemberExpression | T.CallExpression>>,
   Expect<Equal<Match<'Identifier.id'>, T.Identifier>>,
   Expect<Equal<Match<'MemberExpression > Identifier'>, T.Identifier>>,
-  // Identifier can't contain CallExpression
-  Expect<Equal<Match<'Identifier > CallExpression'>, never>>,
+  Expect<Equal<Match<'Identifier > CallExpression'>, never /* Identifier can't contain CallExpression */>>,
   Expect<Equal<Match<'CallExpression[callee] > Identifier[type]'>, T.Identifier>>,
   Expect<Equal<Match<'MemberExpression > Identifier[type] > CallExpression[callee]'>, never>>,
   Expect<Equal<Match<'MemberExpression > Identifier[attr] > CallExpression[attr=value]'>, never>>,

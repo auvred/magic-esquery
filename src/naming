@@ -1,6 +1,0 @@
-query - string query
-selector - parsed query
-
-matcher:
-boundary - outer boundary
-meta - postprocessed selector

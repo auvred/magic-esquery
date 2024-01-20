@@ -1,4 +1,38 @@
-// sorry for bad type names, but I just wan't to finish this dnf stuff
+// Type-level conversion to DNF
+// https://en.wikipedia.org/wiki/Disjunctive_normal_form
+//
+// Source: Conversion to CNF written in JavaScript
+// https://stackoverflow.com/a/70847281
+//
+// DNF helps us to resolve mixed nested :matches and :not, like for example:
+//
+// :matches(:not(:matches(a, :not(b)), c)):matches(:matches(d), :not(e, f))
+//
+// Represented as logical formula:
+// not((a or not(b)) and c) and (d or not(e and f))
+//
+// And it's quite hard to infer the type of nodes that can be queried using such an expression!
+// But if we convert it to the DNF:
+//
+// not((a or not(b)) and c) and (d or not(e and f)) =
+// = (not(a or not(b)) or not(c)) and (d or not(e) or not(f)) =
+// = ((not(a) and b) or not(c)) and (d or not(e) or not(f)) =
+// =    (not(a) and b and d)
+//   or (not(a) and b and not(e))
+//   or (not(a) and b and not(f))
+//   or (not(c) and d)
+//   or (not(c) and not(e))
+//   or (not(c) and not(f))
+//
+// Looks much better! Now we just need to infer type for each of the conjunctions
+// (these conjunctions consist only of variables and negated variables)
+//
+//
+//
+//
+//
+// sorry for bad type names, but I just want to finish this dnf stuff
+// TODO: refactor + rename
 
 import type { MetaAcc } from './utils'
 
@@ -234,42 +268,3 @@ export type Dnf<T> = T extends MetaAcc
           }
         ? NotDnf<T>
         : never
-
-type formula = unknown & {
-  type: 'and'
-  args: [
-    {
-      type: 'or'
-      args: ['a', 'b']
-    },
-    {
-      type: 'not'
-      arg: {
-        type: 'or'
-        args: [
-          'c',
-          {
-            type: 'not'
-            arg: {
-              type: 'or'
-              args: [
-                '11',
-                {
-                  type: 'not'
-                  arg: '22'
-                },
-              ]
-            }
-          },
-        ]
-      }
-    },
-  ]
-}
-
-
-// (a or b) and not(c or not(11 or not(22)))
-// (a or b) and not(c) and (11 or not(22))
-// (a and not(c) and 11) or (b and not(c) and 11) or (a and not(c) and not(22)) or (b and not(c) and not(22))
-
-type _OOOOOHHHHHHHHHHHHHHHHHHHHHITSWORKINGGGGGGGGGGGGGG = Dnf<formula>
