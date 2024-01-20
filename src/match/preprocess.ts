@@ -55,6 +55,7 @@ import type {
   MetaAcc,
   NeverError,
   PickNode,
+  PreprocessExtract,
   TryToNarrowByExtracting,
   TryToParseAttrValue,
 } from './utils'
@@ -201,39 +202,81 @@ type PreprocessCompoundSelector<
               ? Selector['operator'] extends '='
                 ? TryToParseAttrValue<
                     Selector['value']['value']
-                  > extends AttrValueIsUnsafeToIntersect
-                  ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
-                  : PatchMeta<
-                        SelectorAcc,
-                        'exclude',
-                        {
-                          [K in Selector['name']]: TryToParseAttrValue<
-                            Selector['value']['value']
-                          >
-                        }
-                      > extends infer PatchRes
-                    ? PatchRes extends MetaAcc
-                      ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
-                      : NeverError<PatchRes>
-                    : never
-                : Selector['operator'] extends '!='
-                  ? TryToParseAttrValue<
-                      Selector['value']['value']
-                    > extends AttrValueIsUnsafeToIntersect
+                  > extends infer AttrValue
+                  ? AttrValue extends AttrValueIsUnsafeToIntersect
                     ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
-                    : PatchMeta<
+                    : // AttrValue extends boolean
+                      //   ? PatchMeta<
+                      //       SelectorAcc,
+                      //       'exclude',
+                      //       {
+                      //         [K in Selector['name']]: AttrValue extends true
+                      //           ? false
+                      //           : true
+                      //       }
+                      //     > extends infer Res
+                      //     ? Res extends MetaAcc
+                      //       ? PatchMeta<
+                      //           Res,
+                      //           'extract',
+                      //           {
+                      //             [K in Selector['name']]: boolean
+                      //           }
+                      //         >
+                      //       : NeverError<Res>
+                      //     : never
+                      //   :
+                      PatchMeta<
                           SelectorAcc,
                           'extract',
                           {
-                            [K in Selector['name']]: TryToParseAttrValue<
-                              Selector['value']['value']
-                            >
+                            [K in Selector['name']]: AttrValue
                           }
                         > extends infer PatchRes
                       ? PatchRes extends MetaAcc
                         ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
                         : NeverError<PatchRes>
                       : never
+                  : never
+                : Selector['operator'] extends '!='
+                  ? TryToParseAttrValue<
+                      Selector['value']['value']
+                    > extends infer AttrValue
+                    ? AttrValue extends AttrValueIsUnsafeToIntersect
+                      ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
+                      : // AttrValue extends boolean
+                        //   ? PatchMeta<
+                        //       SelectorAcc,
+                        //       'exclude',
+                        //       {
+                        //         [K in Selector['name']]: AttrValue extends true
+                        //           ? true
+                        //           : true
+                        //       }
+                        //     > extends infer Res
+                        //     ? Res extends MetaAcc
+                        //       ? PatchMeta<
+                        //           Res,
+                        //           'extract',
+                        //           {
+                        //             [K in Selector['name']]: boolean
+                        //           }
+                        //         >
+                        //       : NeverError<Res>
+                        //     : never
+                        //   :
+                        PatchMeta<
+                            SelectorAcc,
+                            'exclude',
+                            {
+                              [K in Selector['name']]: AttrValue
+                            }
+                          > extends infer PatchRes
+                        ? PatchRes extends MetaAcc
+                          ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
+                          : NeverError<PatchRes>
+                        : never
+                    : never
                   : PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
               : PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
             : PatchMeta<
@@ -399,15 +442,28 @@ type CollapsePositivesFromConjunction<
                     Left,
                     { field: First['field'] }
                   >,
-              Exclude<
-                TryToNarrowByExtracting<
-                  First['identifier'] extends null
-                    ? TSESTree.Node
-                    : PickNode<First['identifier']>,
-                  First['extract']
-                >,
-                First['exclude']
-              >
+              unknown extends First['extract']
+                ? Exclude<
+                    TryToNarrowByExtracting<
+                      First['identifier'] extends null
+                        ? TSESTree.Node
+                        : PickNode<First['identifier']>,
+                      First['extract']
+                    >,
+                    First['exclude']
+                  >
+                : Exclude<
+                    Exclude<
+                      TryToNarrowByExtracting<
+                        First['identifier'] extends null
+                          ? TSESTree.Node
+                          : PickNode<First['identifier']>,
+                        PreprocessExtract<First['extract']>['extract']
+                      >,
+                      First['exclude']
+                    >,
+                    PreprocessExtract<First['extract']>['exclude']
+                  >
             >,
             First['inferredNodes'] extends null ? any : First['inferredNodes']
           >
@@ -415,6 +471,34 @@ type CollapsePositivesFromConjunction<
       >
     : never
   : Acc
+type ddd34 = CollapsePositivesFromConjunction<
+  LeftIsAny,
+  [
+    //  ^?
+    {
+      identifier: 'VariableDeclarator'
+      field: null
+      extract: unknown
+      exclude: {
+        init: null
+      }
+      inferredNodes: null
+    },
+  ]
+>
+
+type dreee = Extract<
+  Extract<
+    TSESTree.Node,
+    TSESTree.LetOrConstOrVarDeclarator | TSESTree.UsingInNomalConextDeclarator
+  >,
+  TSESTree.Identifier | TSESTree.UsingInNomalConextDeclarator
+>
+type _dreeae = Extract<
+  TSESTree.LetOrConstOrVarDeclarator | TSESTree.UsingDeclarator,
+  TSESTree.LetOrConstOrVarDeclarator | TSESTree.UsingInNomalConextDeclarator
+>
+//     TODO: ^^^^^ WTF??
 type dd = PrecollapseCollectChildBoundaries<
   TSESTree.Node,
   { field: 'decorators' }
@@ -435,24 +519,10 @@ type CollapseChildRelations<Left, Right, Acc = []> = Right extends [
     >
   : Acc[number]
 
-type dsafasd = //Exclude<
+type dsafasd =
   //     ^?
+  Dnf<PreprocessSelector<ParseIt<'TSModuleDeclaration'>, WildcardMeta>>
 
-  Dnf<
-    PreprocessSelector<
-      ParseIt<'[declare=true]:matches(TSDeclareFunction)'>,
-      WildcardMeta
-    >
-  >
-
-// , aa
-// >
-
-type dddfdasf = Mmatch<ParseIt<'Identifier[declare=true]'>>
-//     ^?
-
-// type IterMatchesAndPreprocess<T, Acc = []> = T extends [infer First, ...infer Rest]
-// ? IterMatchesAndPreprocess<Rest, [...Acc,PreprocessSelector< First>]>
 export type Mmatch<T> = CollapseChildRelations<
   LeftIsAny,
   Dnf<PreprocessSelector<T, WildcardMeta>>['args']
@@ -491,16 +561,20 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
           args: PrepreprocessCompoundSelector<T['selectors'], SelectorAcc>
         }
       : T extends { type: 'child' }
-        ? {
-            identifier: null
-            field: null
-            extract: unknown
-            exclude: never
-            inferredNodes: CollapseChildRelations<
-              /* Left */ Mmatch<T['left']>,
-              Dnf<PreprocessSelector<T['right'], WildcardMeta>>['args']
-            >
-          }
+        ? CollapseChildRelations<
+            /* Left */ Mmatch<T['left']>,
+            Dnf<PreprocessSelector<T['right'], WildcardMeta>>['args']
+          > extends infer InferredNodes
+          ? [InferredNodes] extends [never]
+            ? never
+            : {
+                identifier: null
+                field: null
+                extract: unknown
+                exclude: never
+                inferredNodes: InferredNodes
+              }
+          : never
         : T extends { type: 'matches'; selectors: any }
           ? PreprocessSelectorsList<T['selectors'], SelectorAcc>
           : T extends { type: 'not'; selectors: any }

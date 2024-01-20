@@ -37,10 +37,10 @@ type _testCarefullyIntersectNodes = [
   Expect<Equal<CarefullyIntersectNodes<TSESTree.Literal | TSESTree.ImportDeclaration, TSESTree.Node>, TSESTree.Literal | TSESTree.ImportDeclaration>>,
 ]
 
-// export type TryToNarrowByExtracting<T, U> = Extract<T, U> extends never
-//   ? Extract<T, { [K in keyof U]: any }>
-//   : Extract<T, U>
-export type TryToNarrowByExtracting<T, U> = Extract<T, U>
+export type TryToNarrowByExtracting<T, U> = Extract<T, U> extends never
+  ? Extract<T, { [K in keyof U]: any }>
+  : Extract<T, U>
+// export type TryToNarrowByExtracting<T, U> = Extract<T, U>
 
 // prettier-ignore
 type _testTryToNarrowByExtracting = [
@@ -96,20 +96,49 @@ declare const AttrValueIsUnsafeToIntersect: unique symbol
 export type AttrValueIsUnsafeToIntersect = typeof AttrValueIsUnsafeToIntersect
 
 export type TryToParseAttrValue<T> = T extends 'true'
-  ? false
+  ? true
   : T extends 'false'
-    ? true
+    ? false
     : T extends 'null'
-      ? any
+      ? null
       : T extends 'undefined'
-        ? any
+        ? undefined
         : AttrValueIsUnsafeToIntersect
 
 // prettier-ignore
 type _testTryToParseAttrValue = [
-  Expect<Equal<TryToParseAttrValue<'true'>, false>>,
-  Expect<Equal<TryToParseAttrValue<'false'>, true>>,
-  Expect<Equal<TryToParseAttrValue<'null'>, any>>,
-  Expect<Equal<TryToParseAttrValue<'undefined'>, any>>,
+  Expect<Equal<TryToParseAttrValue<'true'>, true>>,
+  Expect<Equal<TryToParseAttrValue<'false'>, false>>,
+  Expect<Equal<TryToParseAttrValue<'null'>, null>>,
+  Expect<Equal<TryToParseAttrValue<'undefined'>, undefined>>,
   Expect<Equal<TryToParseAttrValue<'something'>, AttrValueIsUnsafeToIntersect>>,
 ]
+
+export type PreprocessExtract<T> = {
+  extract: {
+    [K in keyof T]: T[K] extends boolean ? boolean : T[K]
+  }
+  exclude: {
+    [K in keyof T]: T[K] extends boolean
+      ? T[K] extends true
+        ? false
+        : true
+      : never
+  }
+}
+
+type aaafsad = unknown extends 1 ? 1 : 2
+//
+// type dddd = PreprocessExtract<{
+//   //   ^?
+//   computed: false
+//   ddd: string
+// }>
+//
+// type excll<T extends MetaAcc> = Exclude<
+//   TryToNarrowByExtracting<
+//     T['identifier'] extends null ? TSESTree.Node : PickNode<T['identifier']>,
+//     First['extract']
+//   >,
+//   First['exclude']
+// >

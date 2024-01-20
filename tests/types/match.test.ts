@@ -7,7 +7,7 @@ type Match<_T extends string> = Mmatch<ParseIt<_T>>
 
 type dded = Exclude<Match<'[declare=true]:matches(TSModuleDeclaration)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared>
 type ddd2 = Exclude<Match<'[declare=true]:matches(TSModuleDeclaration, TSDeclareFunction)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared | T.TSDeclareFunction>
-type ddd = Match<'Identifier[declare=true]'>
+type ddd = Match<'Identifier:not([declare=true])'>
 //   ^?
 
 export type TestCases = [
@@ -27,10 +27,10 @@ export type TestCases = [
   Expect<Equal<Match<'Identifier.id'>, T.Identifier>>,
   Expect<Equal<Match<'MemberExpression > Identifier'>, T.Identifier>>,
   // Identifier can't contain CallExpression
-  // Expect<Equal<Match<'Identifier > CallExpression'>, never>>,
+  Expect<Equal<Match<'Identifier > CallExpression'>, never>>,
   Expect<Equal<Match<'CallExpression[callee] > Identifier[type]'>, T.Identifier>>,
-  // Expect<Equal<Match<'MemberExpression > Identifier[type] > CallExpression[callee]'>, never>>,
-  // Expect<Equal<Match<'MemberExpression > Identifier[attr] > CallExpression[attr=value]'>, never>>,
+  Expect<Equal<Match<'MemberExpression > Identifier[type] > CallExpression[callee]'>, never>>,
+  Expect<Equal<Match<'MemberExpression > Identifier[attr] > CallExpression[attr=value]'>, never>>,
   Expect<Equal<Match<'MemberExpression > .property'>, T.PrivateIdentifier | T.Expression>>,
   Expect<Equal<Match<'MemberExpression > .property > .elements'>, T.SpreadElement | T.Expression | T.DestructuringPattern>>,
   // Expect<Equal<Match<'MemberExpression > .property.elements'>, T.SpreadElement | T.Expression | T.DestructuringPattern>>,
@@ -83,6 +83,7 @@ export type TestCases = [
   Expect<Equal<Match<':matches(:matches(:matches(CallExpression))):matches(CallExpression)'>, T.CallExpression>>,
 
   Expect<Equal<Match<'MemberExpression:not([computed=true])'>, T.MemberExpressionNonComputedName>>,
+  Expect<Equal<Match<':matches(MemberExpression, Identifier):not([computed=true])'>, T.MemberExpressionNonComputedName | T.Identifier>>,
   Expect<Equal<Match<'MemberExpression:not(:not([computed=true]))'>, T.MemberExpressionComputedName>>,
   Expect<Equal<Match<'MemberExpression:not(:not(:not([computed=true])))'>, T.MemberExpressionNonComputedName>>,
   Expect<Equal<Match<':matches(CallExpression > MemberExpression)'>, T.MemberExpression>>,
@@ -90,5 +91,24 @@ export type TestCases = [
   Expect<Equal<Match<':matches(CallExpression > Identifier, MemberExpression:not([computed=true]))'>, T.MemberExpressionNonComputedName | T.Identifier>>,
   Expect<Equal<Match<'MemberExpression:matches(Program [computed=true])'>, T.MemberExpressionComputedName>>,
 
-  Expect<Equal<Match<'[declare=true]:matches(TSModuleDeclaration)'>>
+  Expect<Equal<Match<'[declare=true]:matches(TSModuleDeclaration)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared>>,
+  Expect<Equal<Match<'[declare=true]:matches(TSModuleDeclaration, TSDeclareFunction)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared | T.TSDeclareFunction>>,
+  Expect<Equal<Match<'[declare=true]:matches(TSModuleDeclaration, TSDeclareFunction, Identifier)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdDeclared | T.TSDeclareFunction>>,
+  Expect<Equal<Match<'Identifier[declare=true]'>, never>>,
+  Expect<Equal<Match<':matches(Identifier)[declare=true]'>, never>>,
+  Expect<Equal<Match<':matches(TSDeclareFunction, Identifier)[declare=true]'>, T.TSDeclareFunction>>,
+  
+  Expect<Equal<Match<'[declare=false]:matches(TSModuleDeclaration)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdNotDeclared>>,
+  Expect<Equal<Match<'[declare=false]:matches(TSModuleDeclaration, TSDeclareFunction)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdNotDeclared | T.TSDeclareFunction>>,
+  Expect<Equal<Match<'[declare=false]:matches(TSModuleDeclaration, TSDeclareFunction, Identifier)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdNotDeclared | T.TSDeclareFunction>>,
+  Expect<Equal<Match<'Identifier[declare=false]'>, never>>,
+  Expect<Equal<Match<':matches(Identifier)[declare=false]'>, never>>,
+  Expect<Equal<Match<':matches(TSDeclareFunction, Identifier)[declare=false]'>, T.TSDeclareFunction>>,
+  
+  Expect<Equal<Match<':not([declare=true]):matches(TSModuleDeclaration)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdNotDeclared>>,
+  Expect<Equal<Match<':not([declare=true]):matches(TSModuleDeclaration, TSDeclareFunction)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdNotDeclared | T.TSDeclareFunction>>,
+  Expect<Equal<Match<':not([declare=true]):matches(TSModuleDeclaration, TSDeclareFunction, Identifier)'>, T.TSModuleDeclarationGlobal | T.TSModuleDeclarationNamespace | T.TSModuleDeclarationModuleWithIdentifierId | T.TSModuleDeclarationModuleWithStringIdNotDeclared | T.TSDeclareFunction | T.Identifier>>,
+  Expect<Equal<Match<'Identifier:not([declare=true])'>, T.Identifier>>,
+  Expect<Equal<Match<':matches(Identifier):not([declare=true])'>, T.Identifier>>,
+  Expect<Equal<Match<':matches(TSDeclareFunction, Identifier):not([declare=true])'>, T.TSDeclareFunction | T.Identifier>>,
 ]
