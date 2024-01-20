@@ -1,9 +1,12 @@
-import type { MatchIt } from '../../src/matcher'
+import type { Mmatch } from '../../src/match/preprocess'
 import type { ParseIt } from '../../src/parser'
 import type { Equal, Expect } from '@type-challenges/utils'
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
-type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
+type Match<_T extends string> = Mmatch<ParseIt<_T>>
+
+type das = Exclude<Match<"Program > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), Program > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)[declare = true]">, T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclaration | T.TSDeclareFunction | T.TSEnumDeclaration>
+//   ^?
 
 export type TestCases = [
 Expect<Equal<Match<"*">, T.Node>>,
@@ -87,7 +90,7 @@ Expect<Equal<Match<"ExportNamedDeclaration[declaration.type=\"TSEnumDeclaration\
 Expect<Equal<Match<"ExportNamedDeclaration[declaration.type=\"TSEnumDeclaration\"]:exit">, T.ExportNamedDeclaration>>,
 Expect<Equal<Match<"ExportNamedDeclaration[declaration.type=\"TSModuleDeclaration\"]">, T.ExportNamedDeclaration>>,
 Expect<Equal<Match<"ExportNamedDeclaration[declaration.type=\"TSModuleDeclaration\"]:exit">, T.ExportNamedDeclaration>>,
-Expect<Equal<Match<"ExportNamedDeclaration:not([source])">, TODO>>,
+Expect<Equal<Match<"ExportNamedDeclaration:not([source])">, T.ExportNamedDeclarationWithoutSourceWithMultiple | T.ExportNamedDeclarationWithoutSourceWithSingle>>,
 Expect<Equal<Match<"ExportNamedDeclaration[source]">, T.ExportNamedDeclarationWithSource>>,
 Expect<Equal<Match<"ExportSpecifier">, T.ExportSpecifier>>,
 Expect<Equal<Match<"ExpressionStatement">, T.ExpressionStatement>>,
@@ -96,7 +99,7 @@ Expect<Equal<Match<"ForOfStatement">, T.ForOfStatement>>,
 Expect<Equal<Match<"ForOfStatement[await = true]">, T.ForOfStatement>>,
 Expect<Equal<Match<"ForStatement">, T.ForStatement>>,
 Expect<Equal<Match<"ForStatement:exit">, T.ForStatement>>,
-Expect<Equal<Match<"ForStatement > *.init:exit">, T.Expression | T.VariableDeclaration>>,
+Expect<Equal<Match<"ForStatement > *.init:exit">, T.Expression | T.ForInitialiser>>,
 Expect<Equal<Match<"FunctionDeclaration">, T.FunctionDeclaration>>,
 Expect<Equal<Match<"FunctionDeclaration[async = false]">, T.FunctionDeclaration>>,
 Expect<Equal<Match<"FunctionDeclaration:exit">, T.FunctionDeclaration>>,
@@ -154,7 +157,7 @@ Expect<Equal<Match<"MethodDefinition, TSAbstractMethodDefinition">, T.MethodDefi
 Expect<Equal<Match<"NewExpression">, T.NewExpression>>,
 Expect<Equal<Match<":not(ArrowFunctionExpression) > TSTypeParameterDeclaration > TSTypeParameter[constraint]">, T.TSTypeParameter>>,
 Expect<Equal<Match<":not(ObjectPattern) > Property">, T.Property>>,
-Expect<Equal<Match<":not(ObjectPattern) > Property[computed = false][kind = \"init\"][value.type != \"ArrowFunctionExpression\"][value.type != \"FunctionExpression\"][value.type != \"TSEmptyBodyFunctionExpression\"]">, TODO_narrower>>,
+Expect<Equal<Match<":not(ObjectPattern) > Property[computed = false][kind = \"init\"][value.type != \"ArrowFunctionExpression\"][value.type != \"FunctionExpression\"][value.type != \"TSEmptyBodyFunctionExpression\"]">, T.PropertyNonComputedName>>,
 Expect<Equal<Match<":not(TSClassImplements, TSInterfaceHeritage) > MemberExpression">, T.MemberExpression>>,
 Expect<Equal<Match<"ObjectExpression">, T.ObjectExpression>>,
 Expect<Equal<Match<"ObjectExpression, ObjectPattern">, T.ObjectExpression | T.ObjectPattern>>,

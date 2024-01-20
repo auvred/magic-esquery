@@ -98,7 +98,50 @@ type PrepreprocessCompoundSelector<
         >
   : Acc['matches'] extends [infer _, ...infer __]
     ? PreprocessCompoundSelector<
-        [...Acc['selectors'], ...Acc['matches'], ...Acc['nots']],
+        // [...Acc['selectors'], ...Acc['matches'], ...Acc['nots']],
+        [
+          ...(Acc['matches'] extends [infer _, ...infer __]
+            ? [
+                {
+                  type: 'matches'
+                  selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
+                },
+              ]
+            : Acc['nots'] extends [infer _, ...infer __]
+              ? [
+                  {
+                    type: 'matches'
+                    selectors: [
+                      { type: 'compound'; selectors: Acc['selectors'] },
+                    ]
+                  },
+                ]
+              : Acc['selectors']),
+
+          ...Acc['matches'],
+          ...Acc['nots'],
+
+          // ...Acc['selectors'],
+          // TODO: yep yep
+          // ...(Acc['matches'] extends [infer _, ...infer __]
+          //   ? [
+          //       {
+          //         type: 'matches'
+          //         selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
+          //       },
+          //       ...Acc['matches'],
+          //     ]
+          //   : []),
+          // ...(Acc['matches'] extends [infer _, ...infer __]
+          //   ? [
+          //       {
+          //         type: 'matches'
+          //         selectors: [{ type: 'compound'; selectors: Acc['selectors'] }]
+          //       },
+          //       ...Acc['matches'],
+          //     ]
+          //   : []),
+        ],
         SelectorAcc
       >
     : PreprocessCompoundSelector<
@@ -162,7 +205,7 @@ type PreprocessCompoundSelector<
                   ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
                   : PatchMeta<
                         SelectorAcc,
-                        'extract',
+                        'exclude',
                         {
                           [K in Selector['name']]: TryToParseAttrValue<
                             Selector['value']['value']
@@ -173,19 +216,25 @@ type PreprocessCompoundSelector<
                       ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
                       : NeverError<PatchRes>
                     : never
-                : PatchMeta<
-                      SelectorAcc,
-                      'exclude',
-                      {
-                        [K in Selector['name']]: TryToParseAttrValue<
-                          Selector['value']['value']
-                        >
-                      }
-                    > extends infer PatchRes
-                  ? PatchRes extends MetaAcc
-                    ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
-                    : NeverError<PatchRes>
-                  : never
+                : Selector['operator'] extends '!='
+                  ? TryToParseAttrValue<
+                      Selector['value']['value']
+                    > extends AttrValueIsUnsafeToIntersect
+                    ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
+                    : PatchMeta<
+                          SelectorAcc,
+                          'extract',
+                          {
+                            [K in Selector['name']]: TryToParseAttrValue<
+                              Selector['value']['value']
+                            >
+                          }
+                        > extends infer PatchRes
+                      ? PatchRes extends MetaAcc
+                        ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
+                        : NeverError<PatchRes>
+                      : never
+                  : PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
               : PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
             : PatchMeta<
                   SelectorAcc,
@@ -226,14 +275,6 @@ type PreprocessCompoundSelector<
   : Acc extends any[]
     ? Acc
     : [SelectorAcc]
-
-type adfs = PreprocessSelector<
-  //   ^?
-  // ParseIt<':matches(:not(.init), .init)'>,
-  ParseIt<'ExportNamedDeclaration.body:not([source])'>,
-  WildcardMeta
->
-type ddd = Dnf<adfs> // ['args'][0]['args']
 
 type SplitConjunction<
   T,
@@ -276,8 +317,6 @@ type SplitConjunction<
       : never
   : Simplify<Acc>
 
-type fdsaf = SplitConjunction<ddd['args'][0]['args']>
-
 type PrecollapseCollectChildBoundaries<
   Boundary,
   Ctx extends { field: any | null },
@@ -296,6 +335,11 @@ type MatchSplittedConjunction<Left, Splitted> = Extract<
   CollapseNegativesFromConjunction<Left, Splitted['not']>
 >
 
+declare const LeftIsAny: unique symbol
+type LeftIsAny = typeof LeftIsAny
+
+// TODO: extract inferredNodes too
+// TODO: change Acc default value accordingly
 type CollapseNegativesFromConjunction<
   Left,
   Negatives,
@@ -308,7 +352,12 @@ type CollapseNegativesFromConjunction<
         Exclude<
           Acc,
           Extract<
-            PrecollapseCollectChildBoundaries<Left, { field: First['field'] }>,
+            Left extends LeftIsAny
+              ? TSESTree.Node
+              : PrecollapseCollectChildBoundaries<
+                  Left,
+                  { field: First['field'] }
+                >,
             Exclude<
               TryToNarrowByExtracting<
                 First['identifier'] extends null
@@ -327,7 +376,9 @@ type CollapseNegativesFromConjunction<
 type CollapsePositivesFromConjunction<
   Left,
   Positives,
-  Acc = PrecollapseCollectChildBoundaries<Left, { field: null }>,
+  Acc = Left extends LeftIsAny
+    ? TSESTree.Node
+    : PrecollapseCollectChildBoundaries<Left, { field: null }>,
 > = Positives extends [infer First, ...infer Rest]
   ? First extends MetaAcc
     ? CollapsePositivesFromConjunction<
@@ -336,24 +387,39 @@ type CollapsePositivesFromConjunction<
         Extract<
           Acc,
           Extract<
-            PrecollapseCollectChildBoundaries<Left, { field: First['field'] }>,
-            Exclude<
-              TryToNarrowByExtracting<
-                First['identifier'] extends null
+            Extract<
+              Left extends LeftIsAny
+                ? First['field'] extends null
                   ? TSESTree.Node
-                  : PickNode<First['identifier']>,
-                First['extract']
-              >,
-              First['exclude']
-            >
+                  : PrecollapseCollectChildBoundaries<
+                      TSESTree.Node,
+                      { field: First['field'] }
+                    >
+                : PrecollapseCollectChildBoundaries<
+                    Left,
+                    { field: First['field'] }
+                  >,
+              Exclude<
+                TryToNarrowByExtracting<
+                  First['identifier'] extends null
+                    ? TSESTree.Node
+                    : PickNode<First['identifier']>,
+                  First['extract']
+                >,
+                First['exclude']
+              >
+            >,
+            First['inferredNodes'] extends null ? any : First['inferredNodes']
           >
         >
       >
     : never
   : Acc
-type ddafa = CollapsePositivesFromConjunction<TSESTree.Program, fdsaf['and']>
-//     ^?
-
+type dd = PrecollapseCollectChildBoundaries<
+  TSESTree.Node,
+  { field: 'decorators' }
+>
+//   ^?
 type CollapseChildRelations<Left, Right, Acc = []> = Right extends [
   infer First,
   ...infer Rest,
@@ -361,12 +427,36 @@ type CollapseChildRelations<Left, Right, Acc = []> = Right extends [
   ? CollapseChildRelations<
       Left,
       Rest,
-      [...Acc, MatchSplittedConjunction<Left, SplitConjunction<First['args']>>]
+      [
+        ...Acc,
+        // SplitConjunction<First['args']>,
+        MatchSplittedConjunction<Left, SplitConjunction<First['args']>>,
+      ]
     >
-  : Acc
+  : Acc[number]
 
-type collll = CollapseChildRelations<TSESTree.Program, ddd['args']>
-//    ^?
+type dsafasd = //Exclude<
+  //     ^?
+
+  Dnf<
+    PreprocessSelector<
+      ParseIt<'[declare=true]:matches(TSDeclareFunction)'>,
+      WildcardMeta
+    >
+  >
+
+// , aa
+// >
+
+type dddfdasf = Mmatch<ParseIt<'Identifier[declare=true]'>>
+//     ^?
+
+// type IterMatchesAndPreprocess<T, Acc = []> = T extends [infer First, ...infer Rest]
+// ? IterMatchesAndPreprocess<Rest, [...Acc,PreprocessSelector< First>]>
+export type Mmatch<T> = CollapseChildRelations<
+  LeftIsAny,
+  Dnf<PreprocessSelector<T, WildcardMeta>>['args']
+>
 
 type PreprocessSelectorsList<
   Selectors extends any[],
@@ -398,17 +488,37 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
     : T extends { type: 'compound'; selectors: any }
       ? {
           type: 'and'
-          // a: [T, SelectorAcc]
-          // args: PreprocessCompoundSelector<T['selectors'], SelectorAcc>
           args: PrepreprocessCompoundSelector<T['selectors'], SelectorAcc>
         }
       : T extends { type: 'child' }
-        ? 'the most complicated thing'
+        ? {
+            identifier: null
+            field: null
+            extract: unknown
+            exclude: never
+            inferredNodes: CollapseChildRelations<
+              /* Left */ Mmatch<T['left']>,
+              Dnf<PreprocessSelector<T['right'], WildcardMeta>>['args']
+            >
+          }
         : T extends { type: 'matches'; selectors: any }
           ? PreprocessSelectorsList<T['selectors'], SelectorAcc>
           : T extends { type: 'not'; selectors: any }
             ? {
-                type: 'not'
-                arg: PreprocessSelectorsList<T['selectors'], SelectorAcc>
+                type: 'and'
+                args: [
+                  // SelectorAcc,
+                  {
+                    type: 'not'
+                    arg: {
+                      type: 'not'
+                      arg: SelectorAcc
+                    }
+                  },
+                  {
+                    type: 'not'
+                    arg: PreprocessSelectorsList<T['selectors'], SelectorAcc>
+                  },
+                ]
               }
             : NeverError<'not impleeemented'>

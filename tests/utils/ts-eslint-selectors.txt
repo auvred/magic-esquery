@@ -162,7 +162,7 @@ ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]
 ExportNamedDeclaration[declaration.type="TSModuleDeclaration"]:exit
   T.ExportNamedDeclaration
 ExportNamedDeclaration:not([source])
-  TODO
+  T.ExportNamedDeclarationWithoutSourceWithMultiple | T.ExportNamedDeclarationWithoutSourceWithSingle
 ExportNamedDeclaration[source]
   T.ExportNamedDeclarationWithSource
 ExportSpecifier
@@ -180,7 +180,7 @@ ForStatement
 ForStatement:exit
   T.ForStatement
 ForStatement > *.init:exit
-  T.Expression | T.VariableDeclaration
+  T.Expression | T.ForInitialiser
 FunctionDeclaration
   T.FunctionDeclaration
 FunctionDeclaration[async = false]
@@ -296,7 +296,7 @@ NewExpression
 :not(ObjectPattern) > Property
   T.Property
 :not(ObjectPattern) > Property[computed = false][kind = "init"][value.type != "ArrowFunctionExpression"][value.type != "FunctionExpression"][value.type != "TSEmptyBodyFunctionExpression"]
-  TODO_narrower
+  T.PropertyNonComputedName
 :not(TSClassImplements, TSInterfaceHeritage) > MemberExpression
   T.MemberExpression
 ObjectExpression

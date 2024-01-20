@@ -1,6 +1,6 @@
 // sorry for bad type names, but I just wan't to finish this dnf stuff
 
-import type {MetaAcc} from "./utils"
+import type { MetaAcc } from './utils'
 
 // will rename it later
 type CartesianInner<
@@ -267,45 +267,9 @@ type formula = unknown & {
   ]
 }
 
+
 // (a or b) and not(c or not(11 or not(22)))
 // (a or b) and not(c) and (11 or not(22))
 // (a and not(c) and 11) or (b and not(c) and 11) or (a and not(c) and not(22)) or (b and not(c) and not(22))
 
 type _OOOOOHHHHHHHHHHHHHHHHHHHHHITSWORKINGGGGGGGGGGGGGG = Dnf<formula>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
