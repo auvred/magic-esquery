@@ -1,9 +1,9 @@
-import type { Mmatch } from '../../src/match/preprocess'
+import type { MatchIt } from '../../src/matcher'
 import type { ParseIt } from '../../src/parser'
 import type { Equal, Expect } from '@type-challenges/utils'
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
-type Match<_T extends string> = Mmatch<ParseIt<_T>>
+type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
 
 export type TestCases = [
 Expect<Equal<Match<"*">, T.Node>>,
@@ -244,7 +244,7 @@ Expect<Equal<Match<"TSModuleDeclaration[declare = true] > TSModuleBlock TSModule
 Expect<Equal<Match<"TSModuleDeclaration:exit">, T.TSModuleDeclaration>>,
 Expect<Equal<Match<"TSModuleDeclaration[global!=true][id.type!='Literal']">, T.TSModuleDeclaration>>,
 Expect<Equal<Match<"TSModuleDeclaration > TSModuleBlock">, T.TSModuleBlock>>,
-Expect<Equal<Match<"TSModuleDeclaration > TSModuleDeclaration">, never>>,
+Expect<Equal<Match<"TSModuleDeclaration > TSModuleDeclaration">, never /* https://github.com/typescript-eslint/typescript-eslint/issues/8278 */>>,
 Expect<Equal<Match<"TSNeverKeyword">, T.TSNeverKeyword>>,
 Expect<Equal<Match<"TSNonNullExpression">, T.TSNonNullExpression>>,
 Expect<Equal<Match<"TSNonNullExpression > ChainExpression">, T.ChainExpression>>,

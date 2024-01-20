@@ -16,7 +16,7 @@ ArrowFunctionExpression[async = false]
 ArrowFunctionExpression[async = true]:exit
   T.ArrowFunctionExpression
 ArrowFunctionExpression[async = true] > :not(BlockStatement, AwaitExpression)
-  T.ArrowFunctionExpression
+  Exclude<T.Parameter | T.BlockStatement | T.Expression | T.TSTypeAnnotation | T.TSTypeParameterDeclaration, T.BlockStatement | T.AwaitExpression>
 ArrowFunctionExpression:exit
   T.ArrowFunctionExpression
 ArrowFunctionExpression, FunctionDeclaration, FunctionExpression
@@ -30,7 +30,7 @@ ArrowFunctionExpression, FunctionDeclaration, FunctionExpression, TSCallSignatur
 ArrowFunctionExpression, FunctionExpression
   T.ArrowFunctionExpression | T.FunctionExpression
 ArrowFunctionExpression > :not(BlockStatement).body
-  T.ArrowFunctionExpression
+  Exclude<T.BlockStatement | T.Expression, T.BlockStatement>
 ArrowFunctionExpression > TSTypeParameterDeclaration > TSTypeParameter[constraint]
   T.TSTypeParameter
 AssignmentExpression
@@ -146,7 +146,7 @@ EmptyStatement
 *:exit
   T.Node
 ExperimentalSpreadProperty
-  T.ExperimentalSpreadProperty
+  never /* deprecated */
 ExportAllDeclaration
   T.ExportAllDeclaration
 ExportDefaultDeclaration
@@ -314,7 +314,7 @@ Program
 Program:exit
   T.Program
 Program > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), Program > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)[declare = true]
-  TODO
+  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclaration | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclaration | T.VariableDeclaration
 Property
   T.Property
 Property[computed = false][kind = "init"][value.type = "ArrowFunctionExpression"], Property[computed = false][kind = "init"][value.type = "FunctionExpression"], Property[computed = false][kind = "init"][value.type = "TSEmptyBodyFunctionExpression"]
@@ -346,7 +346,7 @@ SpreadElement
 SpreadProperty
   T.SpreadProperty
 :statement
-  TODO
+  T.Node
 StaticBlock
   T.StaticBlock
 StaticBlock:exit
@@ -466,9 +466,9 @@ TSModuleBlock:exit
 TSModuleDeclaration
   T.TSModuleDeclaration
 TSModuleDeclaration[declare = true] > TSModuleBlock > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), TSModuleDeclaration[declare = true] > TSModuleBlock > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)
-  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclaration | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclaration | T.VariableDeclaration
+  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclarationWithName | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclaration | T.VariableDeclaration
 TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModuleBlock > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration), TSModuleDeclaration[declare = true] > TSModuleBlock TSModuleDeclaration > TSModuleBlock > :matches(ClassDeclaration, TSDeclareFunction, TSEnumDeclaration, TSModuleDeclaration, VariableDeclaration)
-  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclaration | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclaration | T.VariableDeclaration
+  T.TSInterfaceDeclaration | T.TSTypeAliasDeclaration | T.ClassDeclarationWithName | T.TSDeclareFunction | T.TSEnumDeclaration | T.TSModuleDeclaration | T.VariableDeclaration
 TSModuleDeclaration:exit
   T.TSModuleDeclaration
 TSModuleDeclaration[global!=true][id.type!='Literal']
@@ -476,7 +476,7 @@ TSModuleDeclaration[global!=true][id.type!='Literal']
 TSModuleDeclaration > TSModuleBlock
   T.TSModuleBlock
 TSModuleDeclaration > TSModuleDeclaration
-  T.TSModuleDeclaration
+  never /* https://github.com/typescript-eslint/typescript-eslint/issues/8278 */
 TSNeverKeyword
   T.TSNeverKeyword
 TSNonNullExpression
@@ -562,7 +562,7 @@ VariableDeclarator
 VariableDeclarator, AssignmentExpression
   T.VariableDeclarator | T.AssignmentExpression
 VariableDeclarator[init != null]
-  T.LetOrConstOrVarDeclarator | T.UsingInNomalConextDeclarator
+  T.VariableDeclarator /* for some reason this doesn't work as intended Extract<TSESTree.LetOrConstOrVarDeclarator | TSESTree.UsingDeclarator, TSESTree.LetOrConstOrVarDeclarator | TSESTree.UsingInNomalConextDeclarator> */
 VariableDeclarator[init.type='ThisExpression'], AssignmentExpression[right.type='ThisExpression']
   T.VariableDeclarator | T.AssignmentExpression
 VariableDeclarator,PropertyDefinition,:matches(FunctionDeclaration,FunctionExpression) > AssignmentPattern
