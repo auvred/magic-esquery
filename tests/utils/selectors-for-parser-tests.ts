@@ -191,6 +191,7 @@ export const selectors = (
       ':matches(A > B)',
       spaces,
     ),
+    ':matches(* > :has( .callee, .arguments:not( aaa bbb:matches( * ~ ccc[ddd] ) ) ) ) ',
 
     genVariants(
       spaces,
