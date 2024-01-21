@@ -1,5 +1,4 @@
-import type { MatchIt } from "../../../src/matcher"
-import type { ParseIt } from "../../../src/parser"
+import type { Match as MatchIt, Parse as ParseIt } from "../../../src/index"
 import type { Equal, Expect } from "../../../src/utils"
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 

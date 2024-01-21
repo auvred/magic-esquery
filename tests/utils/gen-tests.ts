@@ -27,11 +27,9 @@ function genMatcherTestsFromPairs(
   pairs: [string, string][],
 ): void {
   const srcPath = srcPathRelativeFrom(destPath)
-  const matcherPath = JSON.stringify(path.join(srcPath, 'matcher'))
-  const parserPath = JSON.stringify(path.join(srcPath, 'parser'))
+  const indexPath = JSON.stringify(path.join(srcPath, 'index'))
   const utilsPath = JSON.stringify(path.join(srcPath, 'utils'))
-  let content = `import type { MatchIt } from ${matcherPath}
-import type { ParseIt } from ${parserPath}
+  let content = `import type { Match as MatchIt, Parse as ParseIt } from ${indexPath}
 import type { Equal, Expect } from ${utilsPath}
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
@@ -58,9 +56,9 @@ function genParserTestsFromSelectors(
 ): void {
   const srcPath = srcPathRelativeFrom(destPath)
   const utilsPath = JSON.stringify(path.join(srcPath, 'utils'))
-  const parserPath = JSON.stringify(path.join(srcPath, 'parser'))
+  const indexPath = JSON.stringify(path.join(srcPath, 'index'))
   let content = `import type { Expect, Equal } from ${utilsPath}
-import type { ParseIt } from ${parserPath}
+import type { Parse as ParseIt } from ${indexPath}
 
 export type TestCases = [
 `
