@@ -260,7 +260,7 @@ type CollapseNegativesFromConjunction<
               TryToNarrowByExtracting<
                 First['identifier'] extends null
                   ? AST
-                  : PickNode<First['identifier']>,
+                  : PickNode<First['identifier'], AST>,
                 First['extract']
               >,
               First['exclude']
@@ -306,7 +306,7 @@ type CollapsePositivesFromConjunction<
                     TryToNarrowByExtracting<
                       First['identifier'] extends null
                         ? AST
-                        : PickNode<First['identifier']>,
+                        : PickNode<First['identifier'], AST>,
                       First['extract']
                     >,
                     First['exclude']
@@ -316,7 +316,7 @@ type CollapsePositivesFromConjunction<
                       TryToNarrowByExtracting<
                         First['identifier'] extends null
                           ? AST
-                          : PickNode<First['identifier']>,
+                          : PickNode<First['identifier'], AST>,
                         PreprocessExtract<First['extract']>['extract']
                       >,
                       First['exclude']

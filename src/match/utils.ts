@@ -1,5 +1,4 @@
 import type { Simplify } from '../utils'
-import type { TSESTree } from '@typescript-eslint/typescript-estree'
 
 declare const NeverErrorSymbol: unique symbol
 export type NeverError<Message = unknown> = [typeof NeverErrorSymbol, Message]
@@ -52,8 +51,8 @@ export type ExtractChildDeps<T, AST extends { type: any }> = NonNullable<
   }[keyof T]
 >
 
-export type PickNode<T> = [T] extends [any]
-  ? Extract<TSESTree.Node, { type: T }>
+export type PickNode<T, AST> = [T] extends [any]
+  ? Extract<AST, { type: T }>
   : never
 
 declare const AttrValueIsUnsafeToIntersect: unique symbol
