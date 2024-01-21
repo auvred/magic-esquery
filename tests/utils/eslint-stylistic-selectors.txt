@@ -1,0 +1,337 @@
+# 8eaf62dba81e5efebd77ef975abf1220a9b67b8b
+*
+  T.Node
+ArrayExpression
+  T.ArrayExpression
+ArrayExpression, ArrayPattern
+  T.ArrayExpression | T.ArrayPattern
+ArrayPattern
+  T.ArrayPattern
+ArrowFunctionExpression
+  T.ArrowFunctionExpression
+ArrowFunctionExpression, CallExpression, FunctionDeclaration, FunctionExpression, ImportExpression, NewExpression
+  T.ArrowFunctionExpression | T.CallExpression | T.FunctionDeclaration | T.FunctionExpression | T.ImportExpression | T.NewExpression
+ArrowFunctionExpression:exit
+  T.ArrowFunctionExpression
+ArrowFunctionExpression[params.length=1]
+  T.ArrowFunctionExpression
+AssignmentExpression
+  T.AssignmentExpression
+AssignmentPattern
+  T.AssignmentPattern
+AwaitExpression
+  T.AwaitExpression
+BinaryExpression
+  T.BinaryExpression
+BinaryExpression, LogicalExpression
+  T.BinaryExpression | T.LogicalExpression
+BinaryExpression[operator='>']
+  T.BinaryExpression
+BlockStatement
+  T.BlockStatement
+BlockStatement, ClassBody
+  T.BlockStatement | T.ClassBody
+BlockStatement:exit
+  T.BlockStatement
+BreakStatement
+  T.BreakStatement
+BreakStatement,ContinueStatement,DebuggerStatement,DoWhileStatement,ExportAllDeclaration,ExportDefaultDeclaration,ExportNamedDeclaration,ExpressionStatement,ImportDeclaration,ReturnStatement,ThrowStatement,VariableDeclaration,PropertyDefinition
+  T.BreakStatement | T.ContinueStatement | T.DebuggerStatement | T.DoWhileStatement | T.ExportAllDeclaration | T.ExportDefaultDeclaration | T.ExportNamedDeclaration | T.ExpressionStatement | T.ImportDeclaration | T.ReturnStatement | T.ThrowStatement | T.VariableDeclaration | T.PropertyDefinition
+BreakStatement:exit
+  T.BreakStatement
+CallExpression
+  T.CallExpression
+CallExpression:exit
+  T.CallExpression
+CallExpression, NewExpression
+  T.CallExpression | T.NewExpression
+CallExpression > ObjectExpression
+  T.ObjectExpression
+ClassBody
+  T.ClassBody
+ClassDeclaration
+  T.ClassDeclaration
+ClassDeclaration:exit
+  T.ClassDeclaration
+ClassDeclaration[superClass], ClassExpression[superClass]
+  T.ClassDeclaration | T.ClassExpression
+ClassExpression
+  T.ClassExpression
+ConditionalExpression
+  T.ConditionalExpression
+ContinueStatement
+  T.ContinueStatement
+ContinueStatement:exit
+  T.ContinueStatement
+DebuggerStatement
+  T.DebuggerStatement
+DebuggerStatement:exit
+  T.DebuggerStatement
+DoWhileStatement
+  T.DoWhileStatement
+DoWhileStatement:exit
+  T.DoWhileStatement
+DoWhileStatement, WhileStatement, ForInStatement, ForOfStatement, WithStatement
+  T.DoWhileStatement | T.WhileStatement | T.ForInStatement | T.ForOfStatement | T.WithStatement
+EmptyStatement
+  T.EmptyStatement
+*:exit
+  T.Node
+ExportAllDeclaration
+  T.ExportAllDeclaration
+ExportAllDeclaration:exit
+  T.ExportAllDeclaration
+ExportDefaultDeclaration
+  T.ExportDefaultDeclaration
+ExportDefaultDeclaration > CallExpression > ObjectExpression
+  T.ObjectExpression
+ExportDefaultDeclaration:exit
+  T.ExportDefaultDeclaration
+ExportNamedDeclaration
+  T.ExportNamedDeclaration
+ExportNamedDeclaration:exit
+  T.ExportNamedDeclaration
+ExportSpecifier
+  T.ExportSpecifier
+ExpressionStatement
+  T.ExpressionStatement
+ExpressionStatement > CallExpression[callee.name='$'] > FunctionExpression > BlockStatement
+  T.BlockStatement
+ExpressionStatement > CallExpression > FunctionExpression.callee > BlockStatement
+  T.BlockStatement
+ExpressionStatement:exit
+  T.ExpressionStatement
+ForInStatement
+  T.ForInStatement
+ForInStatement:exit
+  T.ForInStatement
+ForOfStatement
+  T.ForOfStatement
+ForOfStatement:exit
+  T.ForOfStatement
+ForStatement
+  T.ForStatement
+ForStatement:exit
+  T.ForStatement
+ForStatement > *.init:exit
+  T.Expression | T.ForInitialiser
+FunctionDeclaration
+  T.FunctionDeclaration
+FunctionDeclaration:exit
+  T.FunctionDeclaration
+FunctionDeclaration, FunctionExpression
+  T.FunctionDeclaration | T.FunctionExpression
+FunctionExpression
+  T.FunctionExpression
+IfStatement
+  T.IfStatement
+IfStatement:exit
+  T.IfStatement
+ImportDeclaration
+  T.ImportDeclaration
+ImportDeclaration:exit
+  T.ImportDeclaration
+ImportDeclaration[importKind=type]
+  T.ImportDeclaration
+ImportExpression
+  T.ImportExpression
+ImportNamespaceSpecifier
+  T.ImportNamespaceSpecifier
+ImportSpecifier
+  T.ImportSpecifier
+JSONProperty
+  never /* ... */
+JSXAttribute
+  T.JSXAttribute
+JSXAttribute > JSXElement, Literal, JSXText
+  never /* TODO: T.JSXElement | T.Literal | T.JSXText (see: https://github.com/typescript-eslint/typescript-eslint/issues/8280) */
+JSXAttribute > JSXExpressionContainer > JSXElement
+  T.JSXElement
+JSXAttribute[value]
+  T.JSXAttribute
+JSXClosingElement
+  T.JSXClosingElement
+JSXClosingFragment
+  T.JSXClosingFragment
+JSXElement
+  T.JSXElement
+JSXExpressionContainer
+  T.JSXExpressionContainer
+JSXFragment
+  T.JSXFragment
+JSXOpeningElement
+  T.JSXOpeningElement
+JSXOpeningElement:exit
+  T.JSXOpeningElement
+JSXOpeningFragment
+  T.JSXOpeningFragment
+JSXSpreadAttribute
+  T.JSXSpreadAttribute
+JSXText
+  T.JSXText
+LabeledStatement
+  T.LabeledStatement
+LabeledStatement:exit
+  T.LabeledStatement
+Literal
+  T.Literal
+LogicalExpression
+  T.LogicalExpression
+:matches(DoWhileStatement, ForStatement, ForInStatement, ForOfStatement, IfStatement, WhileStatement, WithStatement):exit
+  T.DoWhileStatement | T.ForStatement | T.ForInStatement | T.ForOfStatement | T.IfStatement | T.WhileStatement | T.WithStatement
+:matches(JSXElement, JSXFragment) > :matches(JSXElement, JSXExpressionContainer)
+  T.JSXElement | T.JSXExpressionContainer
+MemberExpression
+  T.MemberExpression
+MemberExpression, JSXMemberExpression, MetaProperty
+  T.MemberExpression | T.JSXMemberExpression | T.MetaProperty
+MethodDefinition
+  T.MethodDefinition
+MethodDefinition[computed=true]
+  T.MethodDefinitionComputedName
+MethodDefinition, PropertyDefinition, StaticBlock
+  T.MethodDefinition | T.PropertyDefinition | T.StaticBlock
+NewExpression
+  T.NewExpression
+ObjectExpression
+  T.ObjectExpression
+ObjectExpression, ObjectPattern
+  T.ObjectExpression | T.ObjectPattern
+ObjectPattern
+  T.ObjectPattern
+Program
+  T.Program
+Program:exit
+  T.Program
+Program > ExpressionStatement > CallExpression[callee.name='$'] > FunctionExpression > BlockStatement
+  T.BlockStatement
+Property
+  T.Property
+PropertyDefinition
+  T.PropertyDefinition
+RestElement
+  T.RestElement
+ReturnStatement
+  T.ReturnStatement
+ReturnStatement:exit
+  T.ReturnStatement
+SequenceExpression
+  T.SequenceExpression
+SpreadElement
+  T.SpreadElement
+SpreadProperty
+  never /* deprecated */
+:statement
+  T.Node
+StaticBlock
+  T.StaticBlock
+StaticBlock:exit
+  T.StaticBlock
+Super
+  T.Super
+SwitchCase
+  T.SwitchCase
+SwitchCase:exit
+  T.SwitchCase
+SwitchStatement
+  T.SwitchStatement
+SwitchStatement:exit
+  T.SwitchStatement
+TaggedTemplateExpression
+  T.TaggedTemplateExpression
+TemplateElement
+  T.TemplateElement
+TemplateLiteral
+  T.TemplateLiteral
+ThisExpression
+  T.ThisExpression
+ThrowStatement
+  T.ThrowStatement
+ThrowStatement:exit
+  T.ThrowStatement
+TryStatement
+  T.TryStatement
+TryStatement:exit
+  T.TryStatement
+TSAbstractMethodDefinition, TSAbstractPropertyDefinition
+  T.TSAbstractMethodDefinition | T.TSAbstractPropertyDefinition
+TSAbstractPropertyDefinition
+  T.TSAbstractPropertyDefinition
+TSAsExpression
+  T.TSAsExpression
+TSConditionalType
+  T.TSConditionalType
+TSDeclareFunction
+  T.TSDeclareFunction
+TSDeclareFunction:exit
+  T.TSDeclareFunction
+TSEmptyBodyFunctionExpression
+  T.TSEmptyBodyFunctionExpression
+TSEnumDeclaration
+  T.TSEnumDeclaration
+TSEnumDeclaration, TSTypeLiteral
+  T.TSEnumDeclaration | T.TSTypeLiteral
+TSEnumMember
+  T.TSEnumMember
+TSExportAssignment
+  T.TSExportAssignment
+TSImportEqualsDeclaration
+  T.TSImportEqualsDeclaration
+TSIndexedAccessType
+  T.TSIndexedAccessType
+TSInterfaceBody
+  T.TSInterfaceBody
+TSInterfaceBody, TSModuleBlock
+  T.TSInterfaceBody | T.TSModuleBlock
+TSInterfaceDeclaration[extends.length > 0]
+  T.TSInterfaceDeclaration
+TSIntersectionType
+  T.TSIntersectionType
+TSMappedType
+  T.TSMappedType
+TSModuleBlock
+  T.TSModuleBlock
+TSModuleBlock:exit
+  T.TSModuleBlock
+TSNamedTupleMember
+  T.TSNamedTupleMember
+TSQualifiedName
+  T.TSQualifiedName
+TSStringKeyword
+  T.TSStringKeyword
+TSTupleType
+  T.TSTupleType
+TSTypeAliasDeclaration
+  T.TSTypeAliasDeclaration
+TSTypeAnnotation
+  T.TSTypeAnnotation
+TSTypeLiteral
+  T.TSTypeLiteral
+TSTypeParameter
+  T.TSTypeParameter
+TSTypeParameterDeclaration
+  T.TSTypeParameterDeclaration
+TSTypeParameterInstantiation
+  T.TSTypeParameterInstantiation
+TSUnionType
+  T.TSUnionType
+UnaryExpression
+  T.UnaryExpression
+UpdateExpression
+  T.UpdateExpression
+VariableDeclaration
+  T.VariableDeclaration
+VariableDeclaration:exit
+  T.VariableDeclaration
+VariableDeclarator
+  T.VariableDeclarator
+WhileStatement
+  T.WhileStatement
+WhileStatement:exit
+  T.WhileStatement
+WithStatement
+  T.WithStatement
+WithStatement:exit
+  T.WithStatement
+YieldExpression
+  T.YieldExpression

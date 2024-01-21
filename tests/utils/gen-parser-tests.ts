@@ -43,10 +43,12 @@ export type TestCases = [
 
 genFromSelectors('parse.generated-test.ts', manualSelectors)
 
-const tsEslintSelectors = fs
-  .readFileSync(path.join(__dirname, 'ts-eslint-selectors.txt'), 'utf8')
-  .split('\n')
-  .filter(sel => {
-    return sel.trim() && !sel.startsWith('  ') && !sel.startsWith('#')
-  })
-genFromSelectors('ts-eslint-parse.generated-test.ts', tsEslintSelectors)
+for (const txtSelector of ['ts-eslint', 'eslint-stylistic']) {
+  const selectors = fs
+    .readFileSync(path.join(__dirname, `${txtSelector}-selectors.txt`), 'utf8')
+    .split('\n')
+    .filter(sel => {
+      return sel.trim() && !sel.startsWith('  ') && !sel.startsWith('#')
+    })
+  genFromSelectors(`${txtSelector}-parse.generated-test.ts`, selectors)
+}

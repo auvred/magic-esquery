@@ -33,28 +33,30 @@ export type TestCases = [
   })
 }
 
-const lines = fs
-  .readFileSync(path.join(__dirname, 'ts-eslint-selectors.txt'), 'utf8')
-  .split('\n')
-const pairs: [string, string][] = []
-for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-  const line = lines[lineIndex]
-  if (typeof line === 'undefined') {
-    throw new Error('line is undefined')
-  }
-  if (!line.trim() || line.startsWith('#')) {
-    continue
-  }
+for (const txtSelector of ['ts-eslint', 'eslint-stylistic']) {
+  const lines = fs
+    .readFileSync(path.join(__dirname, `${txtSelector}-selectors.txt`), 'utf8')
+    .split('\n')
+  const pairs: [string, string][] = []
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex]
+    if (typeof line === 'undefined') {
+      throw new Error('line is undefined')
+    }
+    if (!line.trim() || line.startsWith('#')) {
+      continue
+    }
 
-  const nextLine = lines[lineIndex + 1]
-  if (!nextLine) {
-    throw new Error('nextLine is falsy')
-  }
-  if (!nextLine.startsWith('  ')) {
-    throw new Error('nextLine is not starts with two spaces')
-  }
+    const nextLine = lines[lineIndex + 1]
+    if (!nextLine) {
+      throw new Error('nextLine is falsy')
+    }
+    if (!nextLine.startsWith('  ')) {
+      throw new Error('nextLine is not starts with two spaces')
+    }
 
-  pairs.push([line, nextLine.slice(2)])
-  lineIndex++
+    pairs.push([line, nextLine.slice(2)])
+    lineIndex++
+  }
+  genFromPairs(`${txtSelector}-matcher.generated-test.ts`, pairs)
 }
-genFromPairs('ts-eslint-matcher.generated-test.ts', pairs)
