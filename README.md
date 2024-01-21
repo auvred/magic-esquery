@@ -1,4 +1,4 @@
-# magic-esquery
+# 🪄 magic-esquery
 
 Type level [ESQuery](https://github.com/estools/esquery) selector parser and matcher!
 
