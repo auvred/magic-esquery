@@ -44,7 +44,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install
-        run: corepack enable
+        run: corepack enable && pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
 
       - name: Publish to NPM
         run: pnpm publish --no-git-checks
