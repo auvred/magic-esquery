@@ -1,8 +1,8 @@
-import type { Match as MatchIt, Parse as ParseIt } from "../../../src/index"
+import type { Query } from "../../../src/index"
 import type { Equal, Expect } from "../../../src/utils"
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
-type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
+type Match<_T extends string> = Query<_T, T.Node>
 
 export type TestCases = [
 Expect<Equal<Match<"ArrowFunctionExpression">, T.ArrowFunctionExpression>>,

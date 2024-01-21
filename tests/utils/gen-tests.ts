@@ -29,11 +29,11 @@ function genMatcherTestsFromPairs(
   const srcPath = srcPathRelativeFrom(destPath)
   const indexPath = JSON.stringify(path.join(srcPath, 'index'))
   const utilsPath = JSON.stringify(path.join(srcPath, 'utils'))
-  let content = `import type { Match as MatchIt, Parse as ParseIt } from ${indexPath}
+  let content = `import type { Query } from ${indexPath}
 import type { Equal, Expect } from ${utilsPath}
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
-type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
+type Match<_T extends string> = Query<_T, T.Node>
 
 export type TestCases = [
 `
