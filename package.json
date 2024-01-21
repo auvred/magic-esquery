@@ -30,7 +30,8 @@
     "extract:eslint-stylistic": "tsx scripts/extract-selectors/eslint-stylistic/run.ts",
     "extract:jest": "tsx scripts/extract-selectors/jest/run.ts",
     "test": "tsc --noEmit -p tsconfig.tests.json",
-    "typecheck": "tsc --noEmit -p tsconfig.src.json"
+    "typecheck": "tsc --noEmit -p tsconfig.src.json",
+    "release": "npx -y bumpp"
   },
   "devDependencies": {
     "@auvred/eslint-config": "^0.6.1",
