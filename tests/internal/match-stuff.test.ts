@@ -26,9 +26,9 @@ export type TestExtractChildDeps = [
 ]
 
 export type TestPickNode = [
-  Expect<Equal<PickNode<'CallExpression'>, TSESTree.CallExpression>>,
-  Expect<Equal<PickNode<'ExportNamedDeclaration'>, TSESTree.ExportNamedDeclaration>>,
-  Expect<Equal<PickNode<'something'>, never>>,
+  Expect<Equal<PickNode<'CallExpression', TSESTree.Node>, TSESTree.CallExpression>>,
+  Expect<Equal<PickNode<'ExportNamedDeclaration', TSESTree.Node>, TSESTree.ExportNamedDeclaration>>,
+  Expect<Equal<PickNode<'something', TSESTree.Node>, never>>,
 ]
 
 export type TestTryToParseAttrValue = [
