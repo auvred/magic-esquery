@@ -1,6 +1,6 @@
 {
   "name": "magic-esquery",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "packageManager": "pnpm@8.14.1",
   "description": "🪄 Type level ESQuery selector parser and matcher!",
   "author": "auvred <aauvred@gmail.com> (https://github.com/auvred/)",
