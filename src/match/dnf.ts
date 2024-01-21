@@ -129,17 +129,18 @@ type NotDnf<
     type: 'not'
     arg: any
   },
-> = IsNotDnf<T, 2> extends true
-  ? {
-      type: 'or'
-      args: [
-        {
-          type: 'and'
-          args: [T]
-        },
-      ]
-    }
-  : NegatedDnf<T['arg']>
+> =
+  IsNotDnf<T, 2> extends true
+    ? {
+        type: 'or'
+        args: [
+          {
+            type: 'and'
+            args: [T]
+          },
+        ]
+      }
+    : NegatedDnf<T['arg']>
 
 type NegatedDnf<T> = T extends {
   type: 'or'
@@ -179,12 +180,13 @@ type DisjunctionDnf<
     type: 'or'
     args: any[]
   },
-> = IsDisjunctionDnf<T, 0> extends true
-  ? T
-  : {
-      type: 'or'
-      args: DnfArgs<T['args'], true>
-    }
+> =
+  IsDisjunctionDnf<T, 0> extends true
+    ? T
+    : {
+        type: 'or'
+        args: DnfArgs<T['args'], true>
+      }
 
 // depth >= 2
 type IsVariableDnf<Depth> = Depth extends 0

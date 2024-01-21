@@ -43,30 +43,28 @@ export type MergeTwoMetaFields<
         >
       >
 
-export type MergeTwoMetas<
-  L extends MetaAcc,
-  R extends MetaAcc,
-> = MergeTwoMetaIdentifiers<
-  L['identifier'],
-  R['identifier']
-> extends infer MergedIdentifiers
-  ? MergedIdentifiers extends NeverError
-    ? NeverError<MergedIdentifiers>
-    : MergeTwoMetaFields<L['field'], R['field']> extends infer MergedFields
-      ? MergedFields extends NeverError
-        ? NeverError<MergedFields>
-        : {
-            identifier: MergedIdentifiers
-            field: MergedFields
-            extract: IntersectAndSimplify<L['extract'], R['extract']>
-            exclude: L['exclude'] | R['exclude']
-            inferredNodes: CarefullyIntersectNodes<
-              L['inferredNodes'],
-              R['inferredNodes']
-            >
-          }
-      : NeverError
-  : NeverError
+export type MergeTwoMetas<L extends MetaAcc, R extends MetaAcc> =
+  MergeTwoMetaIdentifiers<
+    L['identifier'],
+    R['identifier']
+  > extends infer MergedIdentifiers
+    ? MergedIdentifiers extends NeverError
+      ? NeverError<MergedIdentifiers>
+      : MergeTwoMetaFields<L['field'], R['field']> extends infer MergedFields
+        ? MergedFields extends NeverError
+          ? NeverError<MergedFields>
+          : {
+              identifier: MergedIdentifiers
+              field: MergedFields
+              extract: IntersectAndSimplify<L['extract'], R['extract']>
+              exclude: L['exclude'] | R['exclude']
+              inferredNodes: CarefullyIntersectNodes<
+                L['inferredNodes'],
+                R['inferredNodes']
+              >
+            }
+        : NeverError
+    : NeverError
 
 export type PatchMeta<
   T extends MetaAcc,

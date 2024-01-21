@@ -44,20 +44,18 @@ export type ParseIdentifierName<
       : ParseIdentifierName<Rest, RestrictedChars, `${Acc}${First}`>
     : never
 
-type ParseIdentifierInternal<
-  T extends string,
-  RestrictedChars extends string,
-> = ParseIdentifierName<T, RestrictedChars> extends infer ParseRes
-  ? ParseRes extends { value: infer V; rest: infer R }
-    ? {
-        type: 'identifier'
-        value: V
-        rest: R
-      }
-    : ParseRes extends 'identifierNameEmpty'
-      ? 'identifierEmpty'
-      : 'identifier-unhandled'
-  : never
+type ParseIdentifierInternal<T extends string, RestrictedChars extends string> =
+  ParseIdentifierName<T, RestrictedChars> extends infer ParseRes
+    ? ParseRes extends { value: infer V; rest: infer R }
+      ? {
+          type: 'identifier'
+          value: V
+          rest: R
+        }
+      : ParseRes extends 'identifierNameEmpty'
+        ? 'identifierEmpty'
+        : 'identifier-unhandled'
+    : never
 
 export type ParseIdentifier<
   T extends string,
@@ -106,25 +104,23 @@ export type ParseStringAttrValueRecurser<
     : { res: BeforeQuote; rest: Rest }
   : 'no'
 
-type ParseStringAttrValueImpl<
-  T extends string,
-  Q extends '"' | "'",
-> = ParseStringAttrValueRecurser<T, Q> extends infer Res
-  ? Res extends string
-    ? `stringParseErr-${Res}`
-    : Res extends {
-          res: infer ResRes
-          rest: infer ResRest
-        }
-      ? ResRes extends string
-        ? {
-            type: 'literal'
-            value: Replace<ResRes, `\\${Q}`, Q>
-            rest: ResRest
+type ParseStringAttrValueImpl<T extends string, Q extends '"' | "'"> =
+  ParseStringAttrValueRecurser<T, Q> extends infer Res
+    ? Res extends string
+      ? `stringParseErr-${Res}`
+      : Res extends {
+            res: infer ResRes
+            rest: infer ResRest
           }
+        ? ResRes extends string
+          ? {
+              type: 'literal'
+              value: Replace<ResRes, `\\${Q}`, Q>
+              rest: ResRest
+            }
+          : never
         : never
-      : never
-  : never
+    : never
 
 export type ParseStringAttrValue<T extends string> = T extends `"${infer Rest}`
   ? ParseStringAttrValueImpl<Rest, '"'>
@@ -145,21 +141,19 @@ export type ParseNumberAttrValue<T extends string> =
     : 'arrValueNumberErr'
 
 //  path = i:identifierName { return { type: 'literal', value: i }; }
-export type ParsePathAttrValue<T extends string> = ParseIdentifierName<
-  T,
-  IdentifierNameRestrictedSymbols
-> extends infer Res
-  ? Res extends string
-    ? `pathParseErr-${Res}`
-    : Res extends {
-          value: infer ResValue
-          rest: infer ResRest
-        }
-      ? ResRest extends ''
-        ? { type: 'literal'; value: ResValue }
-        : `pathParseErr-hasSomeRest`
-      : never
-  : never
+export type ParsePathAttrValue<T extends string> =
+  ParseIdentifierName<T, IdentifierNameRestrictedSymbols> extends infer Res
+    ? Res extends string
+      ? `pathParseErr-${Res}`
+      : Res extends {
+            value: infer ResValue
+            rest: infer ResRest
+          }
+        ? ResRest extends ''
+          ? { type: 'literal'; value: ResValue }
+          : `pathParseErr-hasSomeRest`
+        : never
+    : never
 
 //  type = "type(" _ t:[^ )]+ _ ")" { return { type: 'type', value: t.join('') }; }
 //  matches one word inside parens
@@ -448,18 +442,19 @@ type FilterTuple<T extends any[], Acc extends any[] = []> = T extends [
   : Acc
 export type SplitToClosingSquareBracketOrEqualSignOrAngleBracket<
   T extends string,
-> = SortPairsByShortestTemplateLiteral<
-  FilterTuple<
-    [
-      TryToSplitByAngleBracket<T, '>'>,
-      TryToSplitByAngleBracket<T, '<'>,
-      TryToSplitBy<T, '='>,
-      TryToSplitBy<T, ']'>,
-    ]
-  >
-> extends [infer First, ...infer _]
-  ? First
-  : 'cant find splitter'
+> =
+  SortPairsByShortestTemplateLiteral<
+    FilterTuple<
+      [
+        TryToSplitByAngleBracket<T, '>'>,
+        TryToSplitByAngleBracket<T, '<'>,
+        TryToSplitBy<T, '='>,
+        TryToSplitBy<T, ']'>,
+      ]
+    >
+  > extends [infer First, ...infer _]
+    ? First
+    : 'cant find splitter'
 
 // example: AttrName='aa' _AfterAttrName='=4][bbb = 1]'
 // example: AttrName='aa' _AfterAttrName='bbb'
@@ -651,23 +646,21 @@ export type ParseAtom<T extends string> =
       : WildcardParseRes
     : never
 
-export type ParseSequence<
-  T extends string,
-  Acc extends unknown[] = [],
-> = ParseAtom<T> extends infer AtomParseRes
-  ? AtomParseRes extends string
-    ? {
-        selectors: Acc
-        rest: T
-      }
-    : AtomParseRes extends {
-          rest: infer Rest
+export type ParseSequence<T extends string, Acc extends unknown[] = []> =
+  ParseAtom<T> extends infer AtomParseRes
+    ? AtomParseRes extends string
+      ? {
+          selectors: Acc
+          rest: T
         }
-      ? Rest extends string
-        ? ParseSequence<Rest, [...Acc, Simplify<Omit<AtomParseRes, 'rest'>>]>
+      : AtomParseRes extends {
+            rest: infer Rest
+          }
+        ? Rest extends string
+          ? ParseSequence<Rest, [...Acc, Simplify<Omit<AtomParseRes, 'rest'>>]>
+          : never
         : never
-      : never
-  : never
+    : never
 
 export type TrimLeft<
   T extends string,
@@ -692,17 +685,18 @@ export type TrimSpacesLeft<T extends string> = TrimLeft<T, ' '>
 export type TrimSpacesRight<T extends string> = TrimRight<T, ' '>
 export type TrimSpaces<T extends string> = Trim<T, ' '>
 
-export type ParseBinaryOp<T extends string> = TrimSpacesLeft<T> extends infer Op
-  ? Op extends `>${infer Rest}`
-    ? { op: 'child'; rest: Rest }
-    : Op extends `~${infer Rest}`
-      ? { op: 'sibling'; rest: Rest }
-      : Op extends `+${infer Rest}`
-        ? { op: 'adjacent'; rest: Rest }
-        : T extends ` ${infer Rest}`
-          ? { op: 'descendant'; rest: Rest }
-          : 'unknownBinaryOp'
-  : never
+export type ParseBinaryOp<T extends string> =
+  TrimSpacesLeft<T> extends infer Op
+    ? Op extends `>${infer Rest}`
+      ? { op: 'child'; rest: Rest }
+      : Op extends `~${infer Rest}`
+        ? { op: 'sibling'; rest: Rest }
+        : Op extends `+${infer Rest}`
+          ? { op: 'adjacent'; rest: Rest }
+          : T extends ` ${infer Rest}`
+            ? { op: 'descendant'; rest: Rest }
+            : 'unknownBinaryOp'
+    : never
 
 type SimplifySeq<S> = S extends {
   selectors: infer Selectors
@@ -714,72 +708,70 @@ type SimplifySeq<S> = S extends {
     : never
   : never
 
-export type ParseSelectorRequrser<
-  T extends string,
-  Acc,
-> = ParseBinaryOp<T> extends infer BinaryOpParseRes
-  ? BinaryOpParseRes extends string
-    ? // invalid binary op
-      {
-        error: `recursersequenceErr-atomParseFailed-${BinaryOpParseRes}`
-        acc: Acc
-        rest: T
-      }
-    : // valid binary op
-      // op: >
-      // rest: '   Identifier > Identifier'
-      BinaryOpParseRes extends {
-          op: infer Op
-          rest: infer BinaryOpParseResRest
+export type ParseSelectorRequrser<T extends string, Acc> =
+  ParseBinaryOp<T> extends infer BinaryOpParseRes
+    ? BinaryOpParseRes extends string
+      ? // invalid binary op
+        {
+          error: `recursersequenceErr-atomParseFailed-${BinaryOpParseRes}`
+          acc: Acc
+          rest: T
         }
-      ? // just assertion
-        BinaryOpParseResRest extends string
-        ? ParseSequence<
-            TrimSpaces<BinaryOpParseResRest>
-          > extends infer SeqParseRes
-          ? SeqParseRes extends string | never
-            ? // wrong Seq
-              {
-                error: `recursersequenceErr-SeqParseFailed-${SeqParseRes}`
-                acc: Acc
-                rest: T
-              }
-            : // nice Seq/or seq before comma
-              SeqParseRes extends {
-                  selectors: infer Selectors
-                  rest: infer Rest
+      : // valid binary op
+        // op: >
+        // rest: '   Identifier > Identifier'
+        BinaryOpParseRes extends {
+            op: infer Op
+            rest: infer BinaryOpParseResRest
+          }
+        ? // just assertion
+          BinaryOpParseResRest extends string
+          ? ParseSequence<
+              TrimSpaces<BinaryOpParseResRest>
+            > extends infer SeqParseRes
+            ? SeqParseRes extends string | never
+              ? // wrong Seq
+                {
+                  error: `recursersequenceErr-SeqParseFailed-${SeqParseRes}`
+                  acc: Acc
+                  rest: T
                 }
-              ? Selectors extends [infer _, ...infer __]
-                ? // selectors is not empty , let's continue
-                  Rest extends ''
-                  ? // Seq is last in selector
-                    {
-                      type: Op
-                      left: Acc
-                      right: SimplifySeq<SeqParseRes>
-                    }
-                  : // Seq is not last
-                    Rest extends string
-                    ? ParseSelectorRequrser<
-                        Rest,
-                        {
-                          type: Op
-                          left: Acc
-                          right: SimplifySeq<SeqParseRes>
-                        }
-                      >
-                    : never
-                : // seq is closing the selectors chain
-                  {
-                    error: `recursersequenceErr-SeqParseFailed-${'todo'}`
-                    acc: Acc
-                    rest: BinaryOpParseResRest
+              : // nice Seq/or seq before comma
+                SeqParseRes extends {
+                    selectors: infer Selectors
+                    rest: infer Rest
                   }
-              : 'here Stub'
+                ? Selectors extends [infer _, ...infer __]
+                  ? // selectors is not empty , let's continue
+                    Rest extends ''
+                    ? // Seq is last in selector
+                      {
+                        type: Op
+                        left: Acc
+                        right: SimplifySeq<SeqParseRes>
+                      }
+                    : // Seq is not last
+                      Rest extends string
+                      ? ParseSelectorRequrser<
+                          Rest,
+                          {
+                            type: Op
+                            left: Acc
+                            right: SimplifySeq<SeqParseRes>
+                          }
+                        >
+                      : never
+                  : // seq is closing the selectors chain
+                    {
+                      error: `recursersequenceErr-SeqParseFailed-${'todo'}`
+                      acc: Acc
+                      rest: BinaryOpParseResRest
+                    }
+                : 'here Stub'
+            : never
           : never
         : never
-      : never
-  : never
+    : never
 
 export type ParseSelector<T extends string> =
   ParseSequence<T> extends infer SeqParseRes
@@ -817,60 +809,64 @@ export type ParseSelectors<
   T extends string,
   Acc extends unknown[] = [],
   Eosl extends EndOfSelectorsList = EndOfSelectorsList.None,
-> = ParseSelector<T> extends infer SelectorParseRes
-  ? SelectorParseRes extends {
-      error: unknown
-      acc: infer SelectorAcc
-      rest: infer Rest
-    }
-    ? Rest extends string
-      ? _ParseSelectorsTrimCommaAtStart<Rest> extends infer RestWithoutComma
-        ? RestWithoutComma extends string
-          ? //todo here
-            Eosl extends EndOfSelectorsList.None
-            ? `${Rest}-nanoStub-${RestWithoutComma}`
-            : Eosl extends EndOfSelectorsList.ClosingParen
-              ? TrimSpacesLeft<Rest> extends infer R
-                ? R extends `)${infer RestRest}`
-                  ? { selectors: [...Acc, SelectorAcc]; rest: RestRest }
-                  : `commaErr-${T}`
+> =
+  ParseSelector<T> extends infer SelectorParseRes
+    ? SelectorParseRes extends {
+        error: unknown
+        acc: infer SelectorAcc
+        rest: infer Rest
+      }
+      ? Rest extends string
+        ? _ParseSelectorsTrimCommaAtStart<Rest> extends infer RestWithoutComma
+          ? RestWithoutComma extends string
+            ? //todo here
+              Eosl extends EndOfSelectorsList.None
+              ? `${Rest}-nanoStub-${RestWithoutComma}`
+              : Eosl extends EndOfSelectorsList.ClosingParen
+                ? TrimSpacesLeft<Rest> extends infer R
+                  ? R extends `)${infer RestRest}`
+                    ? { selectors: [...Acc, SelectorAcc]; rest: RestRest }
+                    : `commaErr-${T}`
+                  : never
+                : never
+            : RestWithoutComma extends {
+                  res: infer RestWithoutCommaRes
+                }
+              ? RestWithoutCommaRes extends string
+                ? ParseSelectors<
+                    RestWithoutCommaRes,
+                    [...Acc, SelectorAcc],
+                    Eosl
+                  >
                 : never
               : never
-          : RestWithoutComma extends {
-                res: infer RestWithoutCommaRes
-              }
-            ? RestWithoutCommaRes extends string
-              ? ParseSelectors<RestWithoutCommaRes, [...Acc, SelectorAcc], Eosl>
-              : never
-            : never
+          : never
         : never
-      : never
-    : SelectorParseRes extends {
-          rest: infer Rest
-        }
-      ? {
-          selectors: [...Acc, Simplify<Omit<SelectorParseRes, 'rest'>>]
-          rest: Rest
-        }
-      : // all symbols consumed
-        {
-          selectors: [...Acc, Simplify<Omit<SelectorParseRes, 'rest'>>]
-          rest: ''
-        }
-  : never
+      : SelectorParseRes extends {
+            rest: infer Rest
+          }
+        ? {
+            selectors: [...Acc, Simplify<Omit<SelectorParseRes, 'rest'>>]
+            rest: Rest
+          }
+        : // all symbols consumed
+          {
+            selectors: [...Acc, Simplify<Omit<SelectorParseRes, 'rest'>>]
+            rest: ''
+          }
+    : never
 
-export type ParseIt<T extends string> = ParseSelectors<
-  TrimSpaces<T>
-> extends infer SelectorsParseRes
-  ? SelectorsParseRes extends string
-    ? SelectorsParseRes
-    : SelectorsParseRes extends {
-          selectors: infer Selectors
-        }
-      ? Selectors extends [infer First, ...infer Rest]
-        ? Rest[0] extends undefined
-          ? First
-          : { type: 'matches'; selectors: [First, ...Rest] }
+export type ParseIt<T extends string> =
+  ParseSelectors<TrimSpaces<T>> extends infer SelectorsParseRes
+    ? SelectorsParseRes extends string
+      ? SelectorsParseRes
+      : SelectorsParseRes extends {
+            selectors: infer Selectors
+          }
+        ? Selectors extends [infer First, ...infer Rest]
+          ? Rest[0] extends undefined
+            ? First
+            : { type: 'matches'; selectors: [First, ...Rest] }
+          : never
         : never
-      : never
-  : never
+    : never

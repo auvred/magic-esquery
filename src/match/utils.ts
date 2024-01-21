@@ -26,26 +26,25 @@ export type IntersectAndSimplify<L, R> = unknown extends L
     ? L
     : Simplify<L & R>
 
-export type TryToNarrowByExtracting<T, U> = Extract<T, U> extends never
-  ? Extract<T, { [K in keyof U]: any }>
-  : Extract<T, U>
+export type TryToNarrowByExtracting<T, U> =
+  Extract<T, U> extends never
+    ? Extract<T, { [K in keyof U]: any }>
+    : Extract<T, U>
 
-export type FilterNodes<
-  T,
-  AST extends { type: any },
-> = NonNullable<T> extends infer NonNullableT
-  ? NonNullableT extends {
-      type: AST['type']
-    }
-    ? NonNullableT
-    : NonNullableT extends [...infer Elements]
-      ? NonNullable<Elements[number]> extends {
-          type: AST['type']
-        }
-        ? NonNullable<Elements[number]>
+export type FilterNodes<T, AST extends { type: any }> =
+  NonNullable<T> extends infer NonNullableT
+    ? NonNullableT extends {
+        type: AST['type']
+      }
+      ? NonNullableT
+      : NonNullableT extends [...infer Elements]
+        ? NonNullable<Elements[number]> extends {
+            type: AST['type']
+          }
+          ? NonNullable<Elements[number]>
+          : never
         : never
-      : never
-  : never
+    : never
 
 export type ExtractChildDeps<T, AST extends { type: any }> = NonNullable<
   {
