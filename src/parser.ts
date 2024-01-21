@@ -1,5 +1,4 @@
-import type { Equal, Expect } from '@type-challenges/utils'
-import type { Simplify } from 'type-fest'
+import type { Equal, Expect, Simplify } from './utils'
 
 export type IdentifierNameRestrictedSymbols =
   | ' '

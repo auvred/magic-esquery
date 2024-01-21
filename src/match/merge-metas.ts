@@ -4,7 +4,7 @@ import type {
   MetaAcc,
   NeverError,
 } from './utils'
-import type { Equal, Expect } from '@type-challenges/utils'
+import type { Equal, Expect } from '../utils'
 import type { TSESTree } from '@typescript-eslint/typescript-estree'
 
 // TODO: lowercase them

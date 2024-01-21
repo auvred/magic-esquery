@@ -1,6 +1,6 @@
 import type { MatchIt } from '../../src/matcher'
 import type { ParseIt } from '../../src/parser'
-import type { Equal, Expect } from '@type-challenges/utils'
+import type { Equal, Expect } from '../../src/utils'
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
 type Match<_T extends string> = MatchIt<ParseIt<_T>>

@@ -15,7 +15,7 @@ function stringify(arg: unknown): string {
 }
 
 function genFromSelectors(fileName: string, selectors: string[]): void {
-  let content = `import type { Expect, Equal } from '@type-challenges/utils'
+  let content = `import type { Expect, Equal } from '../../src/utils'
 import type { ParseIt } from '../../src/parser'
 
 export type TestCases = [

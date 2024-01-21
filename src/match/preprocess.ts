@@ -12,8 +12,8 @@ import type {
   TryToParseAttrValue,
 } from './utils'
 import type { MatchIt } from '../matcher'
+import type { Simplify } from '../utils'
 import type { TSESTree } from '@typescript-eslint/typescript-estree'
-import type { Simplify } from 'type-fest'
 
 type PrepreprocessCompoundSelector<
   Selectors extends any[],

@@ -1,9 +1,8 @@
-import type { Equal, Expect } from '@type-challenges/utils'
+import type { Equal, Expect, Simplify } from '../utils'
 import type {
   AST_NODE_TYPES,
   TSESTree,
 } from '@typescript-eslint/typescript-estree'
-import type { Simplify } from 'type-fest'
 
 declare const NeverErrorSymbol: unique symbol
 export type NeverError<Message = unknown> = [typeof NeverErrorSymbol, Message]
