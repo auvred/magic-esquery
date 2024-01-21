@@ -1,3 +1,21 @@
-TODO:
-mention that it's better to pin this dep with ~, because it may contain breaking changes until it reach 1.0.0
-add simpler tests for parsers / utils (ce44572)
+# magic-esquery
+
+Type level [ESQuery](https://github.com/estools/esquery) selector parser and matcher!
+
+<img src="https://raw.githubusercontent.com/auvred/magic-esquery/main/docs/magic-esquery.png" alt="magic-esquery">
+
+## Installation
+
+TODO
+
+## Usage
+
+TODO
+
+## Features
+
+TODO
+
+## License
+
+[MIT](./LICENSE)
