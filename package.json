@@ -12,8 +12,8 @@
   "devDependencies": {
     "@auvred/eslint-config": "^0.6.1",
     "@types/esquery": "^1.5.3",
-    "@types/node": "^20.10.7",
-    "@typescript-eslint/typescript-estree": "^6.18.0",
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/typescript-estree": "^6.19.0",
     "eslint": "^8.56.0",
     "esquery": "^1.5.0",
     "prettier": "3.2.2",
