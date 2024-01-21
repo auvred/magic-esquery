@@ -6,11 +6,12 @@ import type {
   PreprocessSelector,
 } from './match/preprocess'
 
-export type MatchIt<T> = CollapseChildRelations<
+export type MatchIt<T, AST extends { type: any }> = CollapseChildRelations<
   LeftIsAny,
-  Dnf<PreprocessSelector<T, WildcardMeta>> extends infer Res
+  Dnf<PreprocessSelector<T, WildcardMeta, AST>> extends infer Res
     ? Res extends { args: any[] }
       ? Res['args']
       : never
-    : never
+    : never,
+  AST
 >

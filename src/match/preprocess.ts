@@ -13,11 +13,11 @@ import type {
 } from './utils'
 import type { MatchIt } from '../matcher'
 import type { Simplify } from '../utils'
-import type { TSESTree } from '@typescript-eslint/typescript-estree'
 
 type PrepreprocessCompoundSelector<
   Selectors extends any[],
   SelectorAcc extends MetaAcc,
+  AST extends { type: any },
   Acc extends {
     selectors: any[]
     matches: any[]
@@ -32,17 +32,20 @@ type PrepreprocessCompoundSelector<
     ? PrepreprocessCompoundSelector<
         Rest,
         SelectorAcc,
+        AST,
         { matches: [...Acc['matches'], Selector] } & Omit<Acc, 'matches'>
       >
     : Selector extends { type: 'not' }
       ? PrepreprocessCompoundSelector<
           Rest,
           SelectorAcc,
+          AST,
           { nots: [...Acc['nots'], Selector] } & Omit<Acc, 'nots'>
         >
       : PrepreprocessCompoundSelector<
           Rest,
           SelectorAcc,
+          AST,
           { selectors: [...Acc['selectors'], Selector] } & Omit<
             Acc,
             'selectors'
@@ -69,16 +72,18 @@ type PrepreprocessCompoundSelector<
         ...Acc['matches'],
         ...Acc['nots'],
       ],
-      SelectorAcc
+      SelectorAcc,
+      AST
     >
 
 type PreprocessCompoundSelector<
   Selectors extends any[],
   SelectorAcc extends MetaAcc,
+  AST extends { type: any },
   Acc extends any[] | null = null,
 > = Selectors extends [infer Selector, ...infer Rest]
   ? Selector extends { type: 'wildcard' } | { type: 'class' } | { type: 'has' }
-    ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
+    ? PreprocessCompoundSelector<Rest, SelectorAcc, AST, Acc>
     : Selector extends { type: 'identifier'; value: any }
       ? PatchMeta<
           SelectorAcc,
@@ -86,13 +91,13 @@ type PreprocessCompoundSelector<
           Selector['value']
         > extends infer PatchRes
         ? PatchRes extends MetaAcc
-          ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
+          ? PreprocessCompoundSelector<Rest, PatchRes, AST, Acc>
           : NeverError<PatchRes>
         : never
       : Selector extends { type: 'attribute'; name: any }
         ? // TODO: add support for nested fields narrowing
           Selector['name'] extends `${string}.${string}`
-          ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
+          ? PreprocessCompoundSelector<Rest, SelectorAcc, AST, Acc>
           : Selector extends { operator: any; value: any }
             ? Selector['value'] extends { type: 'literal'; value: any }
               ? Selector['operator'] extends '='
@@ -100,7 +105,7 @@ type PreprocessCompoundSelector<
                     Selector['value']['value']
                   > extends infer AttrValue
                   ? AttrValue extends AttrValueIsUnsafeToIntersect
-                    ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
+                    ? PreprocessCompoundSelector<Rest, SelectorAcc, AST, Acc>
                     : PatchMeta<
                           SelectorAcc,
                           'extract',
@@ -109,7 +114,7 @@ type PreprocessCompoundSelector<
                           }
                         > extends infer PatchRes
                       ? PatchRes extends MetaAcc
-                        ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
+                        ? PreprocessCompoundSelector<Rest, PatchRes, AST, Acc>
                         : NeverError<PatchRes>
                       : never
                   : never
@@ -118,7 +123,7 @@ type PreprocessCompoundSelector<
                       Selector['value']['value']
                     > extends infer AttrValue
                     ? AttrValue extends AttrValueIsUnsafeToIntersect
-                      ? PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
+                      ? PreprocessCompoundSelector<Rest, SelectorAcc, AST, Acc>
                       : PatchMeta<
                             SelectorAcc,
                             'exclude',
@@ -127,12 +132,12 @@ type PreprocessCompoundSelector<
                             }
                           > extends infer PatchRes
                         ? PatchRes extends MetaAcc
-                          ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
+                          ? PreprocessCompoundSelector<Rest, PatchRes, AST, Acc>
                           : NeverError<PatchRes>
                         : never
                     : never
-                  : PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
-              : PreprocessCompoundSelector<Rest, SelectorAcc, Acc>
+                  : PreprocessCompoundSelector<Rest, SelectorAcc, AST, Acc>
+              : PreprocessCompoundSelector<Rest, SelectorAcc, AST, Acc>
             : PatchMeta<
                   SelectorAcc,
                   'extract',
@@ -148,7 +153,7 @@ type PreprocessCompoundSelector<
                   }
                 > extends infer PatchRes
               ? PatchRes extends MetaAcc
-                ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
+                ? PreprocessCompoundSelector<Rest, PatchRes, AST, Acc>
                 : NeverError<PatchRes>
               : never
         : Selector extends { type: 'field'; name: any }
@@ -158,15 +163,16 @@ type PreprocessCompoundSelector<
               Selector['name']
             > extends infer PatchRes
             ? PatchRes extends MetaAcc
-              ? PreprocessCompoundSelector<Rest, PatchRes, Acc>
+              ? PreprocessCompoundSelector<Rest, PatchRes, AST, Acc>
               : NeverError<PatchRes>
             : never
           : PreprocessCompoundSelector<
               Rest,
               SelectorAcc,
+              AST,
               [
                 ...(Acc extends any[] ? Acc : []),
-                PreprocessSelector<Selector, SelectorAcc>,
+                PreprocessSelector<Selector, SelectorAcc, AST>,
               ]
             >
   : Acc extends any[]
@@ -207,16 +213,21 @@ type SplitConjunction<
 type PrecollapseCollectChildBoundaries<
   Boundary,
   Ctx extends { field: any | null },
+  AST extends { type: any },
 > = Ctx['field'] extends null
-  ? ExtractChildDeps<Boundary>
-  : FilterNodes<Extract<Boundary, { [K in Ctx['field']]: any }>[Ctx['field']]>
+  ? ExtractChildDeps<Boundary, AST>
+  : FilterNodes<
+      Extract<Boundary, { [K in Ctx['field']]: any }>[Ctx['field']],
+      AST
+    >
 
 type MatchSplittedConjunction<
   Left,
   Splitted extends { and: any; not: any },
+  AST extends { type: any },
 > = Extract<
-  CollapsePositivesFromConjunction<Left, Splitted['and']>,
-  CollapseNegativesFromConjunction<Left, Splitted['not']>
+  CollapsePositivesFromConjunction<Left, Splitted['and'], AST>,
+  CollapseNegativesFromConjunction<Left, Splitted['not'], AST>
 >
 
 declare const LeftIsAny: unique symbol
@@ -227,25 +238,28 @@ export type LeftIsAny = typeof LeftIsAny
 type CollapseNegativesFromConjunction<
   Left,
   Negatives,
-  Acc = TSESTree.Node,
+  AST extends { type: any },
+  Acc = AST,
 > = Negatives extends [infer First, ...infer Rest]
   ? First extends MetaAcc
     ? CollapseNegativesFromConjunction<
         Left,
         Rest,
+        AST,
         Exclude<
           Acc,
           Extract<
             Left extends LeftIsAny
-              ? TSESTree.Node
+              ? AST
               : PrecollapseCollectChildBoundaries<
                   Left,
-                  { field: First['field'] }
+                  { field: First['field'] },
+                  AST
                 >,
             Exclude<
               TryToNarrowByExtracting<
                 First['identifier'] extends null
-                  ? TSESTree.Node
+                  ? AST
                   : PickNode<First['identifier']>,
                 First['extract']
               >,
@@ -260,34 +274,38 @@ type CollapseNegativesFromConjunction<
 type CollapsePositivesFromConjunction<
   Left,
   Positives,
+  AST extends { type: any },
   Acc = Left extends LeftIsAny
-    ? TSESTree.Node
-    : PrecollapseCollectChildBoundaries<Left, { field: null }>,
+    ? AST
+    : PrecollapseCollectChildBoundaries<Left, { field: null }, AST>,
 > = Positives extends [infer First, ...infer Rest]
   ? First extends MetaAcc
     ? CollapsePositivesFromConjunction<
         Left,
         Rest,
+        AST,
         Extract<
           Acc,
           Extract<
             Extract<
               Left extends LeftIsAny
                 ? First['field'] extends null
-                  ? TSESTree.Node
+                  ? AST
                   : PrecollapseCollectChildBoundaries<
-                      TSESTree.Node,
-                      { field: First['field'] }
+                      AST,
+                      { field: First['field'] },
+                      AST
                     >
                 : PrecollapseCollectChildBoundaries<
                     Left,
-                    { field: First['field'] }
+                    { field: First['field'] },
+                    AST
                   >,
               unknown extends First['extract']
                 ? Exclude<
                     TryToNarrowByExtracting<
                       First['identifier'] extends null
-                        ? TSESTree.Node
+                        ? AST
                         : PickNode<First['identifier']>,
                       First['extract']
                     >,
@@ -297,7 +315,7 @@ type CollapsePositivesFromConjunction<
                     Exclude<
                       TryToNarrowByExtracting<
                         First['identifier'] extends null
-                          ? TSESTree.Node
+                          ? AST
                           : PickNode<First['identifier']>,
                         PreprocessExtract<First['extract']>['extract']
                       >,
@@ -316,15 +334,17 @@ type CollapsePositivesFromConjunction<
 export type CollapseChildRelations<
   Left,
   Right,
+  AST extends { type: any },
   Acc extends unknown[] = [],
 > = Right extends [infer First, ...infer Rest]
   ? First extends { args: any[] }
     ? CollapseChildRelations<
         Left,
         Rest,
+        AST,
         [
           ...Acc,
-          MatchSplittedConjunction<Left, SplitConjunction<First['args']>>,
+          MatchSplittedConjunction<Left, SplitConjunction<First['args']>, AST>,
         ]
       >
     : never
@@ -333,21 +353,27 @@ export type CollapseChildRelations<
 type PreprocessSelectorsList<
   Selectors extends any[],
   SelectorAcc extends MetaAcc,
+  AST extends { type: any },
   Acc extends any[] = [],
 > = Selectors extends [infer Selector, ...infer Rest]
   ? PreprocessSelectorsList<
       Rest,
       SelectorAcc,
-      [...Acc, PreprocessSelector<Selector, SelectorAcc>]
+      AST,
+      [...Acc, PreprocessSelector<Selector, SelectorAcc, AST>]
     >
   : { type: 'or'; args: Acc }
 
-export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
+export type PreprocessSelector<
+  T,
+  SelectorAcc extends MetaAcc,
+  AST extends { type: any },
+> = T extends
   | { type: 'sibling' }
   | { type: 'adjacent' }
   | { type: 'descendant' }
   ? T extends { right: any }
-    ? PreprocessSelector<T['right'], SelectorAcc>
+    ? PreprocessSelector<T['right'], SelectorAcc, AST>
     : never
   : T extends
         | { type: 'wildcard' }
@@ -356,20 +382,23 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
         | { type: 'field' }
         | { type: 'class' }
         | { type: 'has' }
-    ? PreprocessSelector<{ type: 'compound'; selectors: [T] }, SelectorAcc>
+    ? PreprocessSelector<{ type: 'compound'; selectors: [T] }, SelectorAcc, AST>
     : T extends { type: 'compound'; selectors: any }
       ? {
           type: 'and'
-          args: PrepreprocessCompoundSelector<T['selectors'], SelectorAcc>
+          args: PrepreprocessCompoundSelector<T['selectors'], SelectorAcc, AST>
         }
       : T extends { type: 'child'; left: any; right: any }
         ? CollapseChildRelations<
-            MatchIt<T['left']>,
-            Dnf<PreprocessSelector<T['right'], WildcardMeta>> extends infer Res
+            MatchIt<T['left'], AST>,
+            Dnf<
+              PreprocessSelector<T['right'], WildcardMeta, AST>
+            > extends infer Res
               ? Res extends { args: any[] }
                 ? Res['args']
                 : never
-              : never
+              : never,
+            AST
           > extends infer InferredNodes
           ? [InferredNodes] extends [never]
             ? never
@@ -382,7 +411,7 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
               }
           : never
         : T extends { type: 'matches'; selectors: any }
-          ? PreprocessSelectorsList<T['selectors'], SelectorAcc>
+          ? PreprocessSelectorsList<T['selectors'], SelectorAcc, AST>
           : T extends { type: 'not'; selectors: any }
             ? {
                 type: 'and'
@@ -396,7 +425,11 @@ export type PreprocessSelector<T, SelectorAcc extends MetaAcc> = T extends
                   },
                   {
                     type: 'not'
-                    arg: PreprocessSelectorsList<T['selectors'], SelectorAcc>
+                    arg: PreprocessSelectorsList<
+                      T['selectors'],
+                      SelectorAcc,
+                      AST
+                    >
                   },
                 ]
               }

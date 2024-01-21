@@ -3,7 +3,7 @@ import type { ParseIt } from '../../src/parser'
 import type { Equal, Expect } from '../../src/utils'
 import type { TSESTree as T } from '@typescript-eslint/typescript-estree'
 
-type Match<_T extends string> = MatchIt<ParseIt<_T>/*, T.Node*/>
+type Match<_T extends string> = MatchIt<ParseIt<_T>, T.Node>
 
 export type TestCases = [
 Expect<Equal<Match<"*">, T.Node>>,

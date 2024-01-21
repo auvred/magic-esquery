@@ -1,8 +1,5 @@
 import type { Equal, Expect, Simplify } from '../utils'
-import type {
-  AST_NODE_TYPES,
-  TSESTree,
-} from '@typescript-eslint/typescript-estree'
+import type { TSESTree } from '@typescript-eslint/typescript-estree'
 
 declare const NeverErrorSymbol: unique symbol
 export type NeverError<Message = unknown> = [typeof NeverErrorSymbol, Message]
@@ -46,14 +43,14 @@ type _testTryToNarrowByExtracting = [
   Expect<Equal<TryToNarrowByExtracting<{type: 'a'} | {type: 'b'} | {withoutType: 'c'}, {type: 'a'}>, {type: 'a'}>>,
 ]
 
-export type FilterNodes<T> = NonNullable<T> extends infer NonNullableT
+export type FilterNodes<T, AST extends { type:any }> = NonNullable<T> extends infer NonNullableT
   ? NonNullableT extends {
-      type: AST_NODE_TYPES
+      type: AST['type']
     }
     ? NonNullableT
     : NonNullableT extends [...infer Elements]
       ? NonNullable<Elements[number]> extends {
-          type: AST_NODE_TYPES
+          type: AST['type']
         }
         ? NonNullable<Elements[number]>
         : never
@@ -62,21 +59,21 @@ export type FilterNodes<T> = NonNullable<T> extends infer NonNullableT
 
 // prettier-ignore
 type _testFilterNodes = [
-  Expect<Equal<FilterNodes<TSESTree.CallExpression | TSESTree.MemberExpression>, TSESTree.CallExpression | TSESTree.MemberExpression>>,
-  Expect<Equal<FilterNodes<TSESTree.CallExpression[] | TSESTree.MemberExpression[]>, TSESTree.CallExpression | TSESTree.MemberExpression>>,
-  Expect<Equal<FilterNodes<(TSESTree.CallExpression | TSESTree.MemberExpression)[]>, TSESTree.CallExpression | TSESTree.MemberExpression>>,
+  Expect<Equal<FilterNodes<TSESTree.CallExpression | TSESTree.MemberExpression, TSESTree.Node>, TSESTree.CallExpression | TSESTree.MemberExpression>>,
+  Expect<Equal<FilterNodes<TSESTree.CallExpression[] | TSESTree.MemberExpression[], TSESTree.Node>, TSESTree.CallExpression | TSESTree.MemberExpression>>,
+  Expect<Equal<FilterNodes<(TSESTree.CallExpression | TSESTree.MemberExpression)[], TSESTree.Node>, TSESTree.CallExpression | TSESTree.MemberExpression>>,
 ]
 
-export type ExtractChildDeps<T> = NonNullable<
+export type ExtractChildDeps<T, AST extends { type: any }> = NonNullable<
   {
-    [K in keyof T]: K extends 'parent' ? never : FilterNodes<T[K]>
+    [K in keyof T]: K extends 'parent' ? never : FilterNodes<T[K], AST>
   }[keyof T]
 >
 
 // prettier-ignore
 type _testExtractChildDeps = [
-  Expect<Equal<ExtractChildDeps<TSESTree.CallExpression>, TSESTree.LeftHandSideExpression | TSESTree.CallExpressionArgument | TSESTree.TSTypeParameterInstantiation | TSESTree.TSTypeParameterInstantiation>>,
-  Expect<Equal<ExtractChildDeps<TSESTree.Program>, TSESTree.ProgramStatement>>,
+  Expect<Equal<ExtractChildDeps<TSESTree.CallExpression, TSESTree.Node>, TSESTree.LeftHandSideExpression | TSESTree.CallExpressionArgument | TSESTree.TSTypeParameterInstantiation | TSESTree.TSTypeParameterInstantiation>>,
+  Expect<Equal<ExtractChildDeps<TSESTree.Program, TSESTree.Node>, TSESTree.ProgramStatement>>,
 ]
 
 export type PickNode<T> = [T] extends [any]
