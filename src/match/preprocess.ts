@@ -230,8 +230,8 @@ type MatchSplittedConjunction<
   CollapseNegativesFromConjunction<Left, Splitted['not'], AST>
 >
 
-declare const LeftIsAny: unique symbol
-export type LeftIsAny = typeof LeftIsAny
+declare const _LeftIsAny: unique symbol
+export type LeftIsAny = typeof _LeftIsAny
 
 // TODO: extract inferredNodes too
 // TODO: change Acc default value accordingly

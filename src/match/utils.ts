@@ -55,8 +55,8 @@ export type PickNode<T, AST> = [T] extends [any]
   ? Extract<AST, { type: T }>
   : never
 
-declare const AttrValueIsUnsafeToIntersect: unique symbol
-export type AttrValueIsUnsafeToIntersect = typeof AttrValueIsUnsafeToIntersect
+declare const _AttrValueIsUnsafeToIntersect: unique symbol
+export type AttrValueIsUnsafeToIntersect = typeof _AttrValueIsUnsafeToIntersect
 
 export type TryToParseAttrValue<T> = T extends 'true'
   ? true
