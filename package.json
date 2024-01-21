@@ -4,7 +4,7 @@
     "gen-parser-tests": "tsx tests/utils/gen-parser-tests.ts",
     "gen-matcher-tests": "tsx tests/utils/gen-matcher-tests.ts",
     "extract-ts-eslint-selectors": "tsx scripts/extract-ts-eslint-selectors/run.ts",
-    "test": "tsc --noEmit -p tsconfig.tests.json --pretty | tee /dev/tty | awk '/Found/,0' > tests/status-report",
+    "test": "tsc --noEmit -p tsconfig.tests.json",
     "typecheck": "tsc --noEmit -p tsconfig.src.json"
   },
   "devDependencies": {
