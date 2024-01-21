@@ -1,4 +1,4 @@
-import type { Equal, Expect, Simplify } from './utils'
+import type { Simplify } from './utils'
 
 export type IdentifierNameRestrictedSymbols =
   | ' '
@@ -85,7 +85,7 @@ export type Replace<
   ? Replace<`${Before}${To}${After}`, From, To>
   : T
 
-type ParseStringAttrValueRecurser<
+export type ParseStringAttrValueRecurser<
   T extends string,
   Q extends '"' | "'",
 > = T extends `${infer BeforeQuote}${Q}${infer Rest}`
@@ -105,31 +105,6 @@ type ParseStringAttrValueRecurser<
       : never
     : { res: BeforeQuote; rest: Rest }
   : 'no'
-
-// prettier-ignore
-export type testParseStringAttrValueRecurser = [
-  Expect<Equal<
-    ParseStringAttrValueRecurser<'aaa\\"bbb"ccc', '"'>,
-    { res: 'aaa\\"bbb'; rest: 'ccc' }
-  >>,
-  Expect<Equal<
-    ParseStringAttrValueRecurser<'aaa\\"bbb\\"ccc', '"'>,
-    'unterminatedString'
-  >>,
-  Expect<Equal<
-    ParseStringAttrValueRecurser<"aaa\\'bbb'ccc", "'">,
-    { res: "aaa\\'bbb"; rest: 'ccc' }
-  >>,
-  Expect<Equal<
-    ParseStringAttrValueRecurser<"aaa\\'bbb\\'ccc", "'">,
-    'unterminatedString'
-  >>,
-
-  Expect<Equal<
-    ParseStringAttrValueRecurser<'aaa', '"'>,
-    'no'
-  >>
-]
 
 type ParseStringAttrValueImpl<
   T extends string,
@@ -151,40 +126,11 @@ type ParseStringAttrValueImpl<
       : never
   : never
 
-type ParseStringAttrValue<T extends string> = T extends `"${infer Rest}`
+export type ParseStringAttrValue<T extends string> = T extends `"${infer Rest}`
   ? ParseStringAttrValueImpl<Rest, '"'>
   : T extends `'${infer Rest}`
     ? ParseStringAttrValueImpl<Rest, "'">
     : 'stringParseErr-itDoesntStartWithQuotes'
-
-// prettier-ignore
-export type testParseStringAttrValue = [
-  Expect<Equal<
-    ParseStringAttrValue<'"aaa\\"bbb"ccc'>,
-    { type: 'literal'; value: 'aaa"bbb'; rest: 'ccc' }
-  >>,
-  Expect<Equal<
-    ParseStringAttrValue<"'aaa\\'bbb'ccc">,
-    { type: 'literal'; value: "aaa'bbb"; rest: 'ccc' }
-  >>,
- 
-  Expect<Equal<
-    ParseStringAttrValue<'"aaa"bbb'>,
-    { type: 'literal'; value: 'aaa'; rest: 'bbb' }
-  >>,
-  Expect<Equal<
-    ParseStringAttrValue<'"aaa\\"bbb"'>,
-    { type: 'literal'; value: 'aaa"bbb'; rest: '' }
-  >>,
-  Expect<Equal<
-    ParseStringAttrValue<'"a]aa\\"b]bb"  ]'>,
-    { type: 'literal'; value: 'a]aa"b]bb'; rest: '  ]' }
-  >>,
-  Expect<Equal<
-    ParseStringAttrValue<'aaa\\"bbb'>,
-    'stringParseErr-itDoesntStartWithQuotes'
-  >>,
-]
 
 //  number
 //    = a:([0-9]* ".")? b:[0-9]+ {
@@ -260,33 +206,6 @@ export type ParseRegexAttrValueFlags<T extends string> = T extends ''
       : { acc: never; res: ''; rest: T }
     : never
 
-export type bbb = ParseRegexAttrValueFlags<'msiu'>
-//           ^?
-
-// prettier-ignore
-export type testParseRegexAttrValueFlags = [
-  Expect<Equal<
-    ParseRegexAttrValueFlags<'msiu'>,
-    { acc: 'm' | 's' | 'i' | 'u'; res: 'msiu'; rest: '' }
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValueFlags<'ms ]'>,
-    { acc: 'm' | 's'; res: 'ms'; rest: ' ]' }
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValueFlags<' ms ]'>,
-    { acc: never; res: ''; rest: ' ms ]' }
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValueFlags<'mm ]'>,
-    'regexDuplicatedFlag-m'
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValueFlags<''>,
-    'regexEmptyFlags'
-  >>,
-]
-
 export type ParseRegexAttrValueImpl<T extends string> =
   // inheritting this bug for better consistency
   // https://github.com/estools/esquery/issues/68
@@ -331,34 +250,6 @@ export type ParseRegexAttrValue<T extends string> =
           }
         : never
     : never
-
-// prettier-ignore
-export type testParseRegexAttrValue = [
-  Expect<Equal<
-    ParseRegexAttrValue<'/aa/'>,
-    { type: 'regexp'; value: '/aa/'; rest: '' }
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValue<'/aa/aa'>,
-    { type: 'regexp'; value: '/aa/'; rest: 'aa' }
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValue<'/aa/ms]'>,
-    { type: 'regexp'; value: '/aa/ms'; rest: ']' }
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValue<'/a]a/ ] '>,
-    { type: 'regexp'; value: '/a]a/'; rest: ' ] ' }
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValue<'/a]a/m ] '>,
-    { type: 'regexp'; value: '/a]a/m'; rest: ' ] ' }
-  >>,
-  Expect<Equal<
-    ParseRegexAttrValue<'/a]a/mm ] '>,
-    'regexErrInFlags-regexDuplicatedFlag-m'
-  >>,
-]
 
 type PostProcessAttrValueWithRest<V, Next> = V extends infer ParseRes
   ? ParseRes extends string
@@ -509,34 +400,27 @@ type PartitionBy<
     : never
   : [LeftAcc, RightAcc]
 
-type SortPairsByShortestTemplateLiteral<Pairs extends [string, string][]> =
-  Pairs extends [infer Head, ...infer Tail]
-    ? Tail extends [string, string][]
-      ? Head extends [infer HeadFirst, infer _]
-        ? HeadFirst extends string
-          ? PartitionBy<Tail, HeadFirst> extends [infer Left, infer Right]
-            ? Left extends [string, string][]
-              ? Right extends [string, string][]
-                ? [
-                    ...SortPairsByShortestTemplateLiteral<Left>,
-                    Head,
-                    ...SortPairsByShortestTemplateLiteral<Right>,
-                  ]
-                : never
+export type SortPairsByShortestTemplateLiteral<
+  Pairs extends [string, string][],
+> = Pairs extends [infer Head, ...infer Tail]
+  ? Tail extends [string, string][]
+    ? Head extends [infer HeadFirst, infer _]
+      ? HeadFirst extends string
+        ? PartitionBy<Tail, HeadFirst> extends [infer Left, infer Right]
+          ? Left extends [string, string][]
+            ? Right extends [string, string][]
+              ? [
+                  ...SortPairsByShortestTemplateLiteral<Left>,
+                  Head,
+                  ...SortPairsByShortestTemplateLiteral<Right>,
+                ]
               : never
             : never
           : never
         : never
       : never
-    : []
-
-// prettier-ignore
-export type testSortPairsByShortestTemplateLiteral = [
-  Expect<Equal<
-    SortPairsByShortestTemplateLiteral<[['123', '1'], ['1234', '2'], ['12', '3']]>,
-    [['12','3'],['123','1'],['1234','2']]
-  >>,
-]
+    : never
+  : []
 
 type TryToSplitBy<
   T,
@@ -562,43 +446,20 @@ type FilterTuple<T extends any[], Acc extends any[] = []> = T extends [
     ? FilterTuple<Rest, Acc>
     : FilterTuple<Rest, [...Acc, First]>
   : Acc
-type SplitToClosingSquareBracketOrEqualSignOrAngleBracket<T extends string> =
-  SortPairsByShortestTemplateLiteral<
-    FilterTuple<
-      [
-        TryToSplitByAngleBracket<T, '>'>,
-        TryToSplitByAngleBracket<T, '<'>,
-        TryToSplitBy<T, '='>,
-        TryToSplitBy<T, ']'>,
-      ]
-    >
-  > extends [infer First, ...infer _]
-    ? First
-    : 'cant find splitter'
-
-// prettier-ignore
-export type testSplitToClosingSquareBracketOrEqualSignOrAngleBracket = [
-  Expect<Equal<
-    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa]bb'>,
-    ['aa', ']bb']
-  >>,
-  Expect<Equal<
-    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa][bb=1]'>,
-    ['aa', '][bb=1]']
-  >>,
-  Expect<Equal<
-    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa=1]bb'>,
-    ['aa', '=1]bb']
-  >>,
-  Expect<Equal<
-    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa=1][bb=1]'>,
-    ['aa', '=1][bb=1]']
-  >>,
-  Expect<Equal<
-    SplitToClosingSquareBracketOrEqualSignOrAngleBracket<'aa<1][bb=1]'>,
-    ['aa', '<1][bb=1]']
-  >>,
-]
+export type SplitToClosingSquareBracketOrEqualSignOrAngleBracket<
+  T extends string,
+> = SortPairsByShortestTemplateLiteral<
+  FilterTuple<
+    [
+      TryToSplitByAngleBracket<T, '>'>,
+      TryToSplitByAngleBracket<T, '<'>,
+      TryToSplitBy<T, '='>,
+      TryToSplitBy<T, ']'>,
+    ]
+  >
+> extends [infer First, ...infer _]
+  ? First
+  : 'cant find splitter'
 
 // example: AttrName='aa' _AfterAttrName='=4][bbb = 1]'
 // example: AttrName='aa' _AfterAttrName='bbb'
