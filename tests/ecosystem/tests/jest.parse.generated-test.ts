@@ -1,5 +1,5 @@
-import type { Expect, Equal } from '../../src/utils'
-import type { ParseIt } from '../../src/parser'
+import type { Expect, Equal } from "../../../src/utils"
+import type { ParseIt } from "../../../src/parser"
 
 export type TestCases = [
 Expect<Equal<ParseIt<"ArrowFunctionExpression">, {"type":"identifier","value":"ArrowFunctionExpression"}>>,

@@ -1,8 +1,7 @@
 {
   "packageManager": "pnpm@8.14.1",
   "scripts": {
-    "gen-parser-tests": "tsx tests/utils/gen-parser-tests.ts",
-    "gen-matcher-tests": "tsx tests/utils/gen-matcher-tests.ts",
+    "gen-tests": "tsx tests/utils/gen-tests.ts",
     "extract:ts-eslint": "tsx scripts/extract-selectors/ts-eslint/run.ts",
     "extract:eslint-stylistic": "tsx scripts/extract-selectors/eslint-stylistic/run.ts",
     "extract:jest": "tsx scripts/extract-selectors/jest/run.ts",

@@ -84,8 +84,9 @@ export function buildTmpContext(): TmpContext {
             '..',
             '..',
             'tests',
-            'utils',
-            `${destinationKey}-selectors.txt`,
+            'ecosystem',
+            'sources',
+            `${destinationKey}.txt`,
           )
 
           const existingSelectors = fs.existsSync(existingSelectorsPath)
