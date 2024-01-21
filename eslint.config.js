@@ -18,6 +18,12 @@ module.exports = (async () => {
       },
     },
     {
+      files: ['**/*.md/**/*.?([cm])[jt]s?(x)'],
+      rules: {
+        'unused-imports/no-unused-vars': 'off',
+      },
+    },
+    {
       ignores: ['tests/**/*.{test,generated-test}.ts'],
     },
   ]
