@@ -1,0 +1,75 @@
+# 505258c4f350968fc173bde29fcce324f7b5fbb1
+ArrowFunctionExpression
+  T.ArrowFunctionExpression
+ArrowFunctionExpression:exit
+  T.ArrowFunctionExpression
+AssignmentExpression
+  T.AssignmentExpression
+AssignmentExpression > MemberExpression
+  T.MemberExpression
+BlockStatement
+  T.BlockStatement
+BlockStatement:exit
+  T.BlockStatement
+CallExpression
+  T.CallExpression
+CallExpression[callee.name="pending"]
+  T.CallExpression
+CallExpression[callee.name="require"]
+  T.CallExpression
+CallExpression:exit
+  T.CallExpression
+CatchClause
+  T.CatchClause
+CatchClause:exit
+  T.CatchClause
+ConditionalExpression
+  T.ConditionalExpression
+ConditionalExpression:exit
+  T.ConditionalExpression
+ExportNamedDeclaration, ExportDefaultDeclaration
+  T.ExportNamedDeclaration | T.ExportDefaultDeclaration
+ExpressionStatement
+  T.ExpressionStatement
+ForInStatement
+  T.ForInStatement
+ForInStatement:exit
+  T.ForInStatement
+ForOfStatement
+  T.ForOfStatement
+ForOfStatement:exit
+  T.ForOfStatement
+ForStatement
+  T.ForStatement
+ForStatement:exit
+  T.ForStatement
+FunctionDeclaration
+  T.FunctionDeclaration
+FunctionDeclaration:exit
+  T.FunctionDeclaration
+FunctionExpression
+  T.FunctionExpression
+FunctionExpression:exit
+  T.FunctionExpression
+IfStatement
+  T.IfStatement
+IfStatement:exit
+  T.IfStatement
+ImportDeclaration
+  T.ImportDeclaration
+LogicalExpression
+  T.LogicalExpression
+LogicalExpression:exit
+  T.LogicalExpression
+MemberExpression
+  T.MemberExpression
+Program
+  T.Program
+Program:exit
+  T.Program
+SwitchStatement
+  T.SwitchStatement
+SwitchStatement:exit
+  T.SwitchStatement
+VariableDeclarator, AssignmentExpression
+  T.VariableDeclarator | T.AssignmentExpression

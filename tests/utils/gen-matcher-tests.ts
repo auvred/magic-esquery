@@ -33,7 +33,7 @@ export type TestCases = [
   })
 }
 
-for (const txtSelector of ['ts-eslint', 'eslint-stylistic']) {
+for (const txtSelector of ['ts-eslint', 'eslint-stylistic', 'jest']) {
   const lines = fs
     .readFileSync(path.join(__dirname, `${txtSelector}-selectors.txt`), 'utf8')
     .split('\n')

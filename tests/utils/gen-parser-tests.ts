@@ -43,7 +43,7 @@ export type TestCases = [
 
 genFromSelectors('parse.generated-test.ts', manualSelectors)
 
-for (const txtSelector of ['ts-eslint', 'eslint-stylistic']) {
+for (const txtSelector of ['ts-eslint', 'eslint-stylistic', 'jest']) {
   const selectors = fs
     .readFileSync(path.join(__dirname, `${txtSelector}-selectors.txt`), 'utf8')
     .split('\n')
