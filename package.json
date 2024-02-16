@@ -39,7 +39,7 @@
     "@microsoft/api-extractor": "^7.39.4",
     "@types/esquery": "^1.5.3",
     "@types/node": "^20.11.13",
-    "@typescript-eslint/typescript-estree": "^6.20.0",
+    "@typescript-eslint/typescript-estree": "^7.0.1",
     "eslint": "^8.56.0",
     "esquery": "^1.5.0",
     "prettier": "3.2.2",
