@@ -1,7 +1,7 @@
 {
   "name": "magic-esquery",
   "version": "0.0.2",
-  "packageManager": "pnpm@8.14.1",
+  "packageManager": "pnpm@8.15.3",
   "description": "🪄 Type level ESQuery selector parser and matcher!",
   "author": "auvred <aauvred@gmail.com> (https://github.com/auvred/)",
   "license": "MIT",
@@ -36,14 +36,14 @@
   },
   "devDependencies": {
     "@auvred/eslint-config": "^0.6.1",
-    "@microsoft/api-extractor": "^7.39.4",
+    "@microsoft/api-extractor": "^7.40.1",
     "@types/esquery": "^1.5.3",
-    "@types/node": "^20.11.13",
+    "@types/node": "^20.11.19",
     "@typescript-eslint/typescript-estree": "^7.0.1",
     "eslint": "^8.56.0",
     "esquery": "^1.5.0",
     "prettier": "3.2.2",
-    "tsx": "^4.7.0",
+    "tsx": "^4.7.1",
     "typescript": "^5.3.3"
   },
   "publishConfig": {
