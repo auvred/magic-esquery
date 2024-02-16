@@ -1,5 +1,5 @@
 module.exports = (async () => {
-  const { auvred } = await import('@auvred/eslint-config')
+  const { auvred, GLOB_JSTS_IN_MD } = await import('@auvred/eslint-config')
   return [
     ...(await auvred()),
     {
@@ -18,7 +18,7 @@ module.exports = (async () => {
       },
     },
     {
-      files: ['**/*.md/**/*.?([cm])[jt]s?(x)'],
+      files: [GLOB_JSTS_IN_MD],
       rules: {
         'unused-imports/no-unused-vars': 'off',
       },

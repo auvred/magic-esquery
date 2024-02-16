@@ -35,7 +35,7 @@
     "release": "npx -y bumpp"
   },
   "devDependencies": {
-    "@auvred/eslint-config": "^0.6.1",
+    "@auvred/eslint-config": "^0.7.0",
     "@microsoft/api-extractor": "^7.40.1",
     "@types/esquery": "^1.5.3",
     "@types/node": "^20.11.19",
