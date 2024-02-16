@@ -144,7 +144,7 @@ JSONProperty
 JSXAttribute
   T.JSXAttribute
 JSXAttribute > JSXElement, Literal, JSXText
-  never /* TODO: T.JSXElement | T.Literal | T.JSXText (see: https://github.com/typescript-eslint/typescript-eslint/issues/8280) */
+  T.JSXElement | T.Literal | T.JSXText
 JSXAttribute > JSXExpressionContainer > JSXElement
   T.JSXElement
 JSXAttribute[value]
