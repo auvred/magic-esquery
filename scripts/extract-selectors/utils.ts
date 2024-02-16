@@ -101,7 +101,7 @@ export function buildTmpContext(): TmpContext {
               if (!sel) {
                 return false
               }
-              return !existingSelectorsPath.includes(selector)
+              return !existingSelectors.includes(selector)
             })
             .map(selector => [selector, '  TODO_Replace_with_actual_type'])
             .flat(20)
